@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Restock-radar</title>
+<meta name="description" content="Pokémon-restock i Haugesund og nettbutikker – live fra boten din.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Restock">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ECEEF3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0D12" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: mobilapp i én kolonne – radar-hero, kort med gule hylleprislapper, fanebar i bunnen. */
+:root {
+  --bg: #ECEEF3; --surface: #FFFFFF; --surface-2: #F4F5F9; --ink: #10131C; --muted: #5C6273; --line: #D9DCE5;
+  --tag: #FFD84D; --tag-ink: #17140A;
+  --go: #0B9A55; --go-soft: #DCF4E7; --warn: #B86E00; --warn-soft: #FBEBCF; --off: #8A90A2; --hot: #E0342A;
+  --radar: 11, 154, 85;
+  --shadow: 0 1px 2px rgba(16,19,28,.06), 0 6px 18px rgba(16,19,28,.06);
+  --f-display: "Anton", "Impact", "Arial Narrow Bold", sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r: 16px; --bar-h: 64px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0D12; --surface: #151821; --surface-2: #1C202B; --ink: #F1F2F6; --muted: #969CAE; --line: #272B37;
+  --go: #33D17F; --go-soft: #11301F; --warn: #FFB02E; --warn-soft: #33260E; --off: #5E6476; --hot: #FF5A4E;
+  --radar: 51, 209, 127; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0B0D12; --surface: #151821; --surface-2: #1C202B; --ink: #F1F2F6; --muted: #969CAE; --line: #272B37;
+  --go: #33D17F; --go-soft: #11301F; --warn: #FFB02E; --warn-soft: #33260E; --off: #5E6476; --hot: #FF5A4E;
+  --radar: 51, 209, 127; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.45 var(--f-body);
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(var(--bar-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+[hidden] { display: none !important; }
+.num, .tag, .big { font-variant-numeric: tabular-nums; }
+
+/* ---------- Topp ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); }
+.top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px 10px; display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.brand svg { flex: none; }
+.brand b { font: 22px/1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; }
+.brand small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; }
+.live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+  padding: 6px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); white-space: nowrap; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
+.live.on i { background: var(--go); box-shadow: 0 0 0 0 rgba(var(--radar), .6); animation: ping 2s infinite; }
+.live.warn i { background: var(--warn); }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(var(--radar), .55); } 70% { box-shadow: 0 0 0 8px rgba(var(--radar), 0); } 100% { box-shadow: 0 0 0 0 rgba(var(--radar), 0); } }
+
+/* ---------- Bannere ---------- */
+.banner { margin: 6px 0 4px; padding: 11px 14px; border-radius: 12px; font-size: 14px; font-weight: 500;
+  background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
+.banner b { color: var(--warn); }
+
+/* ---------- Radar-hero ---------- */
+.hero { position: relative; overflow: hidden; margin-top: 8px; border-radius: 22px; padding: 22px 20px 20px;
+  background: var(--surface); box-shadow: var(--shadow); isolation: isolate; }
+.hero::before { content: ""; position: absolute; z-index: -1; width: 460px; height: 460px; right: -200px; top: -170px; border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 38px, rgba(var(--radar), .14) 39px 40px),
+    conic-gradient(from 0deg, rgba(var(--radar), .32), rgba(var(--radar), 0) 70deg, transparent 360deg);
+  animation: sweep 5s linear infinite; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .hero::before, .live.on i { animation: none; } }
+.hero-label { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.hero-count { display: flex; align-items: baseline; gap: 12px; margin-top: 4px; }
+.big { font: 76px/0.95 var(--f-display); }
+.hero-count span:last-child { font: 600 18px/1.2 var(--f-body); max-width: 10ch; }
+.hero.has-buy .big { color: var(--go); }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.stat { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--line); }
+.stat i { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ---------- Seksjoner ---------- */
+.sec { margin-top: 26px; }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 10px; }
+.sec-h h2 { margin: 0; font: 20px/1.1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; }
+.sec-h span { font-size: 13px; color: var(--muted); }
+.stack { display: grid; gap: 12px; }
+.empty { padding: 18px; border-radius: var(--r); background: var(--surface); border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
+
+/* ---------- Tilbudskort ---------- */
+.offer { position: relative; padding: 16px 16px 14px 20px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.offer::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--go); }
+.offer.over::before { background: var(--warn); }
+.offer.plain::before { background: var(--line); }
+.o-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.where { padding: 3px 7px; border-radius: 6px; color: var(--surface); background: var(--ink); letter-spacing: .08em; }
+.where.hg { background: var(--hot); color: #fff; }
+.tier { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font: 13px/1 var(--f-display); color: #fff; background: var(--off); letter-spacing: 0; }
+.tier.A { background: var(--hot); }
+.offer h3 { margin: 8px 0 12px; font-size: 17px; line-height: 1.25; font-weight: 700; text-wrap: balance; }
+.o-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.tag { position: relative; display: inline-block; padding: 7px 14px 6px 22px; border-radius: 6px 10px 10px 6px; background: var(--tag); color: var(--tag-ink);
+  font: 30px/1 var(--f-display); letter-spacing: .01em; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+.tag::before { content: ""; position: absolute; left: 8px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 1px 1px rgba(0,0,0,.25); }
+.tag small { font: 15px var(--f-display); margin-left: 1px; }
+.nums { display: flex; gap: 16px; margin: 0; }
+.nums div { min-width: 0; }
+.nums dt { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.nums dd { margin: 2px 0 0; font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pos { color: var(--go); } .neg { color: var(--hot); } .warnc { color: var(--warn); }
+.o-note { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+.buy { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; padding: 13px 16px; border-radius: 12px;
+  background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 16px; }
+.buy:active { transform: scale(.985); }
+.offer.over .buy { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.mini { display: grid; gap: 0; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.mini a { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 16px; text-decoration: none; border-top: 1px solid var(--line); }
+.mini a:first-child { border-top: 0; }
+.mini .t { font-weight: 600; font-size: 14px; min-width: 0; }
+.mini .s { grid-column: 1; font-size: 12px; color: var(--muted); }
+.mini .p { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: 20px/1 var(--f-display); }
+
+/* ---------- 30th-listen ---------- */
+.item { padding: 16px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.i-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+.i-head h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.2; min-width: 0; }
+.finn { text-align: right; }
+.finn b { display: block; font: 20px/1 var(--f-display); }
+.finn small { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.i-meta { margin: 8px 0 12px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.i-meta b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--line); background: var(--surface-2); max-width: 100%; }
+.chip .d { width: 8px; height: 8px; border-radius: 50%; background: var(--off); flex: none; }
+.chip .pr { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
+.chip .pr.ok { color: var(--go); }
+.chip .st { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.chip.in { background: var(--go-soft); border-color: color-mix(in srgb, var(--go) 45%, transparent); }
+.chip.in .d { background: var(--go); }
+.chip.in .st { color: var(--go); }
+.chip.unlisted { border-style: dashed; background: transparent; }
+.chip.unlisted .d { background: transparent; border: 1.5px dashed var(--off); }
+.chip:active { transform: scale(.97); }
+details.more { margin-top: 12px; font-size: 13px; color: var(--muted); }
+details.more summary { cursor: pointer; font-weight: 600; color: var(--ink); list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "＋ "; }
+details.more[open] summary::before { content: "－ "; }
+details.more p { margin: 8px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin: -2px 2px 12px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
+.legend i.in { background: var(--go); } .legend i.ul { background: transparent; border: 1.5px dashed var(--off); }
+
+/* ---------- Butikker & bot ---------- */
+.list { border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--line); text-decoration: none; }
+.li:first-child { border-top: 0; }
+.li .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--go); }
+.li .dot.bad { background: var(--hot); }
+.li .lt { font-weight: 600; font-size: 14px; min-width: 0; }
+.li .ls { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }
+.li .lr { font: 18px/1 var(--f-display); text-align: right; }
+.li .lr small { display: block; font: 600 10px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.kind { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line); margin-left: 6px; vertical-align: 1px; }
+.botcard { padding: 18px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.bstate { display: flex; align-items: center; gap: 10px; font: 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; }
+.bstate i { width: 12px; height: 12px; border-radius: 50%; background: var(--go); }
+.bstate.paused i { background: var(--warn); } .bstate.dead i { background: var(--hot); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; margin: 16px 0 0; font-size: 14px; }
+.kv dt { color: var(--muted); white-space: nowrap; } .kv dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.btn { padding: 13px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 700; font-size: 15px; cursor: pointer; }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.wide { grid-column: 1 / -1; }
+.btn:disabled { opacity: .5; }
+.btn:focus-visible, .buy:focus-visible, .chip:focus-visible, .tabbar button:focus-visible { outline: 3px solid var(--tag); outline-offset: 2px; }
+.fine { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+/* ---------- Fanebar ---------- */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--bar-h); }
+.tabbar button { position: relative; display: grid; place-items: center; align-content: center; gap: 3px; border: 0; background: none; cursor: pointer;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em; color: var(--muted); }
+.tabbar button svg { width: 24px; height: 24px; }
+.tabbar button[aria-selected="true"] { color: var(--ink); }
+.tabbar button[aria-selected="true"]::after { content: ""; position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--go); }
+.badge { position: absolute; top: 8px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--go); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
+
+/* ---------- Oppsett & toast ---------- */
+.setup { padding-top: 10vh; }
+.setup h1 { font: 44px/0.95 var(--f-display); text-transform: uppercase; margin: 18px 0 12px; text-wrap: balance; }
+.setup p { color: var(--muted); max-width: 46ch; }
+.setup ol { padding-left: 20px; color: var(--muted); }
+.setup input { width: 100%; margin-top: 8px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 14px var(--f-body); }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9;
+  padding: 11px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 14px; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+</style>
+</head>
+<body>
+
+<header class="top" id="top" hidden>
+  <div class="top-in">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><circle cx="15" cy="15" r="8" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><path d="M15 15 L15 1.5 A13.5 13.5 0 0 1 27.7 10.4 Z" fill="var(--go)" fill-opacity=".55"/><circle cx="21" cy="9.5" r="2.4" fill="var(--hot)"/></svg>
+      <div><b>Restock-radar</b><small id="subtitle">Haugesund · nett</small></div>
+    </div>
+    <span class="live" id="live"><i></i><span id="liveTxt">Kobler til</span></span>
+  </div>
+</header>
+
+<main class="wrap" id="app" hidden>
+  <div id="banners"></div>
+
+  <section id="tab-na" role="tabpanel">
+    <div class="hero" id="hero">
+      <div class="hero-label">Akkurat nå</div>
+      <div class="hero-count"><span class="big" id="buyCount">–</span><span id="buyLabel">kan kjøpes</span></div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+    <div class="sec"><div class="sec-h"><h2>Kjøp nå</h2><span>under makspris</span></div><div class="stack" id="buyList"></div></div>
+    <div class="sec" id="overSec"><div class="sec-h"><h2>Inne, over maks</h2><span>ikke kjøp</span></div><div class="stack" id="overList"></div></div>
+    <div class="sec" id="otherSec"><div class="sec-h"><h2>Annet på lager</h2><span>bundles, ETB, bokser</span></div><div id="otherList"></div></div>
+  </section>
+
+  <section id="tab-30th" role="tabpanel" hidden>
+    <div class="sec" style="margin-top:14px">
+      <div class="sec-h"><h2>30th Celebration</h2><span id="itemsCount"></span></div>
+      <div class="legend"><span><i class="in"></i>På lager</span><span><i></i>Utsolgt</span><span><i class="ul"></i>Ikke lagt ut ennå</span></div>
+      <div class="stack" id="itemList"></div>
+    </div>
+  </section>
+
+  <section id="tab-butikker" role="tabpanel" hidden>
+    <div class="sec" style="margin-top:14px"><div class="sec-h"><h2>Butikker i Haugesund</h2><span>fysisk lager</span></div><div class="list" id="srcHg"></div></div>
+    <div class="sec"><div class="sec-h"><h2>Nettbutikker</h2><span>kan bestilles</span></div><div class="list" id="srcNet"></div></div>
+  </section>
+
+  <section id="tab-bot" role="tabpanel" hidden>
+    <div class="sec" style="margin-top:14px">
+      <div class="botcard">
+        <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
+        <dl class="kv" id="botKv"></dl>
+        <div class="btns">
+          <button class="btn primary" id="btnCheck" type="button">Sjekk nå</button>
+          <button class="btn" id="btnPause" type="button">Pause</button>
+          <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
+        </div>
+        <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
+      </div>
+    </div>
+    <div class="sec"><div class="sec-h"><h2>Tilkobling</h2></div>
+      <div class="botcard"><dl class="kv" id="connKv"></dl>
+        <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
+        <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="wrap setup" id="setup" hidden>
+  <svg width="64" height="64" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><circle cx="15" cy="15" r="8" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><path d="M15 15 L15 1.5 A13.5 13.5 0 0 1 27.7 10.4 Z" fill="var(--go)" fill-opacity=".55"/><circle cx="21" cy="9.5" r="2.4" fill="var(--hot)"/></svg>
+  <h1>Koble til boten din</h1>
+  <p>Appen viser lageret som Pokemon-boten på PC-en din finner. Den trenger koblingslenken fra boten første gang.</p>
+  <ol>
+    <li>Åpne <b>Pokemon-bot</b> på PC-en og velg <b>[A] App</b> → <b>Send app-lenke til telefonen</b>.</li>
+    <li>Trykk på lenken i varselet på telefonen.</li>
+  </ol>
+  <p>Eller lim inn lenken her:</p>
+  <form id="linkForm">
+    <label for="linkInput" class="fine">Koblingslenke</label>
+    <input id="linkInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…#db=…&amp;k=…">
+    <div class="btns"><button class="btn primary wide" type="submit">Koble til</button></div>
+    <p class="fine" id="linkErr" hidden>Fant ingen koblingsdata i lenken. Den skal inneholde «#db=» og «&amp;k=».</p>
+  </form>
+</section>
+
+<nav class="tabbar" id="tabbar" role="tablist" hidden>
+  <div class="tabbar-in">
+    <button type="button" role="tab" data-tab="na" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18.4 5.6"/></svg>Nå<span class="badge" id="tabBadge" hidden></span></button>
+    <button type="button" role="tab" data-tab="30th" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 7h5M8 11h5M8 15h3"/><path d="M20 7v13a1 1 0 0 1-1 1H8"/></svg>30th</button>
+    <button type="button" role="tab" data-tab="butikker" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/><path d="M10 20v-4h4v4"/></svg>Butikker</button>
+    <button type="button" role="tab" data-tab="bot" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="13" r="1.2" fill="currentColor"/><circle cx="15" cy="13" r="1.2" fill="currentColor"/></svg>Bot</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const nf = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 });
+  const kr = (v) => (v || v === 0) && v > 0 ? nf.format(Math.round(v)) : '–';
+  const nb = (s) => String(s ?? '').replace(/per household/i, 'per husstand');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+
+  // ---------- Kobling (#db=...&k=...) ----------
+  function parseLink(text) {
+    const i = String(text || '').indexOf('#');
+    const h = i >= 0 ? text.slice(i + 1) : String(text || '');
+    if (h === 'demo') return { demo: true };
+    const p = new URLSearchParams(h);
+    const db = p.get('db'), k = p.get('k');
+    if (db && k && /^https:\/\/[a-z0-9.-]+\.(firebaseio\.com|firebasedatabase\.app)$/i.test(db.replace(/\/$/, ''))) return { db: db.replace(/\/$/, ''), k };
+    return null;
+  }
+  let cfg = parseLink(location.hash);
+  if (cfg && !cfg.demo) { store.set('rr-cfg', JSON.stringify(cfg)); }
+  if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
+
+  // ---------- Tilstand ----------
+  let tree = { data: null, bot: null };
+  let liveState = 'connecting';
+  let es = null, pollTimer = null;
+
+  function setAt(path, value, merge) {
+    const parts = path.split('/').filter(Boolean);
+    if (!parts.length) {
+      if (merge && value && typeof value === 'object') tree = { ...tree, ...value };
+      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null } : { data: null, bot: null };
+      return;
+    }
+    let o = tree;
+    for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    if (merge && value && typeof value === 'object') o[last] = { ...(o[last] || {}), ...value };
+    else o[last] = value;
+  }
+
+  function connect() {
+    if (cfg.demo) {
+      fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()).then((d) => {
+        tree = { data: d, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, storeEvery: 10, netEvery: 3 } };
+        liveState = 'demo'; render();
+      }).catch(() => { liveState = 'off'; render(); });
+      return;
+    }
+    const base = `${cfg.db}/${encodeURIComponent(cfg.k)}`;
+    try { if (es) es.close(); } catch {}
+    if (typeof EventSource === 'undefined') { startPolling(base); return; }
+    es = new EventSource(`${base}.json`);
+    es.addEventListener('put', (e) => { const m = JSON.parse(e.data); setAt(m.path, m.data, false); liveState = 'on'; render(); });
+    es.addEventListener('patch', (e) => { const m = JSON.parse(e.data); setAt(m.path, m.data, true); liveState = 'on'; render(); });
+    es.addEventListener('cancel', () => { liveState = 'off'; render(); });
+    es.onopen = () => { liveState = 'on'; renderLive(); };
+    es.onerror = () => { liveState = 'off'; renderLive(); if (es.readyState === 2) startPolling(base); };
+  }
+  function startPolling(base) {
+    clearInterval(pollTimer);
+    const once = () => fetch(`${base}.json`, { cache: 'no-store' }).then((r) => r.json()).then((d) => { setAt('/', d, false); liveState = 'poll'; render(); }).catch(() => { liveState = 'off'; renderLive(); });
+    once(); pollTimer = setInterval(once, 30000);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && cfg && !cfg.demo && (!es || es.readyState === 2)) connect();
+  });
+
+  // ---------- Kommandoer til boten ----------
+  async function send(c, okMsg) {
+    if (!cfg || cfg.demo) { toast('Demo: ingen bot å sende til'); return; }
+    try {
+      const r = await fetch(`${cfg.db}/${encodeURIComponent(cfg.k)}/cmd.json`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c, t: { '.sv': 'timestamp' } }) });
+      if (!r.ok) throw new Error(r.status);
+      toast(okMsg);
+    } catch { toast('Fikk ikke sendt. Sjekk nettet og prøv igjen.'); }
+  }
+  let toastT;
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+
+  // ---------- Tid ----------
+  function ago(ms) {
+    if (!ms) return 'aldri';
+    const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+    if (s < 45) return 'nå nettopp';
+    const m = Math.round(s / 60);
+    if (m < 60) return `${m} min siden`;
+    const h = Math.floor(m / 60);
+    return `${h} t ${m % 60} min siden`;
+  }
+  function until(ms) {
+    if (!ms) return '–';
+    const m = Math.round((ms - Date.now()) / 60000);
+    return m <= 0 ? 'snart' : `om ${m} min`;
+  }
+  const clock = (ms) => ms ? new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }) : '–';
+
+  // ---------- Avledede lister ----------
+  function derive(d) {
+    const buy = [], over = [];
+    for (const it of d.items || []) {
+      for (const o of it.offers || []) {
+        if (o.state !== 'in') continue;
+        const ok = !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
+        (ok ? buy : over).push({ it, o });
+      }
+    }
+    const byPrice = (a, b) => (a.o.where === 'haugesund' ? -1 : 0) - (b.o.where === 'haugesund' ? -1 : 0) || (a.it.tier || 'Z').localeCompare(b.it.tier || 'Z') || a.o.price - b.o.price;
+    buy.sort(byPrice); over.sort(byPrice);
+    return { buy, over };
+  }
+
+  // ---------- Tegning ----------
+  function renderLive() {
+    const el = $('live'), t = $('liveTxt');
+    el.className = 'live';
+    const map = { on: ['on', 'Live'], poll: ['on', 'Oppdateres'], demo: ['warn', 'Demo'], connecting: ['', 'Kobler til'], off: ['warn', 'Frakoblet'] };
+    const [cls, txt] = map[liveState] || map.off;
+    if (cls) el.classList.add(cls);
+    t.textContent = txt;
+  }
+
+  function offerCard({ it, o }, over) {
+    const margin = it.finn && it.finn.med && o.price ? it.finn.med - o.price : null;
+    const where = o.where === 'haugesund' ? `<span class="where hg">Haugesund</span><span>${esc(o.store)}</span>` : `<span class="where">Nett</span><span>${esc(o.shop)}</span>`;
+    const tier = it.tier ? `<span class="tier ${esc(it.tier)}" title="Tier ${esc(it.tier)}">${esc(it.tier)}</span>` : '';
+    const nums = [
+      it.max ? `<div><dt>Maks</dt><dd class="${over ? 'warnc' : ''}">${kr(it.max)}</dd></div>` : '',
+      it.finn && it.finn.n ? `<div><dt>Finn</dt><dd>~${kr(it.finn.med)}</dd></div>` : `<div><dt>Finn</dt><dd>ingen funn</dd></div>`,
+      margin !== null ? `<div><dt>Margin</dt><dd class="${margin >= 0 ? 'pos' : 'neg'}">${margin >= 0 ? '+' : ''}${kr(Math.abs(margin)) === '–' ? '0' : (margin < 0 ? '−' : '') + kr(Math.abs(margin))}</dd></div>` : ''
+    ].join('');
+    const notes = [o.note, it.limit ? `Kjøpsgrense: ${nb(it.limit)}` : ''].filter(Boolean).map(esc).join(' · ');
+    return `<article class="offer ${over ? 'over' : ''}">
+      <div class="o-top">${tier}${where}</div>
+      <h3>${esc(o.product)}</h3>
+      <div class="o-row"><div class="tag">${kr(o.price)}<small>,-</small></div><dl class="nums">${nums}</dl></div>
+      ${notes ? `<p class="o-note">${notes}</p>` : ''}
+      <a class="buy" href="${esc(o.url)}" target="_blank" rel="noopener">${over ? 'Se hos' : 'Kjøp hos'} ${esc(o.shop)} ↗</a>
+    </article>`;
+  }
+
+  function itemCard(it) {
+    const offers = [...(it.offers || [])].sort((a, b) => (b.state === 'in') - (a.state === 'in') || (a.price || 9e9) - (b.price || 9e9));
+    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'ikke ute' };
+    const multi = {};
+    offers.forEach((o) => (multi[o.shop] = (multi[o.shop] || 0) + 1));
+    const short = (p) => String(p).replace(/^(pok[eé]mon:?\s*)?30th (celebration|anniversary)\s*/i, '').replace(/^[—–-]\s*/, '');
+    const chips = offers.map((o) => {
+      const ok = o.price > 0 && it.max > 0 && o.price <= it.max;
+      const name = multi[o.shop] > 1 ? `${o.shop} · ${short(o.product)}` : o.shop;
+      const st = o.state === 'in' && o.where === 'haugesund' ? `i ${o.store.replace(/^(Nille|Norli)\s*/i, '')}` : label[o.state];
+      return `<a class="chip ${o.state}" href="${esc(o.url)}" target="_blank" rel="noopener"><span class="d"></span><span>${esc(name)}</span><span class="pr ${ok ? 'ok' : ''}">${kr(o.price)}</span><span class="st">${esc(st)}</span></a>`;
+    }).join('');
+    const cheapest = offers.filter((o) => o.price > 0).sort((a, b) => a.price - b.price)[0];
+    const meta = [
+      it.max ? `Maks <b>${kr(it.max)}</b>` : '',
+      it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
+      cheapest && it.finn && it.finn.med ? `Margin fra billigste <b class="${it.finn.med - cheapest.price >= 0 ? 'pos' : 'neg'}">${it.finn.med - cheapest.price >= 0 ? '+' : '−'}${kr(Math.abs(it.finn.med - cheapest.price))}</b>` : '',
+      it.limit ? `Grense <b>${esc(nb(it.limit))}</b>` : ''
+    ].filter(Boolean).join('');
+    const more = [it.elsewhere ? `<p><b>Fysisk i Norli-butikker:</b> ${esc(it.elsewhere)}</p>` : '', it.note ? `<p>${esc(it.note)}</p>` : '', it.finn && it.finn.n ? `<p>Finn: ${it.finn.n} annonser, laveste ${kr(it.finn.min)} kr.</p>` : ''].join('');
+    return `<article class="item">
+      <div class="i-head"><span class="tier ${esc(it.tier)}">${esc(it.tier)}</span><h3>${esc(it.name)}</h3>
+        <div class="finn">${it.finn && it.finn.n ? `<b>~${kr(it.finn.med)}</b><small>Finn</small>` : `<b>–</b><small>Finn: ingen</small>`}</div></div>
+      <div class="i-meta">${meta}</div>
+      <div class="chips">${chips || '<span class="fine">Ikke funnet i noen butikk ennå.</span>'}</div>
+      ${more ? `<details class="more"><summary>Mer</summary>${more}</details>` : ''}
+    </article>`;
+  }
+
+  function render() {
+    renderLive();
+    const d = tree.data, b = tree.bot || {};
+    if (!d) {
+      $('buyCount').textContent = '–';
+      $('buyList').innerHTML = `<div class="empty">Venter på data fra boten. Står PC-en på og kjører Pokemon-bot?</div>`;
+      return;
+    }
+    $('subtitle').textContent = `${d.stores || 'Haugesund'} · nett`;
+
+    // Bannere
+    const ban = [];
+    const stale = b.beat && Date.now() - b.beat > 5 * 60000;
+    if (!b.beat || stale) ban.push(`<div class="banner"><b>Boten svarer ikke</b> – sist hørt fra ${b.beat ? clock(b.beat) : 'aldri'}. Står PC-en på?</div>`);
+    if (b.paused) ban.push(`<div class="banner"><b>Pauset.</b> Boten sjekker ingenting før du trykker Fortsett under Bot.</div>`);
+    $('banners').innerHTML = ban.join('');
+
+    // Nå
+    const { buy, over } = derive(d);
+    const hgIn = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
+    $('buyCount').textContent = buy.length;
+    $('buyLabel').textContent = buy.length === 1 ? 'kan kjøpes nå' : 'kan kjøpes nå';
+    $('hero').classList.toggle('has-buy', buy.length > 0);
+    $('heroStats').innerHTML = [
+      `<span class="stat"><i style="background:var(--hot)"></i>Haugesund: ${hgIn} inne</span>`,
+      `<span class="stat"><i style="background:var(--warn)"></i>${over.length} over maks</span>`,
+      `<span class="stat"><i style="background:var(--go)"></i>Sjekket ${ago(Math.max(b.lastOnline || 0, b.lastStore || 0) || d.updated)}</span>`
+    ].join('');
+    $('buyList').innerHTML = buy.length ? buy.map((x) => offerCard(x, false)).join('') :
+      `<div class="empty">Ingenting fra 30th-listen er under makspris akkurat nå. Du får varsel på telefonen så fort noe dukker opp.</div>`;
+    $('overSec').hidden = !over.length;
+    $('overList').innerHTML = over.map((x) => offerCard(x, true)).join('');
+    const other = d.other || [];
+    $('otherSec').hidden = !other.length;
+    $('otherList').innerHTML = other.length ? `<div class="mini">${other.map((o) => `<a href="${esc(o.url)}" target="_blank" rel="noopener">
+        <span class="t">${esc(o.product)}</span><span class="p">${kr(o.price)}</span>
+        <span class="s">${o.kind === 'Haugesund' ? `Haugesund · ${esc(o.store)}` : `Nett · ${esc(o.shop)}`}${o.finn ? ` · Finn ~${kr(o.finn.med)}` : ''}</span></a>`).join('')}</div>` : '';
+    const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
+
+    // 30th
+    const items = [...(d.items || [])].sort((a, b) => {
+      const ai = (a.offers || []).some((o) => o.state === 'in'), bi = (b.offers || []).some((o) => o.state === 'in');
+      return (bi - ai) || String(a.tier).localeCompare(String(b.tier));
+    });
+    $('itemsCount').textContent = `${items.length} produkter`;
+    $('itemList').innerHTML = items.map(itemCard).join('');
+
+    // Butikker
+    const srcRow = (s) => {
+      const tag = s.url ? 'a' : 'div';
+      const href = s.url ? ` href="${esc(s.url)}" target="_blank" rel="noopener"` : '';
+      const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges`;
+      return `<${tag} class="li"${href}><span class="dot ${s.failing ? 'bad' : ''}"></span><span class="lt">${esc(s.label.replace(/\s*\((butikk.*|nettbutikk)\)/i, ''))}<span class="ls">${esc(sub)}</span></span><span class="lr">${s.inStock}<small>på lager</small></span></${tag}>`;
+    };
+    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').map(srcRow).join('') || '<div class="li">Ingen</div>';
+    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').map(srcRow).join('') || '<div class="li">Ingen</div>';
+
+    // Bot
+    const dead = !b.beat || stale;
+    const bs = $('bstate');
+    bs.className = 'bstate' + (dead ? ' dead' : b.paused ? ' paused' : '');
+    $('bstateTxt').textContent = dead ? 'Svarer ikke' : b.paused ? 'Pauset' : 'Kjører';
+    $('btnPause').textContent = b.paused ? 'Fortsett' : 'Pause';
+    $('botKv').innerHTML = [
+      ['Sist kontakt', b.beat ? ago(b.beat) : 'aldri'],
+      ['Butikker', b.lastStore ? `${clock(b.lastStore)} (${until(b.nextStore)})` : '–'],
+      ['Nett', b.lastOnline ? `${clock(b.lastOnline)} (${until(b.nextOnline)})` : '–'],
+      ['Intervall', `butikk ${b.storeEvery || '?'} min · nett ${b.netEvery || '?'} min`],
+      ['Finn hentet', b.finnAt ? clock(b.finnAt) : '–'],
+      ['Data oppdatert', d.updated ? clock(d.updated) : '–']
+    ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+    $('connKv').innerHTML = [
+      ['Status', { on: 'Live', poll: 'Henter hvert 30. sek', demo: 'Demo', connecting: 'Kobler til', off: 'Frakoblet' }[liveState]],
+      ['Database', cfg.demo ? 'demo' : cfg.db.replace(/^https:\/\//, '')]
+    ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+  }
+
+  // ---------- Faner ----------
+  function showTab(name) {
+    document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    ['na', '30th', 'butikker', 'bot'].forEach((t) => ($('tab-' + t).hidden = t !== name));
+    store.set('rr-tab', name);
+    window.scrollTo({ top: 0 });
+  }
+  document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  $('btnCheck').addEventListener('click', () => send('sjekk', 'Boten sjekker nå – svar om litt'));
+  $('btnPause').addEventListener('click', () => { const p = tree.bot && tree.bot.paused; send(p ? 'fortsett' : 'pause', p ? 'Boten fortsetter' : 'Boten pauses'); });
+  $('btnFinn').addEventListener('click', () => send('finn', 'Henter nye Finn-priser (tar et par minutter)'));
+  let unlinkArmed = false;
+  $('btnUnlink').addEventListener('click', () => {
+    if (!unlinkArmed) { unlinkArmed = true; $('unlinkHint').hidden = false; setTimeout(() => { unlinkArmed = false; $('unlinkHint').hidden = true; }, 4000); return; }
+    store.del('rr-cfg'); location.hash = ''; location.reload();
+  });
+  $('linkForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const c = parseLink($('linkInput').value.trim());
+    if (!c) { $('linkErr').hidden = false; return; }
+    cfg = c; if (!c.demo) store.set('rr-cfg', JSON.stringify(c)); start();
+  });
+
+  function start() {
+    $('setup').hidden = true;
+    ['top', 'app', 'tabbar'].forEach((id) => ($(id).hidden = false));
+    const t = store.get('rr-tab');
+    showTab(['na', '30th', 'butikker', 'bot'].includes(t) ? t : 'na');
+    render(); connect();
+    setInterval(render, 30000);
+  }
+  if (cfg) start(); else $('setup').hidden = false;
+})();
+</script>
+</body>
+</html>
