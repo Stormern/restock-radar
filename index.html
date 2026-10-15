@@ -137,7 +137,50 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .btn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn.wide { grid-column: 1 / -1; }
 .fine { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
-.btn:focus-visible, .rh:focus-visible, .go:focus-visible, .lk:focus-visible, .cta:focus-visible, .tabbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn:focus-visible, .rh:focus-visible, .go:focus-visible, .lk:focus-visible, .cta:focus-visible, .tabbar button:focus-visible, .cr:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Kalender */
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.chip.ok { color: var(--up); background: var(--up-soft); border-color: rgba(43, 214, 123, .35); }
+.chip.av { color: var(--warn); background: var(--warn-soft); border-color: rgba(245, 165, 36, .35); }
+.hero-d { font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-top: 2px; }
+.hero-d span { font-size: 17px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 8px; }
+.hero .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cal { border-bottom: 1px solid var(--line); }
+.cr { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; cursor: pointer; }
+.db { text-align: center; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); padding: 6px 0 5px; }
+.db b { display: block; font-size: 19px; font-weight: 700; line-height: 1.05; }
+.db small { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); margin-top: 1px; }
+.cal.past .db small { color: var(--muted); }
+.cr .cn { min-width: 0; }
+.cr .cn .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr .cn .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd { text-align: right; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.cd b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.cd .ok { color: var(--up); } .cd .av { color: var(--warn); }
+.cal-det { padding: 0 0 14px; }
+.srcs { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; margin-bottom: 12px; }
+.srcs .sr { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.srcs .sr:first-child { border-top: 0; }
+.srcs .sr .mk { font-weight: 700; text-align: center; }
+.srcs .sr.same .mk { color: var(--up); } .srcs .sr.diff .mk { color: var(--warn); } .srcs .sr.none { color: var(--dim); }
+.srcs .sr small { color: var(--muted); font-size: 12px; }
+.srcs .sh { padding: 9px 12px 0; font-size: 12px; color: var(--muted); }
+.prod-t { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.of.ready .s { background: var(--up); }
+.of.ready .lk { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+
+/* Nyheter */
+.nw { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.nw .ic { font-size: 17px; line-height: 1.3; text-align: center; }
+.nw .tt { display: block; font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.nw .tx { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.pn { font-size: 13.5px; font-weight: 600; margin: 12px 0 6px; }
+.nw .tm { font-size: 12px; color: var(--dim); white-space: nowrap; padding-top: 2px; }
+.nw.new .tt::after { content: "NY"; margin-left: 7px; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; background: var(--gold); color: #2A2100; vertical-align: 2px; }
+.src-st { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 10px; align-items: center; font-size: 13px; margin-top: 8px; }
+.src-st .tm { color: var(--muted); text-align: right; }
+.src-st .er { grid-column: 2 / -1; font-size: 12px; color: var(--warn); margin-top: -4px; }
 
 /* Bannere */
 .banner { margin: 6px 0 8px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
@@ -147,8 +190,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* Fanebar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
-.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: var(--bar-h); }
-.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--dim); position: relative; }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--bar-h); }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--dim); position: relative; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
@@ -190,6 +233,21 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     <div class="sec"><div class="sec-t"><span>Nettbutikker</span><span>kan bestilles</span></div><div id="srcNet"></div></div>
   </section>
 
+  <section id="tab-kalender" role="tabpanel" hidden>
+    <div class="hero" id="calHero"></div>
+    <div id="calUp"></div>
+    <div id="calPast"></div>
+    <div class="sec"><div class="sec-t"><span>Kilder</span><span id="calChecked"></span></div>
+      <p class="fine" style="margin-top:0">Datoen for hvert sett sjekkes mot flere uavhengige kilder. Er de enige, står det <b>bekreftet</b>. Har Norli satt salgsstart, er det den som gjelder i Norge.</p>
+      <div class="src-st" id="calSrc"></div></div>
+  </section>
+
+  <section id="tab-nyheter" role="tabpanel" hidden>
+    <div id="newsEvents"></div>
+    <div id="newsArticles"></div>
+    <p class="fine" id="newsFoot"></p>
+  </section>
+
   <section id="tab-bot" role="tabpanel" hidden>
     <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
     <dl class="grid2" id="botKv"></dl>
@@ -227,6 +285,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Marked<span class="badge" id="tabBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="butikker" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>Butikker</button>
+    <button type="button" role="tab" data-tab="kalender" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Kalender</button>
+    <button type="button" role="tab" data-tab="nyheter" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h11v14H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1z"/><path d="M16 9h3a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2h-2"/><path d="M8 9h5M8 12.5h5M8 16h3"/></svg>Nyheter<span class="badge" id="newsBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="bot" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1.1" fill="currentColor"/><circle cx="15" cy="13" r="1.1" fill="currentColor"/></svg>Bot</button>
   </div>
@@ -264,7 +326,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
 
   // ---------- Data ----------
-  let tree = { data: null, bot: null };
+  let tree = { data: null, bot: null, news: null };
   let liveState = 'connecting';
   let es = null, pollTimer = null;
   const openRows = new Set();
@@ -275,7 +337,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const parts = path.split('/').filter(Boolean);
     if (!parts.length) {
       if (merge && value && typeof value === 'object') tree = { ...tree, ...value };
-      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null } : { data: null, bot: null };
+      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null } : { data: null, bot: null, news: null };
       return;
     }
     let o = tree;
@@ -286,8 +348,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   function connect() {
     if (cfg.demo) {
-      fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()).then((d) => {
-        tree = { data: d, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
+      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), fetch('demo-news.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)]).then(([d, n]) => {
+        tree = { data: d, news: n, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
         liveState = 'demo'; render();
       }).catch(() => { liveState = 'off'; render(); });
       return;
@@ -427,8 +489,134 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       ${list.length ? list.map(row).join('') : `<div class="empty">${emptyText}</div>`}</div>`;
   }
 
+  // ---------- Kalender ----------
+  // Sett (fra boten, med dato kryssjekket mot flere kilder) + enkeltprodukter med slippdato (watchlisten og Norli).
+  const openCal = new Set();
+  const MON = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+  const MONL = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+  const ymd = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+  const daysTo = (s) => { const d = ymd(s); if (!d) return null; const t = new Date(); return Math.round((d - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5); };
+  const longDate = (s) => { const d = ymd(s); return d ? `${d.getDate()}. ${MONL[d.getMonth()]}` : String(s || ''); };
+  const countdown = (n) => (n === 0 ? 'i dag' : n === 1 ? 'i morgen' : n > 1 ? `om ${n} dager` : n === -1 ? 'i går' : `${-n} dager siden`);
+  const agoShort = (ms) => { const m = Math.round((Date.now() - ms) / 60000); if (m < 2) return 'nå'; if (m < 60) return `${m} min`; const h = Math.round(m / 60); return h < 24 ? `${h} t` : `${Math.round(h / 24)} d`; };
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanShop = (s) => String(s || '').replace(/\s*\((butikk.*|nettbutikk|hele butikken|produktlenke)\)/i, '');
+  const SRC = { norli: 'Norli (Norge)', offisiell: 'Pokemon.com', serebii: 'Serebii', pokejakt: 'Pokejakt.no' };
+  const AVAIL = { InStock: 'på lager', PreOrder: 'kan forhåndsbestilles', PreSale: 'kan forhåndsbestilles', LimitedAvailability: 'få igjen', BackOrder: 'kan bestilles' };
+
+  function calEntries() {
+    const n = tree.news || {}, d = tree.data || {};
+    const out = (n.sets || []).map((s) => ({ kind: 'sett', key: 'sett:' + s.id, name: s.name, date: s.date, status: s.status, total: s.total, s }));
+    const seen = new Set();
+    (d.items || []).forEach((it) => {
+      if (!it.release) return;
+      seen.add(norm(it.name));
+      const rs = it.relSrc || [];
+      const agree = rs.filter((x) => x.d === it.release).length;
+      out.push({ kind: 'produkt', key: 'p:' + it.name, name: it.name, date: it.release, status: rs.length < 2 ? 'en' : agree === rs.length ? 'ok' : 'avvik', total: rs.length, it });
+    });
+    (d.sources || []).forEach((src) => (src.items || []).forEach((x) => {
+      if (!x.release || x.watched || seen.has(norm(x.name))) return;
+      seen.add(norm(x.name));
+      out.push({ kind: 'produkt', key: 'p:' + x.name, name: x.name, date: x.release, status: 'en', total: 1, x, shop: cleanShop(src.label) });
+    }));
+    return out.filter((e) => ymd(e.date)).sort((a, b) => a.date.localeCompare(b.date) || (a.kind === 'sett' ? -1 : 1));
+  }
+
+  function calRow(e, past) {
+    const dd = ymd(e.date), open = openCal.has(e.key);
+    let sub;
+    if (e.kind === 'sett') sub = `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter i norske butikker` : 'ingen produkter lagt ut ennå'}${e.s.price > 0 ? ` · fra ${kr(e.s.price)} kr` : ''}`;
+    else if (e.it) { const a = analyse(e.it); sub = `<span class="tag">PRODUKT</span>${a.main ? `${esc(a.main.shop)}${a.main.price > 0 ? ` ${kr(a.main.price)} kr` : ''}` : 'ikke lagt ut ennå'}${a.finn ? ` · Finn ${kr(a.finn)}` : ''}`; }
+    else sub = `<span class="tag">PRODUKT</span>${esc(e.shop)}${e.x.price > 0 ? ` · ${kr(e.x.price)} kr` : ''}`;
+    const mark = e.status === 'ok' ? `<span class="ok">✓ ${e.total} kilder</span>` : e.status === 'avvik' ? '<span class="av">⚠ uenige</span>' : '<span>1 kilde</span>';
+    return `<div class="cal${past ? ' past' : ''}${open ? ' open' : ''}" data-key="${esc(e.key)}">
+      <div class="cr" role="button" tabindex="0" aria-expanded="${open}">
+        <div class="db"><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small></div>
+        <div class="cn"><div class="t">${esc(e.name)}</div><div class="s">${sub}</div></div>
+        <div class="cd"><b>${countdown(daysTo(e.date))}</b>${mark}</div>
+      </div>
+      <div class="cal-det" ${open ? '' : 'hidden'}>${calDetails(e)}</div></div>`;
+  }
+
+  function calDetails(e) {
+    const srcRowH = (cls, mk, name, val, link) => {
+      const inner = `<span class="mk">${mk}</span><span>${esc(name)}</span><small>${esc(val)}</small>`;
+      return link ? `<a class="sr ${cls}" href="${esc(link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="sr ${cls}">${inner}</div>`;
+    };
+    if (e.kind === 'sett') {
+      const s = e.s, up = daysTo(s.date) >= 0;
+      const rows = ['norli', 'offisiell', 'serebii', 'pokejakt'].map((k) => {
+        const v = s.dates && s.dates[k];
+        if (!v) return srcRowH('none', '–', SRC[k], k === 'norli' ? 'ikke lagt ut hos Norli ennå' : 'ingen dato ennå', '');
+        return srcRowH(v === s.date ? 'same' : 'diff', v === s.date ? '✓' : '≠', SRC[k], longDate(v), s.links && s.links[k]);
+      }).join('');
+      const note = s.status === 'avvik' ? `<div class="sh">Kildene er uenige. ${s.dates && s.dates.norli ? 'Norlis dato gjelder i Norge.' : 'Viser datoen flest kilder oppgir.'}</div>` : '';
+      let h = `<div class="srcs">${note}${rows}</div>`;
+      const prods = s.prods || [];
+      if (prods.length) {
+        h += `<div class="prod-t">Produkter i norske butikker</div>` + prods.map((p) => {
+          const ofs = (p.offers || []).map((o) => {
+            const st = o.ready ? (AVAIL[o.avail] || 'kan bestilles') : up ? 'ikke bestillbar ennå' : 'utsolgt';
+            return `<div class="of ${o.ready ? 'ready' : 'out'}"><span class="s"></span><span class="on">${esc(o.store)}<small>${esc(st)}</small></span><span class="pr">${kr(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.ready ? 'Bestill' : 'Åpne'} ↗</a></div>`;
+          }).join('');
+          return `<div class="pn">${esc(String(p.name).replace(/^Pok[eé]mon\s+/i, ''))}</div><div class="offers">${ofs || '<div class="of"><span class="on mut">Ingen butikk ennå</span></div>'}</div>`;
+        }).join('');
+      } else h += `<p class="fine">${up ? 'Ingen norske butikker har lagt ut produkter fra settet ennå. Du får varsel når det skjer.' : `${s.n || 0} produkter i norske butikker – se alle på Pokejakt.`}</p>`;
+      return h + `<a class="go" href="${esc(s.url)}" target="_blank" rel="noopener">Se settet på Pokejakt ↗</a>`;
+    }
+    if (e.it) {
+      const rs = e.it.relSrc || [];
+      const rows = rs.length ? rs.map((x) => srcRowH(x.d === e.date ? 'same' : 'diff', x.d === e.date ? '✓' : '≠', x.s === 'din liste' ? 'Din liste' : x.s, longDate(x.d), '')).join('') : srcRowH('none', '–', 'Ukjent kilde', longDate(e.date), '');
+      return `<div class="srcs">${rows}</div>` + details(e.it, analyse(e.it));
+    }
+    return `<div class="srcs">${srcRowH('same', '✓', e.shop, longDate(e.date), '')}</div><a class="go" href="${esc(e.x.url)}" target="_blank" rel="noopener">Åpne hos ${esc(e.shop)} ↗</a>`;
+  }
+
+  function renderCal() {
+    const n = tree.news, all = calEntries();
+    const up = all.filter((e) => daysTo(e.date) >= 0);
+    const past = all.filter((e) => daysTo(e.date) < 0 && daysTo(e.date) >= -60).reverse();
+    const hero = $('calHero');
+    hero.className = 'hero';
+    if (up.length) {
+      const e = up[0];
+      const chip = e.status === 'ok' ? `<span class="chip ok">✓ Bekreftet av ${e.total} kilder</span>` : e.status === 'avvik' ? '<span class="chip av">⚠ Kildene er uenige – trykk på den under</span>' : '<span class="chip">1 kilde så langt</span>';
+      const extra = e.kind === 'sett' ? `<span class="chip">${e.s.n || 0} produkter lagt ut i Norge</span>` : '';
+      hero.innerHTML = `<div class="hero-l">Neste slipp</div><div class="hero-t">${esc(e.name)}</div><div class="hero-d">${esc(longDate(e.date))}<span>${countdown(daysTo(e.date))}</span></div><div class="chips">${chip}${extra}</div>`;
+    } else if (!n) hero.innerHTML = '<div class="hero-t">Venter på kalenderen</div><div class="hero-s">Boten henter slippdatoer første gang den kjører med den nye versjonen.</div>';
+    else hero.innerHTML = '<div class="hero-t">Ingen kjente slipp framover</div><div class="hero-s">Boten sier fra så snart et nytt sett dukker opp.</div>';
+    $('calUp').innerHTML = `<div class="sec"><div class="sec-t"><span>Kommende</span><span>${up.length} slipp · tidligst øverst</span></div>${up.length ? up.map((e) => calRow(e, false)).join('') : '<div class="empty">Ingen kjente slipp framover ennå.</div>'}</div>`;
+    $('calPast').innerHTML = past.length ? `<div class="sec"><div class="sec-t"><span>Nylig sluppet</span><span>siste 60 dager</span></div>${past.map((e) => calRow(e, true)).join('')}</div>` : '';
+    $('calChecked').textContent = n && n.checked ? `sjekket ${clock(n.checked)}${n.next ? ` · neste ${clock(n.next)}` : ''}` : '';
+    $('calSrc').innerHTML = ((n && n.src) || []).map((x) => `<i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i><span>${esc(x.label)}</span><span class="tm">${x.err ? 'feil' : x.ok ? `ok · ${agoShort(x.ok)}` : '–'}</span>${x.err ? `<span class="er">${esc(x.err)}</span>` : ''}`).join('');
+  }
+
+  // ---------- Nyheter ----------
+  const ICON = { sett: '🆕', dato: '📅', ut: '🏷️', bestill: '🛒', snart: '⏰' };
+  let newsSeenAtOpen = +(store.get('rr-news-seen') || 0);
+  function renderNews() {
+    const n = tree.news || {}, evs = n.events || [], arts = n.articles || [];
+    const onNews = !$('tab-nyheter').hidden;
+    const top = evs.reduce((m, e) => Math.max(m, e.t || 0), 0);
+    if (onNews && top) store.set('rr-news-seen', String(top));
+    const seen = +(store.get('rr-news-seen') || 0);
+    const fresh = evs.filter((e) => e.t > seen).length;
+    const b = $('newsBadge'); b.hidden = !fresh; b.textContent = fresh;
+    const item = (icon, title, text, t, url, isNew) => {
+      const inner = `<span class="ic">${icon}</span><span><span class="tt">${esc(title)}</span>${text ? `<span class="tx">${esc(text)}</span>` : ''}</span><span class="tm">${t ? agoShort(t) : ''}</span>`;
+      return url ? `<a class="nw${isNew ? ' new' : ''}" href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="nw${isNew ? ' new' : ''}">${inner}</div>`;
+    };
+    $('newsEvents').innerHTML = `<div class="sec"><div class="sec-t"><span>Lanseringer og slipp</span><span>i Norge</span></div>${evs.length ? evs.map((e) => item(ICON[e.kind] || '•', e.title, e.text, e.t, e.url, e.t > newsSeenAtOpen)).join('') : '<div class="empty">Ingenting nytt ennå. Boten sier fra her (og på telefonen) når et nytt sett får dato, en dato flyttes, eller en norsk butikk legger ut eller åpner forhåndsbestilling.</div>'}</div>`;
+    // Bare avissaker om lansering/slipp – vises ikke i det hele tatt når det ikke finnes noen.
+    $('newsArticles').innerHTML = arts.length ? `<div class="sec"><div class="sec-t"><span>I norske medier</span><span>om lanseringer</span></div>${arts.map((a) => item('📰', a.title, a.source, a.t, a.url, false)).join('')}</div>` : '';
+    $('newsFoot').textContent = n.checked ? `Boten sjekker hvert ${n.every || 30}. min · sist ${clock(n.checked)}. Bare lanseringsdatoer og slipp – ikke kortspill, turneringer eller dataspill.` : 'Venter på første nyhetssjekk fra boten.';
+  }
+
   function render() {
     renderLive();
+    renderCal();
+    renderNews();
     const d = tree.data, b = tree.bot || {};
     if (!d) { $('hero').innerHTML = `<div class="hero-t">Venter på data fra boten</div><div class="hero-s">Står PC-en på og kjører Pokemon-bot?</div>`; return; }
 
@@ -559,10 +747,24 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   });
   $('tab-butikker').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('li')) { e.preventDefault(); e.target.click(); } });
 
+  $('tab-kalender').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.cr'); if (!h) return;
+    const c = h.closest('.cal'), key = c.dataset.key;
+    if (openCal.has(key)) openCal.delete(key); else openCal.add(key);
+    const open = openCal.has(key);
+    c.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    c.querySelector('.cal-det').hidden = !open;
+  });
+  $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
+
+  const TABS = ['marked', 'butikker', 'kalender', 'nyheter', 'bot'];
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
-    ['marked', 'butikker', 'bot'].forEach((t) => ($('tab-' + t).hidden = t !== name));
+    TABS.forEach((t) => ($('tab-' + t).hidden = t !== name));
     store.set('rr-tab', name);
+    // "NY"-merket gjelder det som kom siden sist du åpnet Nyheter.
+    if (name === 'nyheter') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
     window.scrollTo({ top: 0 });
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
@@ -586,7 +788,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     $('setup').hidden = true;
     ['top', 'app', 'tabbar'].forEach((id) => ($(id).hidden = false));
     const t = store.get('rr-tab');
-    showTab(['marked', 'butikker', 'bot'].includes(t) ? t : 'marked');
+    showTab(TABS.includes(t) ? t : 'marked');
     render(); connect();
     setInterval(render, 30000);
   }

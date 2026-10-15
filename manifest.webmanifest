@@ -1,10 +1,10 @@
 {
-  "name": "Restock-radar",
-  "short_name": "Restock",
+  "name": "PikaJew",
+  "short_name": "PikaJew",
   "description": "Pokémon-restock i Haugesund og nettbutikker – live fra boten din.",
   "display": "standalone",
-  "background_color": "#0B0D12",
-  "theme_color": "#0B0D12",
+  "background_color": "#0B0C0F",
+  "theme_color": "#0B0C0F",
   "lang": "nb",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
