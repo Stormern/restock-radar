@@ -25,7 +25,7 @@
   --warn: #F5A524; --warn-soft: rgba(245, 165, 36, .10);
   --down: #FF6B5B; --gold: #FFCB05;
   --f: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --cols: minmax(0, 1fr) 52px 52px 58px;
+  --cols: minmax(0, 1fr) 62px 62px 68px;
   --bar-h: 52px;
   color-scheme: dark;
 }
@@ -80,6 +80,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .row.m-good .rh { box-shadow: inset 3px 0 0 var(--up); }
 .row.m-thin .rh { box-shadow: inset 3px 0 0 var(--warn); }
 .row.m-loss .rh { box-shadow: inset 3px 0 0 var(--down); }
+.u { font-size: .74em; font-weight: 500; opacity: .75; }
 .v.mg small { display: block; font-size: 11px; font-weight: 500; opacity: .8; margin-top: 1px; }
 .nm { min-width: 0; }
 .nm .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -116,7 +117,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .shop.open .li { border-bottom-color: transparent; }
 .shop-det { padding: 0 0 14px; border-bottom: 1px solid var(--line); }
 .shop-det .go { margin: 0 0 12px; }
-.cols5, .sp { display: grid; grid-template-columns: 10px minmax(0, 1fr) 50px 50px 56px; gap: 8px; align-items: center; }
+.cols5, .sp { display: grid; grid-template-columns: 10px minmax(0, 1fr) 58px 58px 64px; gap: 8px; align-items: center; }
 .cols5 { font-size: 11px; color: var(--dim); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
 .cols5 span:not(:first-child):not(:nth-child(2)) { text-align: right; }
 .sp { padding: 10px 0; border-bottom: 1px solid var(--line); }
@@ -190,6 +191,85 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .src-st .tm { color: var(--muted); text-align: right; }
 .src-st .er { grid-column: 2 / -1; font-size: 12px; color: var(--warn); margin-top: -4px; }
 
+/* Finn */
+.mvh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mvh .hero-l { min-width: 0; }
+.per { display: flex; gap: 4px; flex: none; }
+.per button { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); border: 1px solid var(--line-2); }
+.per button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.mvs { display: grid; margin-top: 8px; }
+.mv { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); text-align: left; width: 100%; }
+.mv:first-child { border-top: 0; }
+.mv .ma { font-size: 13px; text-align: center; } .mv .ma.up, .mv .mc.up { color: var(--up); } .mv .ma.down, .mv .mc.down { color: var(--down); }
+.mv .mn { min-width: 0; font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mv .mn small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.mv .mc { text-align: right; font-weight: 700; font-size: 15px; white-space: nowrap; }
+.mv .mc small { display: block; font-size: 11.5px; font-weight: 500; opacity: .8; }
+.seg { display: flex; gap: 6px; overflow-x: auto; margin: 14px -16px 2px; padding: 0 16px 2px; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--panel); border: 1px solid var(--line-2); color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.fp { border-bottom: 1px solid var(--line); padding: 12px 0; }
+.fh { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: start; cursor: pointer; }
+.fh .rk { font-size: 15px; font-weight: 700; color: var(--dim); padding-top: 1px; text-align: center; }
+.fp:nth-child(-n+3) .fh .rk { color: var(--ink); }
+.fh .fn { min-width: 0; }
+.fh .fn .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fh .fn .s { font-size: 12.5px; color: var(--muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fh .fm { text-align: right; font-size: 16px; font-weight: 700; white-space: nowrap; }
+.fh .fm small { display: block; font-size: 11px; font-weight: 500; opacity: .8; }
+.bars { margin: 8px 0 0 32px; display: grid; gap: 4px; }
+.bar { display: grid; grid-template-columns: 44px minmax(0, 1fr) 52px; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.bar i { display: block; height: 8px; border-radius: 4px; background: var(--line-2); min-width: 3px; }
+.bar.up i { background: var(--up); }
+.bar.down i { background: var(--down); }
+.bar.up b { color: var(--up); } .bar.down b { color: var(--down); }
+.ltag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 1px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); }
+.bar b { text-align: right; font-weight: 600; color: var(--ink); font-size: 12.5px; }
+.fstat { margin: 7px 0 0 32px; font-size: 12.5px; color: var(--muted); }
+.fstat b { color: var(--ink); font-weight: 600; }
+.fdet { margin: 12px 0 2px 32px; }
+.chart { width: 100%; height: auto; display: block; margin: 4px 0 10px; }
+.chart .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ln.up { stroke: var(--up); } .chart .ln.down { stroke: var(--down); }
+.chart .ar.up { fill: rgba(43, 214, 123, .10); } .chart .ar.down { fill: rgba(255, 107, 91, .10); }
+.chart .st { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 4 4; }
+.chart text { fill: var(--dim); font-size: 10px; font-family: var(--f); }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: -4px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--up) 50%, var(--down) 50%); vertical-align: 3px; margin-right: 5px; }
+.legend i.st { background: none; border-top: 2px dashed var(--muted); height: 0; }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tile { padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); min-width: 0; }
+.tile span { display: block; font-size: 12px; color: var(--muted); }
+.tile b { display: block; font-size: 17px; font-weight: 700; margin-top: 2px; white-space: nowrap; }
+.tile small { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.chart.pc { touch-action: pan-y; cursor: crosshair; margin-bottom: 4px; }
+.chart .gd { stroke: var(--line); stroke-width: 1; }
+.chart .sg { stroke-width: 2.6; stroke-linecap: round; }
+.chart .sg.up { stroke: var(--up); } .chart .sg.down { stroke: var(--down); } .chart .sg.flat { stroke: var(--muted); }
+.chart .pt { fill: var(--ink); }
+.chart .pt.end.up, .chart .td { fill: var(--up); } .chart .pt.end.down { fill: var(--down); }
+.chart .pv { fill: var(--ink); font-size: 10.5px; font-weight: 600; }
+.chart .pv.end { font-size: 12px; font-weight: 700; }
+.chart .pv.end.up { fill: var(--up); } .chart .pv.end.down { fill: var(--down); }
+.chart .sl { fill: var(--muted); font-size: 10px; }
+.chart .pv, .chart .sl { paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.chart .tl { stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.chart .td { stroke: var(--bg); stroke-width: 2; }
+.ctip { font-size: 12.5px; color: var(--muted); min-height: 18px; margin-bottom: 6px; }
+.ctip b { color: var(--ink); font-weight: 600; }
+.legend i.u { background: var(--up); } .legend i.d { background: var(--down); }
+
+.chart .sp2 { fill: none; stroke: #A9B1C6; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .pt.st2, .chart .td2 { fill: #A9B1C6; }
+.chart .pv.st2 { fill: #A9B1C6; font-size: 11px; font-weight: 600; }
+.chart .ar.up { fill: rgba(43, 214, 123, .14); } .chart .ar.down { fill: rgba(255, 107, 91, .16); }
+.chart .td2 { stroke: var(--bg); stroke-width: 2; }
+.legend i.bp { background: #A9B1C6; } .legend i.fa { background: rgba(43, 214, 123, .45); height: 8px; vertical-align: 0; }
+.legend { flex-wrap: wrap; row-gap: 4px; }
+.offers .rtag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 1px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .35); color: var(--warn); }
+
 /* Bannere */
 .banner { margin: 6px 0 8px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
 .banner b { color: var(--warn); }
@@ -198,8 +278,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* Fanebar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
-.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--bar-h); }
-.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--dim); position: relative; }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--bar-h); }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--dim); position: relative; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
@@ -251,6 +331,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <div class="src-st" id="calSrc"></div></div>
   </section>
 
+  <section id="tab-finn" role="tabpanel" hidden>
+    <div class="hero" id="finnHero"></div>
+    <div class="seg" id="finnSort" role="group" aria-label="Sorter"></div>
+    <div id="finnList"></div>
+    <p class="fine" id="finnFoot"></p>
+  </section>
+
   <section id="tab-bot" role="tabpanel" hidden>
     <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
     <dl class="grid2" id="botKv"></dl>
@@ -290,6 +377,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>Butikker</button>
     <button type="button" role="tab" data-tab="kalender" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Kalender<span class="badge" id="calBadge" hidden></span></button>
+    <button type="button" role="tab" data-tab="finn" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/></svg>Finn</button>
     <button type="button" role="tab" data-tab="bot" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1.1" fill="currentColor"/><circle cx="15" cy="13" r="1.1" fill="currentColor"/></svg>Bot</button>
   </div>
@@ -303,6 +392,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   const $ = (id) => document.getElementById(id);
   const nf = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 });
   const kr = (v) => (v > 0 ? nf.format(Math.round(v)) : '–');
+  const krU = (v) => (v > 0 ? `${nf.format(Math.round(v))}<span class="u"> kr</span>` : '–');
   const sign = (v) => (v >= 0 ? '+' : '−') + nf.format(Math.abs(Math.round(v)));
   const nb = (s) => String(s ?? '').replace(/per household/i, 'per husstand');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -327,7 +417,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
 
   // ---------- Data ----------
-  let tree = { data: null, bot: null, news: null };
+  let tree = { data: null, bot: null, news: null, finn: null };
   let liveState = 'connecting';
   let es = null, pollTimer = null;
   const openRows = new Set();
@@ -338,7 +428,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const parts = path.split('/').filter(Boolean);
     if (!parts.length) {
       if (merge && value && typeof value === 'object') tree = { ...tree, ...value };
-      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null } : { data: null, bot: null, news: null };
+      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null, finn: value.finn ?? null } : { data: null, bot: null, news: null, finn: null };
       return;
     }
     let o = tree;
@@ -349,8 +439,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   function connect() {
     if (cfg.demo) {
-      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), fetch('demo-news.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)]).then(([d, n]) => {
-        tree = { data: d, news: n, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
+      const opt = (f) => fetch(f, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), opt('demo-news.json'), opt('demo-finn.json')]).then(([d, n, fi]) => {
+        tree = { data: d, news: n, finn: fi, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
         liveState = 'demo'; render();
       }).catch(() => { liveState = 'off'; render(); });
       return;
@@ -446,7 +537,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     if (m === null) return '<span class="v mg dim">–</span>';
     const p = marginPct(m, price);
     const pt = p === null ? '' : `<small>${p < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p)))} %</small>`;
-    return `<span class="v mg ${m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${sign(m)}${pt}</span>`;
+    return `<span class="v mg ${m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${sign(m)}<span class="u"> kr</span>${pt}</span>`;
   };
 
   function row(x) {
@@ -455,12 +546,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const o = a.main;
     const cls = [a.status === 'buy' ? 'buy' : a.status === 'over' ? 'over' : '', marginTier(a.margin, o && o.price)].filter(Boolean).join(' ');
     const mg = marginCell(a.margin, o && o.price);
-    const pc = o && o.price > 0 ? `<span class="v ${a.status === 'over' ? 'warn' : a.status === 'watch' ? 'mut' : ''}">${kr(o.price)}</span>` : '<span class="v dim">–</span>';
+    const pc = o && o.price > 0 ? `<span class="v ${a.status === 'over' ? 'warn' : a.status === 'watch' ? 'mut' : ''}">${krU(o.price)}</span>` : '<span class="v dim">–</span>';
     const btn = a.status !== 'watch' ? `<a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${a.status === 'buy' ? 'Kjøp' : 'Åpne'} hos ${esc(o.shop)} ↗</a>` : '';
     return `<div class="row ${cls}${open ? ' open' : ''}" data-name="${esc(it.name)}">
       <div class="rh" role="button" tabindex="0" aria-expanded="${open}">
         <div class="nm"><div class="t">${esc(it.name)}</div><div class="s">${statusLine(x)}</div>${btn}</div>
-        ${pc}<span class="v ${a.finn ? '' : 'dim'}">${a.finn ? kr(a.finn) : '–'}</span>${mg}
+        ${pc}<span class="v ${a.finn ? '' : 'dim'}">${a.finn ? krU(a.finn) : '–'}</span>${mg}
       </div>
       <div class="det" ${open ? '' : 'hidden'}>${details(it, a)}</div>
     </div>`;
@@ -644,10 +735,189 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${list.map((x) => x.h).join('')}</div>` : '';
   }
 
+  // ---------- Finn ----------
+  // Toppliste: butikkpris (laveste i norske butikker) mot Finn-median, rangert etter fortjeneste × salgsfart.
+  const openFinn = new Set();
+  let finnById = {};
+  let finnSort = store.get('rr-finn-sort') || 'best';
+  let movePeriod = [7, 30, 90].includes(+store.get('rr-finn-period')) ? +store.get('rr-finn-period') : 30;
+  const FSORT = [['best', 'Best', (p) => p.score], ['margin', 'Fortjeneste', (p) => p.margin], ['sold', 'Selges mest', (p) => p.soldWeek], ['listed', 'Legges ut mest', (p) => p.newWeek]];
+  const nfx = (v) => (v === null || v === undefined || isNaN(v) ? '–' : nf.format(Math.round(v)));
+
+  // Prisgraf i aksjestil: resale-linjen er grønn der prisen stiger og rød der den faller. Butikkprisen
+  // (billigste i norske butikker) er en egen grå linje – den endrer seg også over tid. Feltet mellom dem er
+  // fortjenesten (grønt) eller tapet (rødt).
+  const niceTicks = (lo, hi, n) => {
+    const raw = (hi - lo) / Math.max(1, n - 1) || 1;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) || 10 * mag;
+    const out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(Math.round(v));
+    return out;
+  };
+  const CHS = { begge: { W: 320, H: 210, L: 46, R: 12, T: 18, B: 22 } };
+  const histRows = (p) => (p.hist || []).filter((r) => r && r[1] > 0);
+  // Skala for én graf: hvilke verdier den skal få plass til.
+  function chartGeom(p, kind) {
+    const C = CHS[kind], h = histRows(p);
+    const res = h.map((r) => r[1]), st = h.map((r) => r[2]).filter((v) => v > 0);
+    const vals = res.concat(st);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = Math.max((hi - lo) * 0.14, 20);
+    lo = Math.max(0, lo - pad); hi += pad;
+    const x = (i) => C.L + (i / Math.max(1, h.length - 1)) * (C.W - C.L - C.R);
+    const y = (v) => C.T + (1 - (v - lo) / (hi - lo)) * (C.H - C.T - C.B);
+    return { C, h, lo, hi, x, y };
+  }
+  function chartSvg(p, kind, title) {
+    const g = chartGeom(p, kind), { C, h, x, y } = g, n = h.length - 1, f1 = (v) => v.toFixed(1);
+    const lab = (s) => { const d = ymd(s); return d ? `${d.getDate()}.${d.getMonth() + 1}` : ''; };
+    const grid = niceTicks(g.lo, g.hi, 5).map((v) => `<line class="gd" x1="${C.L}" x2="${C.W - C.R}" y1="${f1(y(v))}" y2="${f1(y(v))}"/><text x="${C.L - 6}" y="${f1(y(v) + 3.5)}" text-anchor="end">${nf.format(v)}</text>`).join('');
+    const resSegs = () => h.slice(1).map((r, i) => {
+      const a = h[i][1], b = r[1];
+      return `<line class="sg ${b > a ? 'up' : b < a ? 'down' : 'flat'}" x1="${f1(x(i))}" y1="${f1(y(a))}" x2="${f1(x(i + 1))}" y2="${f1(y(b))}"/>`;
+    }).join('');
+    const stLine = () => { const pts = h.map((r, i) => (r[2] > 0 ? `${f1(x(i))},${f1(y(r[2]))}` : null)).filter(Boolean); return pts.length > 1 ? `<polyline class="sp2" points="${pts.join(' ')}"/>` : ''; };
+    // Høyeste og laveste verdi i perioden får tallet skrevet på grafen.
+    const extremes = (k) => {
+      let iMax = -1, iMin = -1;
+      h.forEach((r, i) => { if (r[k] > 0) { if (iMax < 0 || r[k] > h[iMax][k]) iMax = i; if (iMin < 0 || r[k] < h[iMin][k]) iMin = i; } });
+      const mk = (i, above) => (i < 0 || i === n ? '' : `<circle class="pt" cx="${f1(x(i))}" cy="${f1(y(h[i][k]))}" r="2.5"/><text class="pv" x="${f1(Math.min(Math.max(x(i), C.L + 16), C.W - C.R - 16))}" y="${f1(y(h[i][k]) + (above ? -7 : 14))}" text-anchor="middle">${nf.format(h[i][k])}</text>`);
+      return mk(iMax, true) + (iMin !== iMax ? mk(iMin, false) : '');
+    };
+    const lastR = h[n][1], lastS = h[n][2];
+    const endRes = `<circle class="pt end ${lastS > 0 ? (lastR >= lastS ? 'up' : 'down') : ''}" cx="${f1(x(n))}" cy="${f1(y(lastR))}" r="3.6"/><text class="pv end ${lastS > 0 ? (lastR >= lastS ? 'up' : 'down') : ''}" x="${f1(x(n) - 7)}" y="${f1(y(lastR) - 8)}" text-anchor="end">${nf.format(lastR)} kr</text>`;
+    const endSt = lastS > 0 ? `<circle class="pt st2" cx="${f1(x(n))}" cy="${f1(y(lastS))}" r="3.2"/><text class="pv st2" x="${f1(x(n) - 7)}" y="${f1(y(lastS) + (lastS < lastR ? 15 : -8))}" text-anchor="end">Butikk ${nf.format(lastS)} kr</text>` : '';
+    let body = '';
+    if (kind === 'begge') {
+      // Feltet mellom linjene: grønt = fortjeneste, rødt = tap.
+      const fill = h.slice(1).map((r, i) => {
+        const a = h[i], b = r; if (!(a[2] > 0 && b[2] > 0)) return '';
+        const up = (a[1] - a[2]) + (b[1] - b[2]) >= 0;
+        return `<polygon class="ar ${up ? 'up' : 'down'}" points="${f1(x(i))},${f1(y(a[1]))} ${f1(x(i + 1))},${f1(y(b[1]))} ${f1(x(i + 1))},${f1(y(b[2]))} ${f1(x(i))},${f1(y(a[2]))}"/>`;
+      }).join('');
+      body = fill + stLine() + resSegs() + extremes(1) + endSt + endRes;
+    }
+    const axis = `<text x="${C.L}" y="${C.H - 4}">${lab(h[0][0])}</text><text x="${C.W - C.R}" y="${C.H - 4}" text-anchor="end">${lab(h[n][0])}</text>`;
+    return `<svg class="chart pc" data-id="${esc(p.id)}" data-kind="${kind}" viewBox="0 0 ${C.W} ${C.H}" role="img" aria-label="${esc(title || 'Prisutvikling')}">
+      ${grid}${body}${axis}<g class="tip" visibility="hidden"><line class="tl" y1="${C.T}" y2="${C.H - C.B}"/><circle class="td" r="4"/><circle class="td2" r="3.4"/></g></svg>`;
+  }
+  function finnChart(p) {
+    const h = histRows(p);
+    if (h.length < 2) return '<p class="fine" style="margin-top:0">Prisgrafen vises når boten har samlet noen dager med data.</p>';
+    const hasSt = h.some((r) => r[2] > 0);
+    const charts = chartSvg(p, 'begge', '');
+    return `${charts}<div class="ctip">Trykk på grafen for å se prisene en bestemt dag</div>
+      <div class="legend"><span><i class="u"></i>stiger</span><span><i class="d"></i>faller</span>${hasSt ? '<span><i class="bp"></i>butikkpris</span><span><i class="fa"></i>fortjeneste</span>' : ''}</div>`;
+  }
+  // Viser dato, resale, butikkpris og fortjeneste for dagen nærmest der du trykker (i alle grafene til produktet).
+  function finnPick(svg, clientX) {
+    const p = finnById[svg.dataset.id]; if (!p) return;
+    const C0 = CHS[svg.dataset.kind], h = histRows(p); if (h.length < 2) return;
+    const r = svg.getBoundingClientRect();
+    const vx = ((clientX - r.left) / r.width) * C0.W;
+    const i = Math.max(0, Math.min(h.length - 1, Math.round(((vx - C0.L) / (C0.W - C0.L - C0.R)) * (h.length - 1))));
+    const box = svg.closest('.fdet');
+    if (!Number.isFinite(i) || !h[i] || !box) return;   // f.eks. grafen er skjult eller har null bredde
+    box.querySelectorAll('svg.pc').forEach((s) => {
+      const g = chartGeom(p, s.dataset.kind), tip = s.querySelector('.tip'), cx = g.x(i).toFixed(1);
+      tip.querySelector('.tl').setAttribute('x1', cx); tip.querySelector('.tl').setAttribute('x2', cx);
+      const d1 = tip.querySelector('.td'), d2 = tip.querySelector('.td2');
+      const showR = true, showS = h[i][2] > 0;
+      d1.setAttribute('visibility', showR ? 'visible' : 'hidden'); d2.setAttribute('visibility', showS ? 'visible' : 'hidden');
+      if (showR) { d1.setAttribute('cx', cx); d1.setAttribute('cy', g.y(h[i][1]).toFixed(1)); }
+      if (showS) { d2.setAttribute('cx', cx); d2.setAttribute('cy', g.y(h[i][2]).toFixed(1)); }
+      tip.setAttribute('visibility', 'visible');
+    });
+    const d = ymd(h[i][0]), ch = i > 0 ? h[i][1] - h[i - 1][1] : 0, s = h[i][2], m = s > 0 ? h[i][1] - s : null;
+    box.querySelector('.ctip').innerHTML = `<b>${d ? `${d.getDate()}. ${MONL[d.getMonth()]}` : esc(h[i][0])}</b> · Resale <b>${nf.format(h[i][1])} kr</b>`
+      + (i > 0 && ch ? ` <span class="${ch > 0 ? 'up' : 'down'}">${ch > 0 ? '▲' : '▼'} ${sign(ch)}</span>` : '')
+      + (s > 0 ? ` · Butikk <b>${nf.format(s)} kr</b> · <span class="${m >= 0 ? 'up' : 'down'}">${sign(m)} kr</span>` : '');
+  }
+
+  // Kort detaljvisning: fire nøkkeltall, grafen og de billigste annonsene.
+  function finnDetails(p) {
+    const m = p.margin, has = m !== null && m !== undefined;
+    const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
+    const tiles = [
+      tile('Fortjeneste', has ? `${sign(m)} kr` : '–', has && p.pct !== null && p.pct !== undefined ? `${p.pct < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p.pct)))} % per stk` : 'per stk', has ? (m >= 0 ? 'up' : 'down') : ''),
+      p.track >= 3 ? tile('Selges', `ca. ${nfx(p.soldWeek)}/uke`, p.days ? `typisk ${nfx(p.days)} dager` : 'trolig solgt')
+        : tile('Selges', 'måles nå', `boten har fulgt i ${Math.max(1, Math.ceil(p.track || 0))} d`),
+      tile('Ute nå', nfx(p.n), `${nfx(p.newWeek)} nye/uke${p.res ? ` · ${p.res} reservert` : ''}`),
+      tile('Billigst nå', p.min ? `${nfx(p.min)} kr` : '–', 'på Finn')
+    ].join('');
+    const cheap = (p.cheap || []).map((a) => `<div class="of"><span class="s"></span><span class="on">${esc(a.t)}${a.r ? '<span class="rtag">RESERVERT</span>' : ''}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Åpne ↗</a></div>`).join('');
+    const btn = (href, txt, pri) => `<a class="btn wide${pri ? ' pri' : ''}" style="display:block;text-align:center" href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
+    // Alle norske butikker som selger produktet: på lager først (grønn), så billigste.
+    const shops = (p.offers || []).map((o) => `<div class="of ${o.in ? 'in' : 'out'}"><span class="s"></span><span class="on">${esc(o.shop)}<small>${o.in ? 'på lager' : 'ikke på lager'}</small></span><span class="pr">${krU(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.in ? 'Kjøp' : 'Åpne'} ↗</a></div>`).join('');
+    return `<div class="tiles">${tiles}</div>${finnChart(p)}
+      ${shops ? `<div class="prod-t">Kjøp i butikk · ${(p.offers || []).length} butikker</div><div class="offers">${shops}</div>` : ''}
+      ${cheap ? `<div class="prod-t">Billigst på Finn nå</div><div class="offers">${cheap}</div>` : ''}
+      <div class="btns">${p.url ? btn(p.url, 'Se alle annonser på Finn ↗') : ''}</div>`;
+  }
+
+  function finnRow(p, i) {
+    const open = openFinn.has(p.id);
+    const sp = p.store && p.store.price > 0 ? p.store.price : null;
+    const max = Math.max(sp || 0, p.med || 0) || 1;
+    const m = p.margin;
+    const has = m !== null && m !== undefined;
+    return `<div class="fp${open ? ' open' : ''}" data-id="${esc(p.id)}">
+      <div class="fh" role="button" tabindex="0" aria-expanded="${open}"><span class="rk">${i + 1}</span>
+        <div class="fn"><div class="t">${esc(p.name)}</div><div class="s">${esc(p.set)}${p.odd ? '<span class="ltag">BUTIKKPRIS USIKKER</span>' : ''}</div></div>
+        <span class="fm ${!has ? 'dim' : m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${has ? `${sign(m)}<span class="u"> kr</span>` : '–'}${has && p.pct !== null && p.pct !== undefined ? `<small>${p.pct < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p.pct)))} %</small>` : ''}</span></div>
+      <div class="bars">
+        <div class="bar"><span>Butikk</span><i style="width:${sp ? ((sp / max) * 100).toFixed(1) : 0}%"></i><b>${sp ? `${nfx(sp)}<span class="u"> kr</span>` : '–'}</b></div>
+        <div class="bar ${p.med && sp ? (p.med >= sp ? 'up' : 'down') : ''}"><span>Resale</span><i style="width:${p.med ? ((p.med / max) * 100).toFixed(1) : 0}%"></i><b>${p.med ? `${nfx(p.med)}<span class="u"> kr</span>` : '–'}</b></div>
+      </div>
+      <div class="fstat">${p.track >= 3
+        ? `🔥 <b>${nfx(p.soldWeek)}</b> trolig solgt/uke · <b>${nfx(p.n)}</b> ute nå · <b>${nfx(p.newWeek)}</b> nye/uke`
+        : `📈 <b>${nfx(p.newWeek)}</b> nye/uke · <b>${nfx(p.n)}</b> ute nå · <span class="dim">salg måles fra i dag</span>`}</div>
+      <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
+  }
+
+  function renderFinn() {
+    const f = tree.finn, hero = $('finnHero');
+    $('finnSort').innerHTML = FSORT.map(([k, label]) => `<button type="button" data-sort="${k}" aria-pressed="${finnSort === k}">${label}</button>`).join('');
+    const ps = ((f && f.products) || []).filter(Boolean);
+    finnById = {}; ps.forEach((p) => (finnById[p.id] = p));
+    hero.className = 'hero';
+    if (!ps.length) {
+      hero.innerHTML = '<div class="hero-t">Venter på Finn-data</div><div class="hero-s">Boten samler Finn-annonser første gang den kjører med den nye versjonen. Salgsfart blir sikrere etter noen dager.</div>';
+      $('finnList').innerHTML = ''; $('finnFoot').textContent = ''; return;
+    }
+    // Bevegelser: hvor mye Finn-prisen (resale) har endret seg i valgt periode (7/30/90 dager), som en aksjeliste.
+    const per = movePeriod;
+    const moves = ps.map((p) => {
+      const h = (p.hist || []).filter((r) => r && r[1] > 0);
+      if (h.length < 2) return null;
+      const last = h[h.length - 1], cut = daysTo(last[0]) - per;
+      const base = [...h].reverse().find((r) => daysTo(r[0]) <= cut) || h[0];
+      if (base === last) return null;
+      const ch = last[1] - base[1];
+      return { p, ch, pct: (ch / base[1]) * 100, span: daysTo(last[0]) - daysTo(base[0]) };
+    }).filter((m) => m && m.ch !== 0);
+    const have = moves.reduce((mx, m) => Math.max(mx, m.span), 0);
+    const perBtns = `<div class="per">${[7, 30, 90].map((d) => `<button type="button" data-per="${d}" aria-pressed="${per === d}">${d} d</button>`).join('')}</div>`;
+    const perNote = have && have < per ? ` · så langt ${have} dager` : '';
+    const ups = moves.filter((m) => m.ch > 0).sort((a, b) => b.ch - a.ch).slice(0, 3);
+    const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
+    const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
+      <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
+    hero.innerHTML = `<div class="mvh"><div class="hero-l">Bevegelser <span class="dim">· Finn-pris siste ${per} dager${perNote}</span></div>${perBtns}</div>`
+      + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>`
+        : '<div class="hero-t" style="margin-top:6px">Samler priser</div><div class="hero-s">Her ser du hva som stiger og faller mest på Finn når boten har fulgt prisene i noen dager. Historikken lagres og bygges på over tid.</div>');
+    const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
+    const list = ps.slice().sort((a, b) => (key[2](b) ?? -1e9) - (key[2](a) ?? -1e9));
+    $('finnList').innerHTML = list.map(finnRow).join('');
+    $('finnFoot').textContent = `Resale = typisk pris på Finn nå (aktive annonser). Butikk = laveste pris i norske butikker. Fortjeneste = resale minus butikk. «Trolig solgt» = annonser som forsvant innen 30 dager. ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
+  }
+
   function render() {
     renderLive();
     renderCal();
     renderNews();
+    renderFinn();
     const d = tree.data, b = tree.bot || {};
     if (!d) { $('hero').innerHTML = `<div class="hero-t">Venter på data fra boten</div><div class="hero-s">Står PC-en på og kjører Pokemon-bot?</div>`; return; }
 
@@ -694,7 +964,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
         <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
         <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
-        <span class="v">${kr(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? kr(o.finn.med) : '–'}</span>
+        <span class="v">${krU(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? krU(o.finn.med) : '–'}</span>
         ${marginCell(m, o.price)}</div></div>` };
     });
     const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
@@ -723,12 +993,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
         const over = it.max > 0 && it.price > it.max;
         return `<a class="sp ${it.state}" href="${esc(it.url)}" target="_blank" rel="noopener"><span class="s"></span>
           <span class="spn">${esc(it.name)}<small>${esc(st)}${rel}</small></span>
-          <span class="v ${over ? 'warn' : ''}">${kr(it.price)}</span><span class="v ${it.finn ? '' : 'dim'}">${it.finn ? kr(it.finn) : '–'}</span>
-          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : sign(m)}</span></a>`;
+          <span class="v ${over ? 'warn' : ''}">${krU(it.price)}</span><span class="v ${it.finn ? '' : 'dim'}">${it.finn ? krU(it.finn) : '–'}</span>
+          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : `${sign(m)}<span class="u"> kr</span>`}</span></a>`;
       }).join('');
       const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges · <b>trykk for å se</b>`;
       return `<div class="shop${open ? ' open' : ''}" data-src="${esc(key)}">
-        <div class="li" role="button" tabindex="0" aria-expanded="${open}"><i class="dot ${s.failing ? 'r' : 'g'}"></i><span class="lt">${esc(name)}<small>${sub}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></div>
+        <div class="li" role="button" tabindex="0" aria-expanded="${open}"><i class="dot ${s.failing ? 'y' : s.inStock ? 'g' : 'r'}"></i><span class="lt">${esc(name)}<small>${sub}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></div>
         <div class="shop-det" ${open ? '' : 'hidden'}>
           ${s.url ? `<a class="go" href="${esc(s.url)}" target="_blank" rel="noopener">Åpne ${esc(name)} ↗</a>` : ''}
           ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
@@ -794,7 +1064,34 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   });
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
-  const TABS = ['marked', 'butikker', 'kalender', 'bot'];
+  $('tab-finn').addEventListener('click', (e) => {
+    const sb = e.target.closest('[data-sort]');
+    if (sb) { finnSort = sb.dataset.sort; store.set('rr-finn-sort', finnSort); renderFinn(); return; }
+    const pb = e.target.closest('[data-per]');
+    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
+    // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
+    const go = e.target.closest('[data-go]');
+    if (go) {
+      const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(go.dataset.go)}"]`);
+      if (card && !openFinn.has(go.dataset.go)) card.querySelector('.fh').click();
+      if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
+      return;
+    }
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.fh'); if (!h) return;
+    const card = h.closest('.fp'), id = card.dataset.id;
+    if (openFinn.has(id)) openFinn.delete(id); else openFinn.add(id);
+    const open = openFinn.has(id);
+    card.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    const det = card.querySelector('.fdet'); det.hidden = !open;
+    if (open && finnById[id]) det.innerHTML = finnDetails(finnById[id]);
+  });
+  // Trykk eller dra på prisgrafen: vis pris for den dagen.
+  $('tab-finn').addEventListener('pointerdown', (e) => { const s = e.target.closest('svg.pc'); if (s) finnPick(s, e.clientX); });
+  $('tab-finn').addEventListener('pointermove', (e) => { const s = e.target.closest('svg.pc'); if (s && (e.buttons || e.pointerType !== 'touch')) finnPick(s, e.clientX); });
+  $('tab-finn').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fh')) { e.preventDefault(); e.target.click(); } });
+
+  const TABS = ['marked', 'butikker', 'kalender', 'finn', 'bot'];
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
     TABS.forEach((t) => ($('tab-' + t).hidden = t !== name));
