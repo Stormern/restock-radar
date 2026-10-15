@@ -291,6 +291,35 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .setup input { width: 100%; margin-top: 6px; padding: 13px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); font: 14px var(--f); }
 .toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; padding: 10px 14px; border-radius: 10px;
   background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 700; max-width: calc(100% - 32px); }
+/* Lynvakt */
+.lyn-hero .hero-v.warn { color: var(--warn); } .lyn-hero .hero-v.down { color: var(--down); }
+.lyn-hero .hero-v span { font-size: 16px; }
+.lyn-pill { float: right; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--up-soft); color: var(--up); }
+.lyn-pill.paused { background: var(--warn-soft); color: var(--warn); } .lyn-pill.dead { background: rgba(255, 107, 91, .12); color: var(--down); }
+.lb { --c: var(--up); --c-soft: rgba(43, 214, 123, .22); display: grid; grid-template-columns: 104px minmax(0, 1fr) 52px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.lb.y { --c: var(--warn); --c-soft: rgba(245, 165, 36, .22); } .lb.r { --c: var(--down); --c-soft: rgba(255, 107, 91, .22); }
+.lb .n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb .n small { display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.lb .bar { position: relative; height: 8px; border-radius: 4px; background: var(--panel-2); }
+.lb .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--c); transition: width .8s ease, background-color .4s; }
+.lb .bar em { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--muted); border-radius: 1px; }
+.lb .bar .f, .lb .bar .g { display: none; }
+/* fill: svak strek = tiden mellom sjekkene, sterk farge fylles opp og tømmes når butikken sjekkes */
+.lb.m-fill .bar i { background: var(--c-soft); overflow: hidden; }
+.lb.m-fill .bar .f { display: block; position: absolute; inset: 0; background: var(--c); border-radius: 4px; transform-origin: left center; transform: scaleX(0); }
+/* dot: et lys løper langs streken og når enden hver gang butikken sjekkes */
+.lb.m-dot .bar .g { display: block; position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 3px var(--c); left: 0; }
+.lb .v { text-align: right; font-weight: 600; }
+.lb.ping .v { animation: lyn-v .7s ease-out; }
+.lb.ping .bar i { animation: lyn-glow .7s ease-out; }
+@keyframes lyn-v { 0% { color: #fff; transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes lyn-glow { 0% { box-shadow: 0 0 0 3px var(--c-soft), 0 0 12px var(--c); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .lb.ping .v, .lb.ping .bar i { animation: none; } }
+.lb-scale { display: grid; grid-template-columns: 104px minmax(0, 1fr) 52px; gap: 10px; font-size: 11px; color: var(--dim); padding: 2px 0 6px; border-bottom: 1px solid var(--line); }
+.lb-scale span:nth-child(2) { display: flex; justify-content: space-between; }
+.lyn-al .lt { font-size: 14px; }
+.lyn-al .lr a { display: inline-block; padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
+.lyn-al.buy .lr a { background: var(--up); color: var(--up-ink); border-color: var(--up); }
 </style>
 </head>
 <body>
@@ -347,6 +376,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
     </div>
     <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
+    <div class="sec" id="lynSec" hidden><div class="sec-t"><span>Lynvakt</span><span id="lynSub"></span></div>
+      <div class="hero lyn-hero" id="lynHero"></div>
+      <div class="lb-scale" id="lynScale"></div>
+      <div id="lynList"></div>
+      <div class="sec"><div class="sec-t"><span>Siste lynvarsler</span><span id="lynAlN"></span></div><div id="lynAlerts"></div></div>
+      <p class="fine">Hver strek går i samme takt som lynvakten på PC-en: hver gang den når enden, blir butikken sjekket. Lengden er tiden mellom sjekkene, og den grå markøren er målet på 5 sekunder. Bremser en butikk oss, blir streken <b class="warn">oransje</b>, lengre og tregere.</p>
+    </div>
     <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
     <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
     <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
@@ -417,7 +453,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
 
   // ---------- Data ----------
-  let tree = { data: null, bot: null, news: null, finn: null };
+  let tree = { data: null, bot: null, news: null, finn: null, lyn: null };
   let liveState = 'connecting';
   let es = null, pollTimer = null;
   const openRows = new Set();
@@ -428,7 +464,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const parts = path.split('/').filter(Boolean);
     if (!parts.length) {
       if (merge && value && typeof value === 'object') tree = { ...tree, ...value };
-      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null, finn: value.finn ?? null } : { data: null, bot: null, news: null, finn: null };
+      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null, finn: value.finn ?? null, lyn: value.lyn ?? null } : { data: null, bot: null, news: null, finn: null, lyn: null };
       return;
     }
     let o = tree;
@@ -440,8 +476,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   function connect() {
     if (cfg.demo) {
       const opt = (f) => fetch(f, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), opt('demo-news.json'), opt('demo-finn.json')]).then(([d, n, fi]) => {
-        tree = { data: d, news: n, finn: fi, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
+      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), opt('demo-news.json'), opt('demo-finn.json'), opt('demo-lyn.json')]).then(([d, n, fi, ly]) => {
+        tree = { data: d, news: n, finn: fi, lyn: ly && { ...ly, updated: Date.now() - 12000, started: Date.now() - 3 * 3600000 }, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
         liveState = 'demo'; render();
       }).catch(() => { liveState = 'off'; render(); });
       return;
@@ -913,6 +949,95 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     $('finnFoot').textContent = `Resale = typisk pris på Finn nå (aktive annonser). Butikk = laveste pris i norske butikker. Fortjeneste = resale minus butikk. «Trolig solgt» = annonser som forsvant innen 30 dager. ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
   }
 
+  // ---------- Lynvakt (egen rask vakt på PC-en, sender status hvert 30. sekund) ----------
+  const LYN_MOTION = 'fill';   // 'fill': streken fylles til neste sjekk · 'dot': et lys løper langs streken
+  const sec1 = (v) => (v > 0 ? v.toLocaleString('nb-NO', { maximumFractionDigits: 1 }) : '–');
+  function lynSummary(L) {
+    const st = L.stores || [];
+    const dead = !L.updated || Date.now() - L.updated > 120000;
+    const err = st.filter((s) => s.status === 'feil'), slow = st.filter((s) => s.status === 'bremset');
+    const gaps = st.map((s) => s.gap).filter((g) => g > 0);
+    // Median: det vanlige tempoet, uten at én bremset butikk drar tallet opp.
+    const sg = [...gaps].sort((a, b) => a - b), avg = sg.length ? (sg.length % 2 ? sg[(sg.length - 1) / 2] : (sg[sg.length / 2 - 1] + sg[sg.length / 2]) / 2) : 0;
+    const ms = st.map((s) => s.avg).filter((v) => v > 0);
+    const avgMs = ms.length ? ms.reduce((a, b) => a + b, 0) / ms.length : 0;
+    const cls = dead || err.length ? 'dead' : slow.length ? 'paused' : '';
+    const head = dead ? 'Svarer ikke' : err.length ? `${err.length} feiler` : slow.length ? `${slow.length} bremset` : 'Alt normalt';
+    return { st, dead, err, slow, avg, avgMs, cls, head };
+  }
+  function lynAlerts(L) {
+    const al = (L.alerts || []).filter(Boolean);
+    $('lynAlN').textContent = al.length ? `${al.length} siste` : '';
+    $('lynAlerts').innerHTML = al.length ? al.map((a) => `<div class="li lyn-al${a.buy ? ' buy' : ''}"><i class="dot ${a.buy ? 'g' : 'y'}"></i><span class="lt">${esc(a.text)}<small>${clock(a.t)} · ${a.buy ? 'under makspris' : 'over makspris'}</small></span><span class="lr">${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${a.buy ? 'Kjøp' : 'Åpne'} ↗</a>` : ''}</span></div>`).join('')
+      : '<div class="empty">Ingen lynvarsler ennå. De kommer her i samme sekund som noe på listen din kommer på lager.</div>';
+  }
+  // Én runde for en butikk = ventetid + butikkens svartid. Lynvakten sender når forrige sjekk ble ferdig (last)
+  // og når neste starter (next), så strekene går i samme takt som PC-en og synkes på nytt hvert 30. sekund.
+  function lynCycle(s, every) {
+    if (s.next && s.last && s.next > s.last) return { p: s.next - s.last + (s.ms || 0), t: s.next };
+    const sec = s.status === 'ok' ? s.gap : Math.max(s.gap || 0, s.wait || 0);
+    return { p: (sec || every) * 1000, t: s.lastOk || 0 };
+  }
+  function renderLyn() {
+    const L = tree.lyn;
+    if (!L || !L.stores) { $('lynSec').hidden = true; return; }
+    $('lynSec').hidden = false;
+    const m = lynSummary(L), every = L.every || 5;
+    $('lynSub').textContent = L.updated ? `oppdatert ${ago(L.updated)}` : '';
+    // Tallet er grønt så lenge det vanlige tempoet holder; problemer med enkeltbutikker vises i merket og listen.
+    const vc = m.dead ? 'down' : m.avg > every * 2 ? 'warn' : '';
+    $('lynHero').innerHTML = `<div class="hero-l">Hver butikk sjekkes hvert <span class="lyn-pill ${m.cls}">${esc(m.head)}</span></div>
+      <div class="hero-v ${vc}">${sec1(m.avg)}<span>sekund</span></div>
+      <div class="hero-s"><span><b>${m.st.length}</b> butikker</span><span><b>${m.slow.length}</b> bremset</span><span><b>${m.err.length}</b> feil</span><span>svar snitt <b>${nf.format(m.avgMs)} ms</b></span></div>`;
+    // Skala: 0 til 30 s (lengre hvis en butikk er bremset mer enn det).
+    const max = Math.max(30, ...m.st.map((s) => Math.max(s.gap || 0, s.status === 'ok' ? 0 : s.wait || 0)));
+    $('lynScale').innerHTML = `<span></span><span><span>0</span><span>${Math.round(max / 2)} s</span><span>${Math.round(max)} s</span></span><span></span>`;
+    const rank = { feil: 0, bremset: 1 };
+    const rows = [...m.st].sort((a, b) => (rank[a.status] ?? 2) - (rank[b.status] ?? 2));
+    // Radene bygges bare på nytt når butikklisten endrer seg; ellers oppdateres de, så strekene glir til ny lengde.
+    const list = $('lynList'), key = rows.map((s) => s.name).join('|');
+    if (list.dataset.key !== key) {
+      list.innerHTML = rows.map(() => '<div class="lb"><span class="n"></span><span class="bar"><i><b class="f"></b><u class="g"></u></i><em></em></span><span class="v"></span></div>').join('');
+      list.dataset.key = key;
+    }
+    rows.forEach((s, k) => {
+      const el = list.children[k], c = s.status === 'feil' ? 'r' : s.status === 'bremset' ? 'y' : 'g';
+      const val = s.status === 'ok' ? s.gap : Math.max(s.gap || 0, s.wait || 0);
+      const cy = lynCycle(s, every);
+      el.className = `lb ${c} m-${LYN_MOTION}${el.classList.contains('ping') ? ' ping' : ''}`;
+      el.dataset.p = cy.p; el.dataset.t = cy.t;
+      el.querySelector('.n').innerHTML = `${esc(s.name)}<small>${s.status === 'feil' ? `<span class="down">${esc(s.lastErr || 'feil')}</span>` : s.status === 'bremset' ? '<span class="warn">bremset</span>' : `${s.avg != null ? nf.format(s.avg) : '–'} ms`}</small>`;
+      el.querySelector('.bar i').style.width = `${Math.min(100, (val || 0) / max * 100).toFixed(1)}%`;
+      el.querySelector('.bar em').style.left = `${(every / max * 100).toFixed(1)}%`;
+      const v = el.querySelector('.v');
+      v.className = `v ${c === 'r' ? 'down' : c === 'y' ? 'warn' : ''}`; v.textContent = `${sec1(val)} s`;
+    });
+    lynAlerts(L);
+    lynStart();
+  }
+  // Bevegelsen regnes ut fra klokka, så den holder takten selv om skjermen tegnes på nytt. Stopper når
+  // Bot-fanen ikke vises eller appen er i bakgrunnen (sparer batteri). Strekene viser ekte takt, så de beveger seg også med
+  // «Reduser bevegelse» på – bare blinket ved hver sjekk slås av da (i CSS).
+  let lynRaf = 0;
+  function lynTick() {
+    lynRaf = 0;
+    if (document.hidden || $('tab-bot').hidden || $('lynSec').hidden) return;
+    const now = Date.now();
+    for (const el of $('lynList').children) {
+      const p = +el.dataset.p, t = +el.dataset.t;
+      if (!(p > 0)) continue;
+      const ph = ((((now - t) % p) + p) % p) / p;
+      if (ph < (+el.dataset.ph || 0)) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
+      el.dataset.ph = ph;
+      if (LYN_MOTION === 'fill') el.querySelector('.f').style.transform = `scaleX(${ph.toFixed(4)})`;
+      else el.querySelector('.g').style.left = `${(ph * 100).toFixed(2)}%`;
+    }
+    lynRaf = requestAnimationFrame(lynTick);
+  }
+  function lynStart() { if (!lynRaf) lynRaf = requestAnimationFrame(lynTick); }
+  document.addEventListener('visibilitychange', lynStart);
+  document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => setTimeout(lynStart)));
+
   function render() {
     renderLive();
     renderCal();
@@ -1023,6 +1148,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       ['Finn hentet', b.finnAt ? clock(b.finnAt) : '–'],
       ['Data oppdatert', d.updated ? clock(d.updated) : '–']
     ].map(kvRow).join('');
+    renderLyn();
     $('connKv').innerHTML = [
       ['Status', { on: 'Live', poll: 'Henter hvert 30. sek', demo: 'Demo', connecting: 'Kobler til', off: 'Frakoblet' }[liveState]],
       ['Database', cfg.demo ? 'demo' : cfg.db.replace(/^https:\/\//, '').replace(/\.firebasedatabase\.app$/, '')]
