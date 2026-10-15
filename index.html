@@ -17,140 +17,132 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: børs-liste – margin-oppsummering øverst, én tett linje per produkt som foldes ut, fanebar nederst. Alltid mørk. */
+/* Layout: børs-tabell – smart toppboks, tre seksjoner (kan kjøpes / inne nå / følger med) med faste kolonner Pris · Finn · Margin. Alltid mørk. */
 :root {
   --bg: #0B0C0F; --panel: #121419; --panel-2: #181B21; --line: #22252D; --line-2: #2C3039;
   --ink: #ECEEF3; --muted: #8C92A1; --dim: #5D6271;
-  --up: #2BD67B; --up-soft: rgba(43, 214, 123, .12); --up-ink: #052914;
-  --warn: #F5A524; --warn-soft: rgba(245, 165, 36, .12);
+  --up: #2BD67B; --up-soft: rgba(43, 214, 123, .10); --up-ink: #052914;
+  --warn: #F5A524; --warn-soft: rgba(245, 165, 36, .10);
   --down: #FF6B5B; --gold: #FFCB05;
-  --f-ui: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --f-num: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --cols: minmax(0, 1fr) 52px 52px 58px;
   --bar-h: 62px;
   color-scheme: dark;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; font-variant-numeric: tabular-nums; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font: 15px/1.4 var(--f-ui); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+body { background: var(--bg); color: var(--ink); font: 15px/1.4 var(--f); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
   padding-top: env(safe-area-inset-top, 0px); }
 a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
 [hidden] { display: none !important; }
-.n { font-family: var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-* { font-variant-numeric: tabular-nums; }
 .wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(var(--bar-h) + 24px + env(safe-area-inset-bottom, 0px)); }
 .up { color: var(--up); } .down { color: var(--down); } .warn { color: var(--warn); } .mut { color: var(--muted); } .dim { color: var(--dim); }
 
 /* Topp */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(11, 12, 15, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(11, 12, 15, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
 .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
-.logo svg { flex: none; }
-.live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
-.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
-.live.on i { background: var(--up); box-shadow: 0 0 0 0 rgba(43, 214, 123, .6); animation: ping 2.2s infinite; }
+.live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex: none; }
+.live.on i { background: var(--up); animation: ping 2.2s infinite; }
 .live.off i { background: var(--down); }
 @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(43, 214, 123, .5); } 70% { box-shadow: 0 0 0 7px rgba(43, 214, 123, 0); } 100% { box-shadow: 0 0 0 0 rgba(43, 214, 123, 0); } }
 @media (prefers-reduced-motion: reduce) { .live.on i { animation: none; } }
 
-/* Oppsummering */
-.sum { padding: 10px 0 16px; border-bottom: 1px solid var(--line); }
-.sum-l { font-size: 13px; color: var(--muted); }
-.sum-v { font: 600 42px/1.1 var(--f-num); letter-spacing: -.035em; margin-top: 2px; }
-.sum-v .u { font-size: 20px; font-weight: 500; letter-spacing: 0; margin-left: 6px; color: var(--muted); }
-.sum-v.zero { color: var(--dim); }
-.sum-s { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 13px; color: var(--muted); }
-.sum-s b { color: var(--ink); font-weight: 500; font-family: var(--f-num); }
+/* Toppboks */
+.hero { margin: 6px 0 4px; padding: 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.hero.buy { background: var(--up-soft); border-color: rgba(43, 214, 123, .35); }
+.hero-l { font-size: 13px; color: var(--muted); }
+.hero-t { font-size: 19px; font-weight: 600; letter-spacing: -.01em; margin-top: 2px; }
+.hero-v { font-size: 44px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05; color: var(--up); }
+.hero-v span { font-size: 20px; font-weight: 500; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.hero-s { margin-top: 8px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.hero-s b { color: var(--ink); font-weight: 600; }
+.hero-n { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.hero-n b { color: var(--ink); font-weight: 600; }
+.hero .cta { display: flex; justify-content: center; margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--up); color: var(--up-ink); font-weight: 700; font-size: 15px; }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--dim); }
 .dot.g { background: var(--up); } .dot.y { background: var(--warn); } .dot.r { background: var(--down); }
 
-/* Filter */
-.filters { display: flex; gap: 6px; padding: 14px 0 6px; overflow-x: auto; scrollbar-width: none; }
-.filters::-webkit-scrollbar { display: none; }
-.chip { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); background: var(--panel); border: 1px solid var(--line); }
-.chip[aria-pressed="true"] { color: var(--bg); background: var(--ink); border-color: var(--ink); }
-.chip .c { font-family: var(--f-num); margin-left: 5px; opacity: .7; }
-
-/* Seksjonsoverskrift */
-.sh { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 2px; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
-
-/* Linjer */
-.rows { border-top: 1px solid var(--line); }
+/* Seksjoner og kolonner */
+.sec { margin-top: 22px; }
+.sec-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.sec-t span:last-child { font-weight: 500; letter-spacing: .02em; text-transform: none; color: var(--dim); }
+.cols { display: grid; grid-template-columns: var(--cols); gap: 8px; font-size: 11px; color: var(--dim); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.cols span { text-align: right; }
 .row { border-bottom: 1px solid var(--line); }
-.rh { width: 100%; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 12px 0; text-align: left; }
-.rn { min-width: 0; }
-.rt { display: flex; align-items: center; gap: 7px; font-weight: 500; font-size: 15px; }
-.rt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tier { flex: none; font: 500 10px/1 var(--f-num); padding: 3px 4px; border-radius: 4px; color: var(--muted); border: 1px solid var(--line-2); }
-.tier.A { color: var(--gold); border-color: rgba(255, 203, 5, .35); }
-.rs { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rp { text-align: right; }
-.rp .p { font: 500 15px/1.2 var(--f-num); }
-.rp .m { font: 400 12.5px/1.3 var(--f-num); margin-top: 2px; }
-.act { min-width: 54px; text-align: center; padding: 7px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-.act.buy { background: var(--up); color: var(--up-ink); }
-.act.see { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line-2); }
-.act.none { color: var(--dim); font-weight: 400; font-size: 12px; padding-inline: 0; }
-.row.open .rh { padding-bottom: 8px; }
+.rh { display: grid; grid-template-columns: var(--cols); gap: 8px; align-items: start; padding: 11px 0; cursor: pointer; }
+.row.buy .rh { box-shadow: inset 3px 0 0 var(--up); padding-left: 10px; margin-left: -10px; }
+.row.over .rh { box-shadow: inset 3px 0 0 var(--warn); padding-left: 10px; margin-left: -10px; }
+.nm { min-width: 0; }
+.nm .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; margin-right: 6px; vertical-align: 1px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--ink); }
+.tag.hg { background: var(--down); border-color: var(--down); color: #2A0905; }
+.v { text-align: right; font-size: 14.5px; font-weight: 500; padding-top: 1px; white-space: nowrap; }
+.v.mg { font-weight: 600; }
+.go { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 7px 11px; border-radius: 8px; font-size: 13px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
+.row.buy .go { background: var(--up); border-color: var(--up); color: var(--up-ink); }
+.empty { padding: 14px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
 
 /* Utfolding */
 .det { padding: 0 0 14px; }
 .kv { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
-.kv b { color: var(--ink); font-weight: 500; font-family: var(--f-num); }
+.kv b { color: var(--ink); font-weight: 600; }
 .offers { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
-.of { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.of { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
 .of:first-child { border-top: 0; }
 .of .s { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
 .of.in .s { background: var(--up); }
-.of.unlisted .s { background: transparent; border: 1.5px dashed var(--dim); }
-.of .nm { min-width: 0; font-size: 13.5px; }
-.of .nm small { display: block; font-size: 12px; color: var(--muted); }
-.of .pr { font: 500 13.5px var(--f-num); }
-.of .go { padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 600; background: var(--panel-2); border: 1px solid var(--line-2); white-space: nowrap; }
-.of.in .go { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+.of.unlisted .s { background: transparent; border: 1.5px dashed var(--muted); }
+.of .on { min-width: 0; font-size: 13.5px; }
+.of .on small { display: block; font-size: 12px; color: var(--muted); }
+.of .pr { font-size: 13.5px; font-weight: 500; }
+.of .lk { padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); white-space: nowrap; }
+.of.in .lk { background: var(--up); color: var(--up-ink); border-color: var(--up); }
 .info { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
 .info li::before { content: "› "; color: var(--dim); }
-.empty { padding: 16px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
 
 /* Butikker & bot */
-.list .li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-.li .lt { min-width: 0; font-size: 14.5px; font-weight: 500; }
+.li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.li .lt { font-size: 14.5px; font-weight: 600; }
 .li .lt small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
-.li .lr { font: 500 15px var(--f-num); text-align: right; }
-.li .lr small { display: block; font: 400 11px var(--f-ui); color: var(--dim); }
-.bstate { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; padding: 12px 0 4px; }
+.li .lr { font-size: 16px; font-weight: 600; text-align: right; }
+.li .lr small { display: block; font-size: 11px; color: var(--dim); font-weight: 400; }
+.bstate { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; padding: 12px 0 4px; }
 .bstate i { width: 10px; height: 10px; border-radius: 50%; background: var(--up); }
 .bstate.paused i { background: var(--warn); } .bstate.dead i { background: var(--down); }
 .grid2 { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; margin: 10px 0 0; font-size: 14px; }
-.grid2 dt { color: var(--muted); } .grid2 dd { margin: 0; text-align: right; font-family: var(--f-num); font-size: 13.5px; }
+.grid2 dt { color: var(--muted); } .grid2 dd { margin: 0; text-align: right; }
 .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
-.btn { padding: 13px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line-2); font-weight: 600; font-size: 14.5px; }
+.btn { padding: 13px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line-2); font-weight: 700; font-size: 14.5px; }
 .btn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn.wide { grid-column: 1 / -1; }
 .fine { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
-.btn:focus-visible, .chip:focus-visible, .rh:focus-visible, .go:focus-visible, .act:focus-visible, .tabbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn:focus-visible, .rh:focus-visible, .go:focus-visible, .lk:focus-visible, .cta:focus-visible, .tabbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* Bannere */
-.banner { margin: 6px 0 10px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
-.banner b { color: var(--warn); font-weight: 600; }
+.banner { margin: 6px 0 8px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
+.banner b { color: var(--warn); }
 .banner.r { background: rgba(255, 107, 91, .1); border-color: rgba(255, 107, 91, .3); }
 .banner.r b { color: var(--down); }
 
 /* Fanebar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
 .tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: var(--bar-h); }
-.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 500; color: var(--dim); position: relative; }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--dim); position: relative; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
-.badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font: 600 11px/17px var(--f-num); text-align: center; }
+.badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
 
 /* Oppsett & toast */
 .setup { padding-top: 12vh; }
-.setup h1 { font-size: 30px; font-weight: 600; letter-spacing: -.02em; margin: 16px 0 10px; }
+.setup h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 16px 0 10px; }
 .setup p, .setup ol { color: var(--muted); max-width: 46ch; }
-.setup input { width: 100%; margin-top: 6px; padding: 13px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); font: 14px var(--f-ui); }
+.setup input { width: 100%; margin-top: 6px; padding: 13px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); font: 14px var(--f); }
 .toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; padding: 10px 14px; border-radius: 10px;
-  background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 600; max-width: calc(100% - 32px); }
+  background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 700; max-width: calc(100% - 32px); }
 </style>
 </head>
 <body>
@@ -169,30 +161,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div id="banners"></div>
 
   <section id="tab-marked" role="tabpanel">
-    <div class="sum">
-      <div class="sum-l">Mulig margin nå</div>
-      <div class="sum-v n" id="sumV">–</div>
-      <div class="sum-s" id="sumS"></div>
-    </div>
-    <div class="filters" role="group" aria-label="Filter">
-      <button class="chip" type="button" data-f="alle" aria-pressed="true">Alle<span class="c" id="cAlle"></span></button>
-      <button class="chip" type="button" data-f="inne" aria-pressed="false">På lager<span class="c" id="cInne"></span></button>
-      <button class="chip" type="button" data-f="hg" aria-pressed="false">Haugesund<span class="c" id="cHg"></span></button>
-      <button class="chip" type="button" data-f="a" aria-pressed="false">Tier A</button>
-    </div>
-    <div class="sh"><span>30th Celebration</span><span id="itemsN"></span></div>
-    <div class="rows" id="rows"></div>
-    <div id="otherWrap" hidden>
-      <div class="sh"><span>Annet på lager</span><span>bundles, ETB, bokser</span></div>
-      <div class="rows" id="other"></div>
-    </div>
+    <div class="hero" id="hero"></div>
+    <div id="secBuy"></div>
+    <div id="secIn"></div>
+    <div id="secWatch"></div>
+    <div id="secOther"></div>
   </section>
 
   <section id="tab-butikker" role="tabpanel" hidden>
-    <div class="sh" style="margin-top:8px"><span>Butikker i Haugesund</span><span>fysisk lager</span></div>
-    <div class="list" id="srcHg"></div>
-    <div class="sh"><span>Nettbutikker</span><span>kan bestilles</span></div>
-    <div class="list" id="srcNet"></div>
+    <div class="sec"><div class="sec-t"><span>Butikker i Haugesund</span><span>fysisk lager</span></div><div id="srcHg"></div></div>
+    <div class="sec"><div class="sec-t"><span>Nettbutikker</span><span>kan bestilles</span></div><div id="srcNet"></div></div>
   </section>
 
   <section id="tab-bot" role="tabpanel" hidden>
@@ -204,8 +182,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
     </div>
     <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
-    <div class="sh" style="margin-top:28px"><span>Tilkobling</span></div>
-    <dl class="grid2" id="connKv"></dl>
+    <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
     <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
     <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
   </section>
@@ -273,7 +250,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   let tree = { data: null, bot: null };
   let liveState = 'connecting';
   let es = null, pollTimer = null;
-  let filter = store.get('rr-filter') || 'alle';
   const openRows = new Set();
 
   function setAt(path, value, merge) {
@@ -292,7 +268,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   function connect() {
     if (cfg.demo) {
       fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()).then((d) => {
-        tree = { data: d, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, storeEvery: 10, netEvery: 3 } };
+        tree = { data: d, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
         liveState = 'demo'; render();
       }).catch(() => { liveState = 'off'; render(); });
       return;
@@ -337,65 +313,69 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     if (m < 60) return `${m} min siden`;
     return `${Math.floor(m / 60)} t ${m % 60} min siden`;
   }
-  const until = (ms) => { if (!ms) return '–'; const m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? 'snart' : `om ${m} min`; };
+  const until = (ms) => { if (!ms) return '–'; const m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? 'nå' : `om ${m} min`; };
   const clock = (ms) => ms ? new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }) : '–';
 
-  // ---------- Analyse per produkt ----------
+  // ---------- Analyse ----------
+  // Hver vare får én "hovedlinje": beste tilbud på lager, ellers billigste kjente pris.
   function analyse(it) {
     const offers = (it.offers || []).slice();
     const inStock = offers.filter((o) => o.state === 'in');
-    const ok = (o) => !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
-    const buy = inStock.filter(ok).sort((a, b) => (a.where === 'haugesund' ? -1 : 0) - (b.where === 'haugesund' ? -1 : 0) || a.price - b.price)[0];
-    const over = inStock.filter((o) => !ok(o)).sort((a, b) => a.price - b.price)[0];
+    const okPrice = (o) => !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
+    const prefer = (a, b) => (a.where === 'haugesund' ? -1 : 0) - (b.where === 'haugesund' ? -1 : 0) || a.price - b.price;
+    const buy = inStock.filter(okPrice).sort(prefer)[0];
+    const over = inStock.filter((o) => !okPrice(o)).sort(prefer)[0];
+    const cheapest = offers.filter((o) => o.price > 0).sort((a, b) => a.price - b.price || (a.state === 'unlisted' ? -1 : 1))[0];
+    const main = buy || over || cheapest;
     const finn = it.finn && it.finn.n ? it.finn.med : null;
-    const status = buy ? 'buy' : over ? 'over' : offers.some((o) => o.state === 'unlisted') ? 'unlisted' : 'out';
-    const best = buy || over;
-    const margin = best && finn && best.price > 0 ? finn - best.price : null;
-    const hg = inStock.some((o) => o.where === 'haugesund');
-    return { offers, inStock, buy, over, finn, status, best, margin, hg };
+    const margin = main && finn && main.price > 0 ? finn - main.price : null;
+    const status = buy ? 'buy' : over ? 'over' : 'watch';
+    return { offers, buy, over, main, finn, margin, status };
   }
-  const rank = { buy: 0, over: 1, unlisted: 2, out: 3 };
+  const shopOf = (o) => o.shop;
 
   // ---------- Tegning ----------
   function renderLive() {
     const el = $('live'), t = $('liveTxt'), b = tree.bot || {};
     el.className = 'live';
-    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(Math.max(b.lastOnline || 0, b.lastStore || 0) || Date.now())}`; }
-    else if (liveState === 'demo') { t.textContent = 'demo'; }
+    const last = Math.max(b.lastOnline || 0, b.lastStore || 0);
+    const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
+    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(last || Date.now())}${nxt ? ` · neste ${clock(nxt)}` : ''}`; }
+    else if (liveState === 'demo') t.textContent = 'demo';
     else if (liveState === 'off') { el.classList.add('off'); t.textContent = 'frakoblet'; }
     else t.textContent = 'kobler til';
   }
 
-  function itemRow(it, a, idx) {
-    const id = 'i' + idx;
+  function statusLine(x) {
+    const o = x.a.main;
+    if (!o) return 'ikke funnet i noen butikk ennå';
+    const tag = o.state === 'in' ? (o.where === 'haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>') : '';
+    let st;
+    if (x.a.status === 'buy') st = o.where === 'haugesund' ? 'på lager i butikken' : 'på lager';
+    else if (x.a.status === 'over') st = `<span class="warn">over maks ${kr(x.it.max)}</span>`;
+    else st = o.state === 'unlisted' ? 'kommer snart' : 'utsolgt';
+    return `${tag}${esc(shopOf(o))} · ${st}`;
+  }
+
+  function row(x) {
+    const { it, a } = x;
     const open = openRows.has(it.name);
-    const tier = it.tier ? `<span class="tier ${esc(it.tier)}">${esc(it.tier)}</span>` : '';
-    let sub, price, mline, act;
-    if (a.status === 'buy') {
-      sub = `${esc(a.buy.where === 'haugesund' ? a.buy.store : a.buy.shop)} · ${a.buy.where === 'haugesund' ? 'i butikk' : 'nett'}`;
-      price = kr(a.buy.price); mline = a.margin !== null ? `<div class="m ${a.margin >= 0 ? 'up' : 'down'}">${sign(a.margin)}</div>` : '';
-      act = `<a class="act buy" href="${esc(a.buy.url)}" target="_blank" rel="noopener">Kjøp</a>`;
-    } else if (a.status === 'over') {
-      sub = `${esc(a.over.where === 'haugesund' ? a.over.store : a.over.shop)} · over maks`;
-      price = kr(a.over.price); mline = `<div class="m down">maks ${kr(it.max)}</div>`;
-      act = `<a class="act see" href="${esc(a.over.url)}" target="_blank" rel="noopener">Se</a>`;
-    } else {
-      sub = `${a.finn ? `Finn ${kr(a.finn)}` : 'Finn –'} · maks ${kr(it.max)}`;
-      price = ''; mline = '';
-      act = `<span class="act none">${a.status === 'unlisted' ? 'ikke ute' : 'utsolgt'}</span>`;
-    }
-    const pcol = price ? `<div class="rp"><div class="p">${price}</div>${mline}</div>` : `<div class="rp"></div>`;
-    return `<div class="row${open ? ' open' : ''}" data-name="${esc(it.name)}">
-      <div class="rh" role="button" tabindex="0" aria-expanded="${open}" aria-controls="${id}">
-        <div class="rn"><div class="rt">${tier}<span>${esc(it.name)}</span></div><div class="rs">${sub}</div></div>
-        ${pcol}${act}
+    const o = a.main;
+    const cls = a.status === 'buy' ? 'buy' : a.status === 'over' ? 'over' : '';
+    const mg = a.margin === null ? '<span class="v mg dim">–</span>' : `<span class="v mg ${a.status === 'over' ? 'warn' : a.margin >= 0 ? 'up' : 'down'}">${sign(a.margin)}</span>`;
+    const pc = o && o.price > 0 ? `<span class="v ${a.status === 'over' ? 'warn' : a.status === 'watch' ? 'mut' : ''}">${kr(o.price)}</span>` : '<span class="v dim">–</span>';
+    const btn = a.status !== 'watch' ? `<a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${a.status === 'buy' ? 'Kjøp' : 'Åpne'} hos ${esc(o.shop)} ↗</a>` : '';
+    return `<div class="row ${cls}${open ? ' open' : ''}" data-name="${esc(it.name)}">
+      <div class="rh" role="button" tabindex="0" aria-expanded="${open}">
+        <div class="nm"><div class="t">${esc(it.name)}</div><div class="s">${statusLine(x)}</div>${btn}</div>
+        ${pc}<span class="v ${a.finn ? '' : 'dim'}">${a.finn ? kr(a.finn) : '–'}</span>${mg}
       </div>
-      <div class="det" id="${id}" ${open ? '' : 'hidden'}>${details(it, a)}</div>
+      <div class="det" ${open ? '' : 'hidden'}>${details(it, a)}</div>
     </div>`;
   }
 
   function details(it, a) {
-    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'ikke lagt ut ennå' };
+    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'kommer snart' };
     const multi = {};
     a.offers.forEach((o) => (multi[o.shop] = (multi[o.shop] || 0) + 1));
     const short = (p) => String(p).replace(/^(pok[eé]mon:?\s*)?30th (celebration|anniversary)\s*/i, '').replace(/^[—–-]\s*/, '');
@@ -404,26 +384,34 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       const where = o.state === 'in' && o.where === 'haugesund' ? `i ${esc(o.store)}` : label[o.state];
       const nm = multi[o.shop] > 1 ? `${esc(o.shop)} · ${esc(short(o.product))}` : esc(o.shop);
       const okp = o.price > 0 && it.max > 0 && o.price <= it.max;
-      return `<div class="of ${o.state}"><span class="s"></span><span class="nm">${nm}<small>${where}</small></span><span class="pr ${okp ? '' : 'mut'}">${kr(o.price)}</span><a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${o.state === 'in' ? 'Kjøp' : 'Åpne'} ↗</a></div>`;
+      return `<div class="of ${o.state}"><span class="s"></span><span class="on">${nm}<small>${where}</small></span><span class="pr ${okp ? '' : 'mut'}">${kr(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.state === 'in' ? 'Kjøp' : 'Åpne'} ↗</a></div>`;
     }).join('');
     const kv = [
       it.max ? `Maks <b>${kr(it.max)}</b>` : '',
       it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
-      a.finn ? `Finn <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} ann., lavest ${kr(it.finn.min)})</span>` : 'Finn <b>ingen funn</b>'
+      a.finn ? `Finn <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} annonser, lavest ${kr(it.finn.min)})</span>` : 'Finn <b>ingen funn</b>'
     ].filter(Boolean).join('');
     const info = [];
     offers.forEach((o) => (o.info || []).forEach((s) => { if (!/klikk og send|ikke lagt ut/i.test(s) || o.state === 'in') info.push(`${o.shop}: ${nb(s)}`); }));
     if (it.limit && !offers.some((o) => o.limit)) info.push(`Kjøpsgrense: ${nb(it.limit)}`);
     if (it.elsewhere) info.push(`Fysisk i Norli-butikker: ${it.elsewhere}`);
     if (it.note) info.push(it.note);
-    return `<div class="kv">${kv}</div><div class="offers">${ofHtml || '<div class="of"><span class="nm mut">Ikke funnet i noen butikk ennå</span></div>'}</div>
+    return `<div class="kv">${kv}</div><div class="offers">${ofHtml || '<div class="of"><span class="on mut">Ikke funnet i noen butikk ennå</span></div>'}</div>
       ${info.length ? `<ul class="info">${[...new Set(info)].map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}`;
+  }
+
+  function section(id, title, note, cols, list, emptyText) {
+    const el = $(id);
+    if (!list.length && !emptyText) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="sec"><div class="sec-t"><span>${title}</span><span>${note}</span></div>
+      <div class="cols"><span></span><span>${cols[0]}</span><span>Finn</span><span>Margin</span></div>
+      ${list.length ? list.map(row).join('') : `<div class="empty">${emptyText}</div>`}</div>`;
   }
 
   function render() {
     renderLive();
     const d = tree.data, b = tree.bot || {};
-    if (!d) { $('rows').innerHTML = `<div class="empty">Venter på data fra boten. Står PC-en på og kjører Pokemon-bot?</div>`; return; }
+    if (!d) { $('hero').innerHTML = `<div class="hero-t">Venter på data fra boten</div><div class="hero-s">Står PC-en på og kjører Pokemon-bot?</div>`; return; }
 
     // Bannere
     const stale = !b.beat || Date.now() - b.beat > 5 * 60000;
@@ -432,47 +420,50 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     if (b.paused) ban.push(`<div class="banner"><b>Pauset.</b> Boten sjekker ingenting før du trykker Fortsett under Bot.</div>`);
     $('banners').innerHTML = ban.join('');
 
-    // Analyse
-    const items = (d.items || []).map((it) => ({ it, a: analyse(it) }));
-    items.sort((x, y) => rank[x.a.status] - rank[y.a.status] || String(x.it.tier).localeCompare(String(y.it.tier)) || (y.a.finn || 0) - (x.a.finn || 0));
-    const buyN = items.filter((x) => x.a.status === 'buy').length;
-    const overN = items.filter((x) => x.a.status === 'over').length;
-    const outN = items.length - buyN - overN;
+    // Varer
+    const all = (d.items || []).map((it) => ({ it, a: analyse(it) }));
+    const byMargin = (x, y) => (y.a.margin ?? -1e9) - (x.a.margin ?? -1e9);
+    const buy = all.filter((x) => x.a.status === 'buy').sort(byMargin);
+    const over = all.filter((x) => x.a.status === 'over').sort(byMargin);
+    const watch = all.filter((x) => x.a.status === 'watch').sort(byMargin);
     const hgN = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
-    const margin = items.filter((x) => x.a.status === 'buy' && x.a.margin > 0).reduce((n, x) => n + x.a.margin, 0);
 
-    const sv = $('sumV');
-    sv.innerHTML = (margin > 0 ? `+${nf.format(Math.round(margin))}` : '0') + '<span class="u">kr</span>';
-    sv.className = 'sum-v n ' + (margin > 0 ? 'up' : 'zero');
-    $('sumS').innerHTML = [
-      `<span><i class="dot g"></i><b>${buyN}</b> kjøpbar</span>`,
-      `<span><i class="dot y"></i><b>${overN}</b> over maks</span>`,
-      `<span><i class="dot"></i><b>${outN}</b> utsolgt</span>`,
-      `<span><i class="dot r"></i>Haugesund <b>${hgN}</b> inne</span>`
-    ].join('');
+    // Toppboks
+    const hero = $('hero');
+    const stats = `<div class="hero-s"><span><i class="dot g"></i><b>${buy.length}</b> kan kjøpes</span><span><i class="dot y"></i><b>${over.length}</b> over maks</span><span><i class="dot r"></i><b>${hgN}</b> i Haugesund</span></div>`;
+    if (buy.length) {
+      const total = buy.reduce((n, x) => n + Math.max(0, x.a.margin || 0), 0);
+      const top = buy[0];
+      hero.className = 'hero buy';
+      hero.innerHTML = `<div class="hero-l">Mulig margin nå</div><div class="hero-v">+${nf.format(Math.round(total))}<span>kr</span></div>${stats}
+        <a class="cta" href="${esc(top.a.main.url)}" target="_blank" rel="noopener">Kjøp ${esc(top.it.name)} hos ${esc(top.a.main.shop)} ↗</a>`;
+    } else {
+      const best = watch.filter((x) => x.a.margin > 0)[0];
+      const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
+      hero.className = 'hero';
+      hero.innerHTML = `<div class="hero-t">Ingenting å kjøpe akkurat nå</div>${stats}
+        <div class="hero-n">${nxt ? `Neste sjekk <b>${until(nxt)}</b>. ` : ''}${best ? `Best når den kommer: <b>${esc(best.it.name)}</b> hos ${esc(best.a.main.shop)} <span class="up">${sign(best.a.margin)}</span>` : ''}</div>`;
+    }
 
-    // Filter
-    const counts = { alle: items.length, inne: items.filter((x) => x.a.inStock.length).length, hg: items.filter((x) => x.a.hg).length };
-    $('cAlle').textContent = counts.alle; $('cInne').textContent = counts.inne; $('cHg').textContent = counts.hg;
-    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.f === filter)));
-    const shown = items.filter((x) => filter === 'alle' || (filter === 'inne' && x.a.inStock.length) || (filter === 'hg' && x.a.hg) || (filter === 'a' && x.it.tier === 'A'));
-    $('itemsN').textContent = `${shown.length} produkter`;
-    $('rows').innerHTML = shown.length ? shown.map((x, i) => itemRow(x.it, x.a, i)).join('') :
-      `<div class="empty">${filter === 'hg' ? 'Ingenting fra listen er inne i Haugesund nå.' : filter === 'inne' ? 'Ingenting fra listen er på lager nå.' : 'Ingen produkter.'}</div>`;
+    section('secBuy', 'Kan kjøpes', 'under makspris', ['Pris'], buy, buy.length ? '' : '');
+    section('secIn', 'Inne nå', 'over makspris – ikke kjøp', ['Pris'], over, '');
+    section('secWatch', 'Følger med', `${watch.length} ikke inne`, ['Billigst'], watch, '');
 
     // Annet på lager
     const other = d.other || [];
-    $('otherWrap').hidden = !other.length;
-    $('other').innerHTML = other.map((o) => {
-      const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
-      const info = (o.info || []).filter((s) => !/ikke lagt ut/i.test(s)).map(nb).join(' · ');
-      return `<div class="row"><a class="rh" href="${esc(o.url)}" target="_blank" rel="noopener">
-        <div class="rn"><div class="rt"><span>${esc(o.product)}</span></div><div class="rs">${esc(o.kind === 'Haugesund' ? o.store : o.shop)} · ${o.kind === 'Haugesund' ? 'i butikk' : 'nett'}${info ? ' · ' + esc(info) : ''}</div></div>
-        <div class="rp"><div class="p">${kr(o.price)}</div>${m !== null ? `<div class="m ${m >= 0 ? 'up' : 'down'}">${sign(m)}</div>` : '<div class="m dim">Finn –</div>'}</div>
-        <span class="act see">Åpne</span></a></div>`;
-    }).join('');
+    $('secOther').innerHTML = other.length ? `<div class="sec"><div class="sec-t"><span>Annet på lager</span><span>bundles, ETB, bokser</span></div>
+      <div class="cols"><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>
+      ${other.map((o) => {
+        const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
+        const tag = o.kind === 'Haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>';
+        return `<div class="row"><div class="rh" style="cursor:default">
+          <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)}</div>
+          <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
+          <span class="v">${kr(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? kr(o.finn.med) : '–'}</span>
+          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : sign(m)}</span></div></div>`;
+      }).join('')}</div>` : '';
 
-    const badge = $('tabBadge'); badge.hidden = !buyN; badge.textContent = buyN;
+    const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
     // Butikker
     const srcRow = (s) => {
@@ -505,17 +496,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   }
 
   // ---------- Hendelser ----------
-  $('rows').addEventListener('click', (e) => {
+  $('tab-marked').addEventListener('click', (e) => {
     if (e.target.closest('a')) return;
     const h = e.target.closest('.rh'); if (!h) return;
-    const row = h.closest('.row'), name = row.dataset.name;
+    const r = h.closest('.row'), name = r.dataset.name; if (!name) return;
     if (openRows.has(name)) openRows.delete(name); else openRows.add(name);
     const open = openRows.has(name);
-    row.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
-    row.querySelector('.det').hidden = !open;
+    r.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    r.querySelector('.det').hidden = !open;
   });
-  $('rows').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('rh')) { e.preventDefault(); e.target.click(); } });
-  document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { filter = c.dataset.f; store.set('rr-filter', filter); render(); }));
+  $('tab-marked').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('rh')) { e.preventDefault(); e.target.click(); } });
 
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
