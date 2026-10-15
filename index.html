@@ -74,8 +74,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cols span { text-align: right; }
 .row { border-bottom: 1px solid var(--line); }
 .rh { display: grid; grid-template-columns: var(--cols); gap: 8px; align-items: start; padding: 11px 0; cursor: pointer; }
-.row.buy .rh { box-shadow: inset 3px 0 0 var(--up); padding-left: 10px; margin-left: -10px; }
-.row.over .rh { box-shadow: inset 3px 0 0 var(--warn); padding-left: 10px; margin-left: -10px; }
+/* Stripe etter fortjeneste: grønn ≥ 10 %, oransje 0–10 %, rød ved tap */
+.row.m-good .rh, .row.m-thin .rh, .row.m-loss .rh { padding-left: 10px; margin-left: -10px; }
+.row.m-good .rh { box-shadow: inset 3px 0 0 var(--up); }
+.row.m-thin .rh { box-shadow: inset 3px 0 0 var(--warn); }
+.row.m-loss .rh { box-shadow: inset 3px 0 0 var(--down); }
+.v.mg small { display: block; font-size: 11px; font-weight: 500; opacity: .8; margin-top: 1px; }
 .nm { min-width: 0; }
 .nm .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nm .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -438,12 +442,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     return `${tag}${esc(shopOf(o))} · ${st}`;
   }
 
+  // Fortjeneste i prosent av butikkprisen. Stripe: grønn ≥ 10 %, oransje 0–10 %, rød ved tap.
+  const marginPct = (m, price) => (m !== null && price > 0 ? (m / price) * 100 : null);
+  const marginTier = (m, price) => { if (m === null) return ''; const p = marginPct(m, price); return m < 0 ? 'm-loss' : p !== null && p < 10 ? 'm-thin' : 'm-good'; };
+  const marginCell = (m, price) => {
+    if (m === null) return '<span class="v mg dim">–</span>';
+    const p = marginPct(m, price);
+    const pt = p === null ? '' : `<small>${p < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p)))} %</small>`;
+    return `<span class="v mg ${m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${sign(m)}${pt}</span>`;
+  };
+
   function row(x) {
     const { it, a } = x;
     const open = openRows.has(it.name);
     const o = a.main;
-    const cls = a.status === 'buy' ? 'buy' : a.status === 'over' ? 'over' : '';
-    const mg = a.margin === null ? '<span class="v mg dim">–</span>' : `<span class="v mg ${a.status === 'over' ? 'warn' : a.margin >= 0 ? 'up' : 'down'}">${sign(a.margin)}</span>`;
+    const cls = [a.status === 'buy' ? 'buy' : a.status === 'over' ? 'over' : '', marginTier(a.margin, o && o.price)].filter(Boolean).join(' ');
+    const mg = marginCell(a.margin, o && o.price);
     const pc = o && o.price > 0 ? `<span class="v ${a.status === 'over' ? 'warn' : a.status === 'watch' ? 'mut' : ''}">${kr(o.price)}</span>` : '<span class="v dim">–</span>';
     const btn = a.status !== 'watch' ? `<a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${a.status === 'buy' ? 'Kjøp' : 'Åpne'} hos ${esc(o.shop)} ↗</a>` : '';
     return `<div class="row ${cls}${open ? ' open' : ''}" data-name="${esc(it.name)}">
@@ -663,11 +677,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       ${other.map((o) => {
         const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
         const tag = o.kind === 'Haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>';
-        return `<div class="row"><div class="rh" style="cursor:default">
+        return `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
           <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)}</div>
           <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
           <span class="v">${kr(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? kr(o.finn.med) : '–'}</span>
-          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : sign(m)}</span></div></div>`;
+          ${marginCell(m, o.price)}</div></div>`;
       }).join('')}</div>` : '';
 
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
