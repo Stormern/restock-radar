@@ -26,7 +26,7 @@
   --down: #FF6B5B; --gold: #FFCB05;
   --f: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --cols: minmax(0, 1fr) 52px 52px 58px;
-  --bar-h: 62px;
+  --bar-h: 52px;
   color-scheme: dark;
 }
 * { box-sizing: border-box; font-variant-numeric: tabular-nums; }
@@ -43,7 +43,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* Topp */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(11, 12, 15, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-.logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 23px; letter-spacing: -.015em; color: var(--gold); }
+.logo img { width: 36px; height: 36px; border-radius: 10px; flex: none; }
 .live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex: none; }
 .live.on i { background: var(--up); animation: ping 2.2s infinite; }
@@ -174,7 +175,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .of.ready .s { background: var(--up); }
 .of.ready .lk { background: var(--up); color: var(--up-ink); border-color: var(--up); }
 
-/* Nyheter */
+/* Siste endringer (øverst i Kalender, bare når noe har skjedd) */
+.chg { margin: 6px 0 14px; padding: 2px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.chg .sec-t { margin: 10px 0 0; }
+.chg .nw:last-child { border-bottom: 0; }
 .nw { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .nw .ic { font-size: 17px; line-height: 1.3; text-align: center; }
 .nw .tt { display: block; font-weight: 600; font-size: 14.5px; line-height: 1.35; }
@@ -194,8 +198,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* Fanebar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
-.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--bar-h); }
-.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--dim); position: relative; }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--bar-h); }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--dim); position: relative; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
@@ -214,7 +218,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <header class="top" id="top" hidden>
   <div class="top-in">
     <div class="logo">
-      <img src="icon-180.png?v=2" width="22" height="22" alt="" style="border-radius:6px">
+      <img src="icon-180.png?v=2" width="36" height="36" alt="">
       PikaJew
     </div>
     <span class="live" id="live"><i></i><span id="liveTxt">kobler til</span></span>
@@ -238,18 +242,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   </section>
 
   <section id="tab-kalender" role="tabpanel" hidden>
+    <div id="calNews"></div>
     <div class="hero" id="calHero"></div>
     <div id="calUp"></div>
     <div id="calPast"></div>
     <div class="sec"><div class="sec-t"><span>Kilder</span><span id="calChecked"></span></div>
       <p class="fine" style="margin-top:0">Datoen for hvert sett sjekkes mot flere uavhengige kilder. Er de enige, står det <b>bekreftet</b>. Har Norli satt salgsstart, er det den som gjelder i Norge.</p>
       <div class="src-st" id="calSrc"></div></div>
-  </section>
-
-  <section id="tab-nyheter" role="tabpanel" hidden>
-    <div id="newsEvents"></div>
-    <div id="newsArticles"></div>
-    <p class="fine" id="newsFoot"></p>
   </section>
 
   <section id="tab-bot" role="tabpanel" hidden>
@@ -290,9 +289,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     <button type="button" role="tab" data-tab="butikker" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>Butikker</button>
     <button type="button" role="tab" data-tab="kalender" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Kalender</button>
-    <button type="button" role="tab" data-tab="nyheter" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h11v14H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1z"/><path d="M16 9h3a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2h-2"/><path d="M8 9h5M8 12.5h5M8 16h3"/></svg>Nyheter<span class="badge" id="newsBadge" hidden></span></button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Kalender<span class="badge" id="calBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="bot" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1.1" fill="currentColor"/><circle cx="15" cy="13" r="1.1" fill="currentColor"/></svg>Bot</button>
   </div>
@@ -425,7 +422,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     el.className = 'live';
     const last = Math.max(b.lastOnline || 0, b.lastStore || 0);
     const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
-    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(last || Date.now())}${nxt ? ` · neste ${clock(nxt)}` : ''}`; }
+    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(last || Date.now())}${nxt ? (nxt > Date.now() ? ` · neste ${clock(nxt)}` : ' · sjekker nå') : ''}`; }
     else if (liveState === 'demo') t.textContent = 'demo';
     else if (liveState === 'off') { el.classList.add('off'); t.textContent = 'frakoblet'; }
     else t.textContent = 'kobler til';
@@ -511,6 +508,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   const ymd = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
   const daysTo = (s) => { const d = ymd(s); if (!d) return null; const t = new Date(); return Math.round((d - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5); };
   const longDate = (s) => { const d = ymd(s); return d ? `${d.getDate()}. ${MONL[d.getMonth()]}` : String(s || ''); };
+  // Spennet kildene oppgir, f.eks. "16.–18. sep" eller "30. sep–2. okt".
+  const dateRange = (list) => {
+    const ds = [...new Set((list || []).filter((x) => ymd(x)))].sort();
+    if (!ds.length) return '';
+    const a = ymd(ds[0]), b = ymd(ds[ds.length - 1]);
+    if (ds.length === 1) return `${a.getDate()}. ${MON[a.getMonth()]}`;
+    return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear() ? `${a.getDate()}.–${b.getDate()}. ${MON[b.getMonth()]}` : `${a.getDate()}. ${MON[a.getMonth()]}–${b.getDate()}. ${MON[b.getMonth()]}`;
+  };
   const countdown = (n) => (n === 0 ? 'i dag' : n === 1 ? 'i morgen' : n > 1 ? `om ${n} dager` : n === -1 ? 'i går' : `${-n} dager siden`);
   const agoShort = (ms) => { const m = Math.round((Date.now() - ms) / 60000); if (m < 2) return 'nå'; if (m < 60) return `${m} min`; const h = Math.round(m / 60); return h < 24 ? `${h} t` : `${Math.round(h / 24)} d`; };
   const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -520,14 +525,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   function calEntries() {
     const n = tree.news || {}, d = tree.data || {};
-    const out = (n.sets || []).map((s) => ({ kind: 'sett', key: 'sett:' + s.id, name: s.name, date: s.date, status: s.status, total: s.total, s }));
+    const out = (n.sets || []).map((s) => ({ kind: 'sett', key: 'sett:' + s.id, name: s.name, date: s.date, status: s.status, total: s.total, range: dateRange(Object.values(s.dates || {})), s }));
     const seen = new Set();
     (d.items || []).forEach((it) => {
       if (!it.release) return;
       seen.add(norm(it.name));
       const rs = it.relSrc || [];
       const agree = rs.filter((x) => x.d === it.release).length;
-      out.push({ kind: 'produkt', key: 'p:' + it.name, name: it.name, date: it.release, status: rs.length < 2 ? 'en' : agree === rs.length ? 'ok' : 'avvik', total: rs.length, it });
+      out.push({ kind: 'produkt', key: 'p:' + it.name, name: it.name, date: it.release, status: rs.length < 2 ? 'en' : agree === rs.length ? 'ok' : 'avvik', total: rs.length, range: dateRange(rs.map((x) => x.d)), it });
     });
     (d.sources || []).forEach((src) => (src.items || []).forEach((x) => {
       if (!x.release || x.watched || seen.has(norm(x.name))) return;
@@ -543,7 +548,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     if (e.kind === 'sett') sub = `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter i norske butikker` : 'ingen produkter lagt ut ennå'}${e.s.price > 0 ? ` · fra ${kr(e.s.price)} kr` : ''}`;
     else if (e.it) { const a = analyse(e.it); sub = `<span class="tag">PRODUKT</span>${a.main ? `${esc(a.main.shop)}${a.main.price > 0 ? ` ${kr(a.main.price)} kr` : ''}` : 'ikke lagt ut ennå'}${a.finn ? ` · Finn ${kr(a.finn)}` : ''}`; }
     else sub = `<span class="tag">PRODUKT</span>${esc(e.shop)}${e.x.price > 0 ? ` · ${kr(e.x.price)} kr` : ''}`;
-    const mark = e.status === 'ok' ? `<span class="ok">✓ ${e.total} kilder</span>` : e.status === 'avvik' ? '<span class="av">⚠ uenige</span>' : '<span>1 kilde</span>';
+    const mark = e.status === 'ok' ? `<span class="ok">✓ ${e.total} kilder</span>` : e.status === 'avvik' ? `<span class="av">${esc(e.range)}</span>` : '<span>1 kilde</span>';
     return `<div class="cal${past ? ' past' : ''}${open ? ' open' : ''}" data-key="${esc(e.key)}">
       <div class="cr" role="button" tabindex="0" aria-expanded="${open}">
         <div class="db"><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small></div>
@@ -565,7 +570,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
         if (!v) return srcRowH('none', '–', SRC[k], k === 'norli' ? 'ikke lagt ut hos Norli ennå' : 'ingen dato ennå', '');
         return srcRowH(v === s.date ? 'same' : 'diff', v === s.date ? '✓' : '≠', SRC[k], longDate(v), s.links && s.links[k]);
       }).join('');
-      const note = s.status === 'avvik' ? `<div class="sh">Kildene er uenige. ${s.dates && s.dates.norli ? 'Norlis dato gjelder i Norge.' : 'Viser datoen flest kilder oppgir.'}</div>` : '';
+      // Hvilken kilde datoen kommer fra: den første i prioritert rekkefølge som oppgir den viste datoen.
+      const pick = ['norli', 'offisiell', 'serebii', 'pokejakt'].find((k) => s.dates && s.dates[k] === s.date);
+      const others = (s.total || 0) - (s.agree || 0);
+      const why = s.dates && s.dates.norli ? 'Norlis dato gjelder i Norge.'
+        : s.agree > others ? `Viser datoen flest kilder oppgir (${s.agree} mot ${others}).`
+        : `Det står ${s.agree} mot ${others}, så viser datoen fra ${SRC[pick] || 'den mest pålitelige kilden'} inntil en kilde til avgjør.`;
+      const note = s.status === 'avvik' ? `<div class="sh">Kildene oppgir ${esc(dateRange(Object.values(s.dates || {})))}. ${why}</div>` : '';
       let h = `<div class="srcs">${note}${rows}</div>`;
       const prods = s.prods || [];
       if (prods.length) {
@@ -595,7 +606,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     hero.className = 'hero';
     if (up.length) {
       const e = up[0];
-      const chip = e.status === 'ok' ? `<span class="chip ok">✓ Bekreftet av ${e.total} kilder</span>` : e.status === 'avvik' ? '<span class="chip av">⚠ Kildene er uenige – trykk på den under</span>' : '<span class="chip">1 kilde så langt</span>';
+      const chip = e.status === 'ok' ? `<span class="chip ok">✓ Bekreftet av ${e.total} kilder</span>` : e.status === 'avvik' ? `<span class="chip av">Kildene sier ${esc(e.range)}</span>` : '<span class="chip">1 kilde så langt</span>';
       const extra = e.kind === 'sett' ? `<span class="chip">${e.s.n || 0} produkter lagt ut i Norge</span>` : '';
       hero.innerHTML = `<div class="hero-l">Neste slipp</div><div class="hero-t">${esc(e.name)}</div><div class="hero-d">${esc(longDate(e.date))}<span>${countdown(daysTo(e.date))}</span></div><div class="chips">${chip}${extra}</div>`;
     } else if (!n) hero.innerHTML = '<div class="hero-t">Venter på kalenderen</div><div class="hero-s">Boten henter slippdatoer første gang den kjører med den nye versjonen.</div>';
@@ -606,25 +617,31 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     $('calSrc').innerHTML = ((n && n.src) || []).map((x) => `<i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i><span>${esc(x.label)}</span><span class="tm">${x.err ? 'feil' : x.ok ? `ok · ${agoShort(x.ok)}` : '–'}</span>${x.err ? `<span class="er">${esc(x.err)}</span>` : ''}`).join('');
   }
 
-  // ---------- Nyheter ----------
+  // ---------- Siste endringer (øverst i Kalender) ----------
+  // Bare det som faktisk har skjedd de siste 14 dagene: ny forhåndsbestilling, flyttet dato, nytt sett, slipp snart.
+  // Boksen vises ikke når ingenting har skjedd. Merket på Kalender-knappen teller det du ikke har sett.
   const ICON = { sett: '🆕', dato: '📅', ut: '🏷️', bestill: '🛒', snart: '⏰' };
   let newsSeenAtOpen = +(store.get('rr-news-seen') || 0);
   function renderNews() {
-    const n = tree.news || {}, evs = n.events || [], arts = n.articles || [];
-    const onNews = !$('tab-nyheter').hidden;
+    const n = tree.news || {};
+    const cut = Date.now() - 14 * 864e5;
+    const evs = (n.events || []).filter((e) => e.t >= cut);
+    const arts = (n.articles || []).filter((a) => a.t >= cut);
+    const onCal = !$('tab-kalender').hidden;
     const top = evs.reduce((m, e) => Math.max(m, e.t || 0), 0);
-    if (onNews && top) store.set('rr-news-seen', String(top));
+    if (onCal && top) store.set('rr-news-seen', String(top));
     const seen = +(store.get('rr-news-seen') || 0);
     const fresh = evs.filter((e) => e.t > seen).length;
-    const b = $('newsBadge'); b.hidden = !fresh; b.textContent = fresh;
+    const b = $('calBadge'); b.hidden = !fresh; b.textContent = fresh;
     const item = (icon, title, text, t, url, isNew) => {
       const inner = `<span class="ic">${icon}</span><span><span class="tt">${esc(title)}</span>${text ? `<span class="tx">${esc(text)}</span>` : ''}</span><span class="tm">${t ? agoShort(t) : ''}</span>`;
       return url ? `<a class="nw${isNew ? ' new' : ''}" href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="nw${isNew ? ' new' : ''}">${inner}</div>`;
     };
-    $('newsEvents').innerHTML = `<div class="sec"><div class="sec-t"><span>Lanseringer og slipp</span><span>i Norge</span></div>${evs.length ? evs.map((e) => item(ICON[e.kind] || '•', e.title, e.text, e.t, e.url, e.t > newsSeenAtOpen)).join('') : '<div class="empty">Ingenting nytt ennå. Boten sier fra her (og på telefonen) når et nytt sett får dato, en dato flyttes, eller en norsk butikk legger ut eller åpner forhåndsbestilling.</div>'}</div>`;
-    // Bare avissaker om lansering/slipp – vises ikke i det hele tatt når det ikke finnes noen.
-    $('newsArticles').innerHTML = arts.length ? `<div class="sec"><div class="sec-t"><span>I norske medier</span><span>om lanseringer</span></div>${arts.map((a) => item('📰', a.title, a.source, a.t, a.url, false)).join('')}</div>` : '';
-    $('newsFoot').textContent = n.checked ? `Boten sjekker hvert ${n.every || 30}. min · sist ${clock(n.checked)}. Bare lanseringsdatoer og slipp – ikke kortspill, turneringer eller dataspill.` : 'Venter på første nyhetssjekk fra boten.';
+    const list = [
+      ...evs.map((e) => ({ t: e.t, h: item(ICON[e.kind] || '•', e.title, e.text, e.t, e.url, e.t > newsSeenAtOpen) })),
+      ...arts.map((a) => ({ t: a.t, h: item('📰', a.title, a.source, a.t, a.url, false) }))
+    ].sort((x, y) => y.t - x.t).slice(0, 6);
+    $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${list.map((x) => x.h).join('')}</div>` : '';
   }
 
   function render() {
@@ -659,30 +676,33 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       hero.innerHTML = `<div class="hero-l">Mulig margin nå</div><div class="hero-v">+${nf.format(Math.round(total))}<span>kr</span></div>${stats}
         <a class="cta" href="${esc(top.a.main.url)}" target="_blank" rel="noopener">Kjøp ${esc(top.it.name)} hos ${esc(top.a.main.shop)} ↗</a>`;
     } else {
-      const best = watch.filter((x) => x.a.margin > 0)[0];
+      // Nærmeste slippdato først; slippes flere samme dag, den med best fortjeneste.
+      const soon = watch.filter((x) => x.it.release && daysTo(x.it.release) >= 0)
+        .sort((p, q) => p.it.release.localeCompare(q.it.release) || (q.a.margin ?? -1e9) - (p.a.margin ?? -1e9))[0];
+      const best = soon || watch.filter((x) => x.a.margin > 0)[0];
       const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
       hero.className = 'hero';
       hero.innerHTML = `<div class="hero-t">Ingenting å kjøpe akkurat nå</div>${stats}
-        <div class="hero-n">${nxt ? `Neste sjekk <b>${until(nxt)}</b>. ` : ''}${best ? `Best når den kommer: <b>${esc(best.it.name)}</b> hos ${esc(best.a.main.shop)} <span class="up">${sign(best.a.margin)}</span>` : ''}</div>`;
+        <div class="hero-n">${nxt ? `<div>⏱ Neste sjekk: <b>${nxt > Date.now() ? `${clock(nxt)}</b> (${until(nxt)})` : 'pågår nå</b>'}</div>` : ''}${best ? `<div style="margin-top:8px">⭐ Neste som kommer på lager:<br><b>${esc(best.it.name)}</b>${best.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(best.it.release))}</span> (${countdown(daysTo(best.it.release))})` : ''}<br>Billigst: ${esc(best.a.main.shop)} ${kr(best.a.main.price)} kr → ${best.a.finn ? `Finn ${kr(best.a.finn)} kr = <span class="${best.a.margin >= 0 ? 'up' : 'down'}">${sign(best.a.margin)} kr</span>` : 'Finn: ingen funn'}</div>` : ''}</div>`;
     }
 
     section('secBuy', 'Kan kjøpes', 'under makspris', ['Pris'], buy, buy.length ? '' : '');
-    section('secIn', 'Inne nå', 'over makspris – ikke kjøp', ['Pris'], over, '');
+    // Inne nå: alt annet som er på lager – varer over makspris og varer som ikke er på listen din – samlet, best fortjeneste øverst.
+    const otherIn = (d.other || []).map((o) => {
+      const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
+      const tag = o.kind === 'Haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>';
+      return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
+        <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
+        <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
+        <span class="v">${kr(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? kr(o.finn.med) : '–'}</span>
+        ${marginCell(m, o.price)}</div></div>` };
+    });
+    const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
+    $('secIn').innerHTML = inNow.length ? `<div class="sec"><div class="sec-t"><span>Inne nå</span><span>over makspris eller ikke på listen</span></div>
+      <div class="cols"><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${inNow.map((x) => x.h).join('')}</div>` : '';
     section('secWatch', 'Følger med', `${watch.length} ikke inne`, ['Billigst'], watch, '');
 
-    // Annet på lager
-    const other = d.other || [];
-    $('secOther').innerHTML = other.length ? `<div class="sec"><div class="sec-t"><span>Annet på lager</span><span>bundles, ETB, bokser</span></div>
-      <div class="cols"><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>
-      ${other.map((o) => {
-        const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
-        const tag = o.kind === 'Haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>';
-        return `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
-          <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)}</div>
-          <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
-          <span class="v">${kr(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? kr(o.finn.med) : '–'}</span>
-          ${marginCell(m, o.price)}</div></div>`;
-      }).join('')}</div>` : '';
+    $('secOther').innerHTML = '';
 
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
@@ -714,8 +734,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
           ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
         </div></div>`;
     };
-    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').map(srcRow).join('');
-    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').map(srcRow).join('');
+    // Butikker med noe på lager alltid øverst (flest først); ellers samme rekkefølge som før.
+    const byStock = (a, b) => (b.inStock > 0) - (a.inStock > 0) || (b.inStock || 0) - (a.inStock || 0);
+    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').sort(byStock).map(srcRow).join('');
+    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').sort(byStock).map(srcRow).join('');
 
     // Bot
     const bs = $('bstate');
@@ -772,13 +794,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   });
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
-  const TABS = ['marked', 'butikker', 'kalender', 'nyheter', 'bot'];
+  const TABS = ['marked', 'butikker', 'kalender', 'bot'];
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
     TABS.forEach((t) => ($('tab-' + t).hidden = t !== name));
     store.set('rr-tab', name);
-    // "NY"-merket gjelder det som kom siden sist du åpnet Nyheter.
-    if (name === 'nyheter') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
+    // "NY"-merket gjelder det som kom siden sist du åpnet Kalender.
+    if (name === 'kalender') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
     window.scrollTo({ top: 0 });
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
