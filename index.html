@@ -105,6 +105,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .info li::before { content: "› "; color: var(--dim); }
 
 /* Butikker & bot */
+.shop .li { cursor: pointer; }
+.shop .lt small b { color: var(--muted); font-weight: 500; }
+.shop.open .li { border-bottom-color: transparent; }
+.shop-det { padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+.shop-det .go { margin: 0 0 12px; }
+.cols5, .sp { display: grid; grid-template-columns: 10px minmax(0, 1fr) 50px 50px 56px; gap: 8px; align-items: center; }
+.cols5 { font-size: 11px; color: var(--dim); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.cols5 span:not(:first-child):not(:nth-child(2)) { text-align: right; }
+.sp { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sp .s { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.sp.in .s { background: var(--up); }
+.sp.unlisted .s { background: transparent; border: 1.5px dashed var(--muted); }
+.sp .spn { min-width: 0; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp .spn small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp .v { font-size: 13.5px; }
+.rel { color: var(--gold); }
 .li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .li .lt { font-size: 14.5px; font-weight: 600; }
 .li .lt small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
@@ -251,6 +267,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   let liveState = 'connecting';
   let es = null, pollTimer = null;
   const openRows = new Set();
+  const openShops = new Set();
+  const fmtDate = (s) => { const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }); };
 
   function setAt(path, value, merge) {
     const parts = path.split('/').filter(Boolean);
@@ -353,7 +371,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     let st;
     if (x.a.status === 'buy') st = o.where === 'haugesund' ? 'på lager i butikken' : 'på lager';
     else if (x.a.status === 'over') st = `<span class="warn">over maks ${kr(x.it.max)}</span>`;
-    else st = o.state === 'unlisted' ? 'kommer snart' : 'utsolgt';
+    else st = (o.state === 'unlisted' ? 'kommer snart' : 'utsolgt') + (x.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(x.it.release))}</span>` : '');
     return `${tag}${esc(shopOf(o))} · ${st}`;
   }
 
@@ -466,11 +484,32 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
     // Butikker
+    // Butikk-rad: trykk for å se alle produktene boten følger der, med pris, Finn, margin og slippdato.
     const srcRow = (s) => {
-      const tag = s.url ? 'a' : 'div';
-      const href = s.url ? ` href="${esc(s.url)}" target="_blank" rel="noopener"` : '';
       const name = s.label.replace(/\s*\((butikk.*|nettbutikk)\)/i, '');
-      return `<${tag} class="li"${href}><i class="dot ${s.failing ? 'r' : 'g'}"></i><span class="lt">${esc(name)}<small>${s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges`}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></${tag}>`;
+      const key = s.source || s.label;
+      const open = openShops.has(key);
+      // Samme vare i flere butikker (f.eks. Nille Markedet og Oasen): én linje, den som er på lager først.
+      const seen = new Set();
+      const items = (s.items || []).filter((it) => { const k = it.name + '|' + it.url; if (seen.has(k)) return false; seen.add(k); return true; });
+      const list = items.map((it) => {
+        const m = it.finn && it.price > 0 ? it.finn - it.price : null;
+        const inStore = it.store && !/^(nettbutikk|\(ingen butikker\))$/i.test(it.store);
+        const st = it.state === 'in' ? (inStore ? `på lager · ${it.store}` : 'på lager') : it.state === 'unlisted' ? 'kommer snart' : 'utsolgt';
+        const rel = it.release ? ` · <span class="rel">slipp ${esc(fmtDate(it.release))}</span>` : '';
+        const over = it.max > 0 && it.price > it.max;
+        return `<a class="sp ${it.state}" href="${esc(it.url)}" target="_blank" rel="noopener"><span class="s"></span>
+          <span class="spn">${esc(it.name)}<small>${esc(st)}${rel}</small></span>
+          <span class="v ${over ? 'warn' : ''}">${kr(it.price)}</span><span class="v ${it.finn ? '' : 'dim'}">${it.finn ? kr(it.finn) : '–'}</span>
+          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : sign(m)}</span></a>`;
+      }).join('');
+      const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges · <b>trykk for å se</b>`;
+      return `<div class="shop${open ? ' open' : ''}" data-src="${esc(key)}">
+        <div class="li" role="button" tabindex="0" aria-expanded="${open}"><i class="dot ${s.failing ? 'r' : 'g'}"></i><span class="lt">${esc(name)}<small>${sub}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></div>
+        <div class="shop-det" ${open ? '' : 'hidden'}>
+          ${s.url ? `<a class="go" href="${esc(s.url)}" target="_blank" rel="noopener">Åpne ${esc(name)} ↗</a>` : ''}
+          ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
+        </div></div>`;
     };
     $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').map(srcRow).join('');
     $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').map(srcRow).join('');
@@ -506,6 +545,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     r.querySelector('.det').hidden = !open;
   });
   $('tab-marked').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('rh')) { e.preventDefault(); e.target.click(); } });
+
+  $('tab-butikker').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.li'); if (!h) return;
+    const shop = h.closest('.shop'); if (!shop) return;
+    const src = shop.dataset.src;
+    if (openShops.has(src)) openShops.delete(src); else openShops.add(src);
+    const open = openShops.has(src);
+    shop.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    shop.querySelector('.shop-det').hidden = !open;
+  });
+  $('tab-butikker').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('li')) { e.preventDefault(); e.target.click(); } });
 
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
