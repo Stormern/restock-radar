@@ -443,7 +443,8 @@ details.more p { margin: 8px 0 0; }
       it.finn && it.finn.n ? `<div><dt>Finn</dt><dd>~${kr(it.finn.med)}</dd></div>` : `<div><dt>Finn</dt><dd>ingen funn</dd></div>`,
       margin !== null ? `<div><dt>Margin</dt><dd class="${margin >= 0 ? 'pos' : 'neg'}">${margin >= 0 ? '+' : ''}${kr(Math.abs(margin)) === '–' ? '0' : (margin < 0 ? '−' : '') + kr(Math.abs(margin))}</dd></div>` : ''
     ].join('');
-    const notes = [o.note, it.limit ? `Kjøpsgrense: ${nb(it.limit)}` : ''].filter(Boolean).map(esc).join(' · ');
+    const lines = (o.info && o.info.length) ? o.info : [o.note, it.limit ? `Kjøpsgrense: ${nb(it.limit)}` : ''];
+    const notes = lines.filter(Boolean).map((s) => esc(nb(s))).join('<br>');
     return `<article class="offer ${over ? 'over' : ''}">
       <div class="o-top">${tier}${where}</div>
       <h3>${esc(o.product)}</h3>
@@ -472,7 +473,8 @@ details.more p { margin: 8px 0 0; }
       cheapest && it.finn && it.finn.med ? `Margin fra billigste <b class="${it.finn.med - cheapest.price >= 0 ? 'pos' : 'neg'}">${it.finn.med - cheapest.price >= 0 ? '+' : '−'}${kr(Math.abs(it.finn.med - cheapest.price))}</b>` : '',
       it.limit ? `Grense <b>${esc(nb(it.limit))}</b>` : ''
     ].filter(Boolean).join('');
-    const more = [it.elsewhere ? `<p><b>Fysisk i Norli-butikker:</b> ${esc(it.elsewhere)}</p>` : '', it.note ? `<p>${esc(it.note)}</p>` : '', it.finn && it.finn.n ? `<p>Finn: ${it.finn.n} annonser, laveste ${kr(it.finn.min)} kr.</p>` : ''].join('');
+    const shopInfo = offers.filter((o) => o.limit || o.cart).map((o) => `<p><b>${esc(o.shop)}:</b> ${[o.limit, o.cart ? '🛒 ' + o.cart : ''].filter(Boolean).map((s) => esc(nb(s))).join(' · ')}</p>`).join('');
+    const more = [shopInfo, it.elsewhere ? `<p><b>Fysisk i Norli-butikker:</b> ${esc(it.elsewhere)}</p>` : '', it.note ? `<p>${esc(it.note)}</p>` : '', it.finn && it.finn.n ? `<p>Finn: ${it.finn.n} annonser, laveste ${kr(it.finn.min)} kr.</p>` : ''].join('');
     return `<article class="item">
       <div class="i-head"><span class="tier ${esc(it.tier)}">${esc(it.tier)}</span><h3>${esc(it.name)}</h3>
         <div class="finn">${it.finn && it.finn.n ? `<b>~${kr(it.finn.med)}</b><small>Finn</small>` : `<b>–</b><small>Finn: ingen</small>`}</div></div>
@@ -518,7 +520,7 @@ details.more p { margin: 8px 0 0; }
     $('otherSec').hidden = !other.length;
     $('otherList').innerHTML = other.length ? `<div class="mini">${other.map((o) => `<a href="${esc(o.url)}" target="_blank" rel="noopener">
         <span class="t">${esc(o.product)}</span><span class="p">${kr(o.price)}</span>
-        <span class="s">${o.kind === 'Haugesund' ? `Haugesund · ${esc(o.store)}` : `Nett · ${esc(o.shop)}`}${o.finn ? ` · Finn ~${kr(o.finn.med)}` : ''}</span></a>`).join('')}</div>` : '';
+        <span class="s">${o.kind === 'Haugesund' ? `Haugesund · ${esc(o.store)}` : `Nett · ${esc(o.shop)}`}${o.finn ? ` · Finn ~${kr(o.finn.med)}` : ''}${(o.info || []).length ? '<br>' + o.info.map((s) => esc(nb(s))).join(' · ') : ''}</span></a>`).join('')}</div>` : '';
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
     // 30th
