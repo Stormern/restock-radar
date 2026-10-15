@@ -12,295 +12,229 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Restock">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#ECEEF3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B0D12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0B0C0F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: mobilapp i én kolonne – radar-hero, kort med gule hylleprislapper, fanebar i bunnen. */
+/* Layout: børs-liste – margin-oppsummering øverst, én tett linje per produkt som foldes ut, fanebar nederst. Alltid mørk. */
 :root {
-  --bg: #ECEEF3; --surface: #FFFFFF; --surface-2: #F4F5F9; --ink: #10131C; --muted: #5C6273; --line: #D9DCE5;
-  --tag: #FFD84D; --tag-ink: #17140A;
-  --go: #0B9A55; --go-soft: #DCF4E7; --warn: #B86E00; --warn-soft: #FBEBCF; --off: #8A90A2; --hot: #E0342A;
-  --radar: 11, 154, 85;
-  --shadow: 0 1px 2px rgba(16,19,28,.06), 0 6px 18px rgba(16,19,28,.06);
-  --f-display: "Anton", "Impact", "Arial Narrow Bold", sans-serif;
-  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --r: 16px; --bar-h: 64px;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0B0D12; --surface: #151821; --surface-2: #1C202B; --ink: #F1F2F6; --muted: #969CAE; --line: #272B37;
-  --go: #33D17F; --go-soft: #11301F; --warn: #FFB02E; --warn-soft: #33260E; --off: #5E6476; --hot: #FF5A4E;
-  --radar: 51, 209, 127; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
-} }
-:root[data-theme="dark"] {
-  --bg: #0B0D12; --surface: #151821; --surface-2: #1C202B; --ink: #F1F2F6; --muted: #969CAE; --line: #272B37;
-  --go: #33D17F; --go-soft: #11301F; --warn: #FFB02E; --warn-soft: #33260E; --off: #5E6476; --hot: #FF5A4E;
-  --radar: 51, 209, 127; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark;
+  --bg: #0B0C0F; --panel: #121419; --panel-2: #181B21; --line: #22252D; --line-2: #2C3039;
+  --ink: #ECEEF3; --muted: #8C92A1; --dim: #5D6271;
+  --up: #2BD67B; --up-soft: rgba(43, 214, 123, .12); --up-ink: #052914;
+  --warn: #F5A524; --warn-soft: rgba(245, 165, 36, .12);
+  --down: #FF6B5B; --gold: #FFCB05;
+  --f-ui: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-num: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --bar-h: 62px;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body {
-  background: var(--bg); color: var(--ink); font: 15px/1.45 var(--f-body);
-  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
-  padding-top: env(safe-area-inset-top, 0px);
-}
-a { color: inherit; }
-button { font: inherit; color: inherit; }
-.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(var(--bar-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+body { background: var(--bg); color: var(--ink); font: 15px/1.4 var(--f-ui); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top, 0px); }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 [hidden] { display: none !important; }
-.num, .tag, .big { font-variant-numeric: tabular-nums; }
+.n { font-family: var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+* { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(var(--bar-h) + 24px + env(safe-area-inset-bottom, 0px)); }
+.up { color: var(--up); } .down { color: var(--down); } .warn { color: var(--warn); } .mut { color: var(--muted); } .dim { color: var(--dim); }
 
-/* ---------- Topp ---------- */
-.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); }
-.top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px 10px; display: flex; align-items: center; gap: 10px; }
-.brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.brand svg { flex: none; }
-.brand b { font: 22px/1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; }
-.brand small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; }
-.live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
-  padding: 6px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); white-space: nowrap; }
-.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
-.live.on i { background: var(--go); box-shadow: 0 0 0 0 rgba(var(--radar), .6); animation: ping 2s infinite; }
-.live.warn i { background: var(--warn); }
-@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(var(--radar), .55); } 70% { box-shadow: 0 0 0 8px rgba(var(--radar), 0); } 100% { box-shadow: 0 0 0 0 rgba(var(--radar), 0); } }
+/* Topp */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(11, 12, 15, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.logo svg { flex: none; }
+.live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
+.live.on i { background: var(--up); box-shadow: 0 0 0 0 rgba(43, 214, 123, .6); animation: ping 2.2s infinite; }
+.live.off i { background: var(--down); }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(43, 214, 123, .5); } 70% { box-shadow: 0 0 0 7px rgba(43, 214, 123, 0); } 100% { box-shadow: 0 0 0 0 rgba(43, 214, 123, 0); } }
+@media (prefers-reduced-motion: reduce) { .live.on i { animation: none; } }
 
-/* ---------- Bannere ---------- */
-.banner { margin: 6px 0 4px; padding: 11px 14px; border-radius: 12px; font-size: 14px; font-weight: 500;
-  background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
-.banner b { color: var(--warn); }
+/* Oppsummering */
+.sum { padding: 10px 0 16px; border-bottom: 1px solid var(--line); }
+.sum-l { font-size: 13px; color: var(--muted); }
+.sum-v { font: 600 42px/1.1 var(--f-num); letter-spacing: -.035em; margin-top: 2px; }
+.sum-v .u { font-size: 20px; font-weight: 500; letter-spacing: 0; margin-left: 6px; color: var(--muted); }
+.sum-v.zero { color: var(--dim); }
+.sum-s { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.sum-s b { color: var(--ink); font-weight: 500; font-family: var(--f-num); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--dim); }
+.dot.g { background: var(--up); } .dot.y { background: var(--warn); } .dot.r { background: var(--down); }
 
-/* ---------- Radar-hero ---------- */
-.hero { position: relative; overflow: hidden; margin-top: 8px; border-radius: 22px; padding: 22px 20px 20px;
-  background: var(--surface); box-shadow: var(--shadow); isolation: isolate; }
-.hero::before { content: ""; position: absolute; z-index: -1; width: 460px; height: 460px; right: -200px; top: -170px; border-radius: 50%;
-  background:
-    repeating-radial-gradient(circle, transparent 0 38px, rgba(var(--radar), .14) 39px 40px),
-    conic-gradient(from 0deg, rgba(var(--radar), .32), rgba(var(--radar), 0) 70deg, transparent 360deg);
-  animation: sweep 5s linear infinite; }
-@keyframes sweep { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .hero::before, .live.on i { animation: none; } }
-.hero-label { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.hero-count { display: flex; align-items: baseline; gap: 12px; margin-top: 4px; }
-.big { font: 76px/0.95 var(--f-display); }
-.hero-count span:last-child { font: 600 18px/1.2 var(--f-body); max-width: 10ch; }
-.hero.has-buy .big { color: var(--go); }
-.hero-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.stat { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 13px; font-weight: 600;
-  background: var(--surface-2); border: 1px solid var(--line); }
-.stat i { width: 8px; height: 8px; border-radius: 50%; }
+/* Filter */
+.filters { display: flex; gap: 6px; padding: 14px 0 6px; overflow-x: auto; scrollbar-width: none; }
+.filters::-webkit-scrollbar { display: none; }
+.chip { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); background: var(--panel); border: 1px solid var(--line); }
+.chip[aria-pressed="true"] { color: var(--bg); background: var(--ink); border-color: var(--ink); }
+.chip .c { font-family: var(--f-num); margin-left: 5px; opacity: .7; }
 
-/* ---------- Seksjoner ---------- */
-.sec { margin-top: 26px; }
-.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 2px 10px; }
-.sec-h h2 { margin: 0; font: 20px/1.1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; }
-.sec-h span { font-size: 13px; color: var(--muted); }
-.stack { display: grid; gap: 12px; }
-.empty { padding: 18px; border-radius: var(--r); background: var(--surface); border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
+/* Seksjonsoverskrift */
+.sh { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 2px; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
 
-/* ---------- Tilbudskort ---------- */
-.offer { position: relative; padding: 16px 16px 14px 20px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
-.offer::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--go); }
-.offer.over::before { background: var(--warn); }
-.offer.plain::before { background: var(--line); }
-.o-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.where { padding: 3px 7px; border-radius: 6px; color: var(--surface); background: var(--ink); letter-spacing: .08em; }
-.where.hg { background: var(--hot); color: #fff; }
-.tier { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font: 13px/1 var(--f-display); color: #fff; background: var(--off); letter-spacing: 0; }
-.tier.A { background: var(--hot); }
-.offer h3 { margin: 8px 0 12px; font-size: 17px; line-height: 1.25; font-weight: 700; text-wrap: balance; }
-.o-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.tag { position: relative; display: inline-block; padding: 7px 14px 6px 22px; border-radius: 6px 10px 10px 6px; background: var(--tag); color: var(--tag-ink);
-  font: 30px/1 var(--f-display); letter-spacing: .01em; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
-.tag::before { content: ""; position: absolute; left: 8px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 1px 1px rgba(0,0,0,.25); }
-.tag small { font: 15px var(--f-display); margin-left: 1px; }
-.nums { display: flex; gap: 16px; margin: 0; }
-.nums div { min-width: 0; }
-.nums dt { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.nums dd { margin: 2px 0 0; font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pos { color: var(--go); } .neg { color: var(--hot); } .warnc { color: var(--warn); }
-.o-note { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
-.buy { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; padding: 13px 16px; border-radius: 12px;
-  background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 16px; }
-.buy:active { transform: scale(.985); }
-.offer.over .buy { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
-.mini { display: grid; gap: 0; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
-.mini a { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 16px; text-decoration: none; border-top: 1px solid var(--line); }
-.mini a:first-child { border-top: 0; }
-.mini .t { font-weight: 600; font-size: 14px; min-width: 0; }
-.mini .s { grid-column: 1; font-size: 12px; color: var(--muted); }
-.mini .p { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: 20px/1 var(--f-display); }
+/* Linjer */
+.rows { border-top: 1px solid var(--line); }
+.row { border-bottom: 1px solid var(--line); }
+.rh { width: 100%; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 12px 0; text-align: left; }
+.rn { min-width: 0; }
+.rt { display: flex; align-items: center; gap: 7px; font-weight: 500; font-size: 15px; }
+.rt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tier { flex: none; font: 500 10px/1 var(--f-num); padding: 3px 4px; border-radius: 4px; color: var(--muted); border: 1px solid var(--line-2); }
+.tier.A { color: var(--gold); border-color: rgba(255, 203, 5, .35); }
+.rs { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp { text-align: right; }
+.rp .p { font: 500 15px/1.2 var(--f-num); }
+.rp .m { font: 400 12.5px/1.3 var(--f-num); margin-top: 2px; }
+.act { min-width: 54px; text-align: center; padding: 7px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+.act.buy { background: var(--up); color: var(--up-ink); }
+.act.see { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line-2); }
+.act.none { color: var(--dim); font-weight: 400; font-size: 12px; padding-inline: 0; }
+.row.open .rh { padding-bottom: 8px; }
 
-/* ---------- 30th-listen ---------- */
-.item { padding: 16px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
-.i-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
-.i-head h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.2; min-width: 0; }
-.finn { text-align: right; }
-.finn b { display: block; font: 20px/1 var(--f-display); }
-.finn small { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-.i-meta { margin: 8px 0 12px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
-.i-meta b { color: var(--ink); font-variant-numeric: tabular-nums; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600;
-  border: 1px solid var(--line); background: var(--surface-2); max-width: 100%; }
-.chip .d { width: 8px; height: 8px; border-radius: 50%; background: var(--off); flex: none; }
-.chip .pr { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
-.chip .pr.ok { color: var(--go); }
-.chip .st { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-.chip.in { background: var(--go-soft); border-color: color-mix(in srgb, var(--go) 45%, transparent); }
-.chip.in .d { background: var(--go); }
-.chip.in .st { color: var(--go); }
-.chip.unlisted { border-style: dashed; background: transparent; }
-.chip.unlisted .d { background: transparent; border: 1.5px dashed var(--off); }
-.chip:active { transform: scale(.97); }
-details.more { margin-top: 12px; font-size: 13px; color: var(--muted); }
-details.more summary { cursor: pointer; font-weight: 600; color: var(--ink); list-style: none; }
-details.more summary::-webkit-details-marker { display: none; }
-details.more summary::before { content: "＋ "; }
-details.more[open] summary::before { content: "－ "; }
-details.more p { margin: 8px 0 0; }
-.legend { display: flex; flex-wrap: wrap; gap: 12px; margin: -2px 2px 12px; font-size: 12px; color: var(--muted); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
-.legend i.in { background: var(--go); } .legend i.ul { background: transparent; border: 1.5px dashed var(--off); }
+/* Utfolding */
+.det { padding: 0 0 14px; }
+.kv { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+.kv b { color: var(--ink); font-weight: 500; font-family: var(--f-num); }
+.offers { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+.of { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.of:first-child { border-top: 0; }
+.of .s { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.of.in .s { background: var(--up); }
+.of.unlisted .s { background: transparent; border: 1.5px dashed var(--dim); }
+.of .nm { min-width: 0; font-size: 13.5px; }
+.of .nm small { display: block; font-size: 12px; color: var(--muted); }
+.of .pr { font: 500 13.5px var(--f-num); }
+.of .go { padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 600; background: var(--panel-2); border: 1px solid var(--line-2); white-space: nowrap; }
+.of.in .go { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+.info { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+.info li::before { content: "› "; color: var(--dim); }
+.empty { padding: 16px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
 
-/* ---------- Butikker & bot ---------- */
-.list { border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
-.li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--line); text-decoration: none; }
-.li:first-child { border-top: 0; }
-.li .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--go); }
-.li .dot.bad { background: var(--hot); }
-.li .lt { font-weight: 600; font-size: 14px; min-width: 0; }
-.li .ls { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }
-.li .lr { font: 18px/1 var(--f-display); text-align: right; }
-.li .lr small { display: block; font: 600 10px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
-.kind { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line); margin-left: 6px; vertical-align: 1px; }
-.botcard { padding: 18px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
-.bstate { display: flex; align-items: center; gap: 10px; font: 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; }
-.bstate i { width: 12px; height: 12px; border-radius: 50%; background: var(--go); }
-.bstate.paused i { background: var(--warn); } .bstate.dead i { background: var(--hot); }
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; margin: 16px 0 0; font-size: 14px; }
-.kv dt { color: var(--muted); white-space: nowrap; } .kv dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-.btn { padding: 13px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-weight: 700; font-size: 15px; cursor: pointer; }
-.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+/* Butikker & bot */
+.list .li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.li .lt { min-width: 0; font-size: 14.5px; font-weight: 500; }
+.li .lt small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.li .lr { font: 500 15px var(--f-num); text-align: right; }
+.li .lr small { display: block; font: 400 11px var(--f-ui); color: var(--dim); }
+.bstate { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; padding: 12px 0 4px; }
+.bstate i { width: 10px; height: 10px; border-radius: 50%; background: var(--up); }
+.bstate.paused i { background: var(--warn); } .bstate.dead i { background: var(--down); }
+.grid2 { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; margin: 10px 0 0; font-size: 14px; }
+.grid2 dt { color: var(--muted); } .grid2 dd { margin: 0; text-align: right; font-family: var(--f-num); font-size: 13.5px; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.btn { padding: 13px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line-2); font-weight: 600; font-size: 14.5px; }
+.btn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn.wide { grid-column: 1 / -1; }
-.btn:disabled { opacity: .5; }
-.btn:focus-visible, .buy:focus-visible, .chip:focus-visible, .tabbar button:focus-visible { outline: 3px solid var(--tag); outline-offset: 2px; }
-.fine { margin-top: 12px; font-size: 12px; color: var(--muted); }
+.fine { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
+.btn:focus-visible, .chip:focus-visible, .rh:focus-visible, .go:focus-visible, .act:focus-visible, .tabbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-/* ---------- Fanebar ---------- */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
-.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--bar-h); }
-.tabbar button { position: relative; display: grid; place-items: center; align-content: center; gap: 3px; border: 0; background: none; cursor: pointer;
-  font-size: 11px; font-weight: 700; letter-spacing: .03em; color: var(--muted); }
-.tabbar button svg { width: 24px; height: 24px; }
+/* Bannere */
+.banner { margin: 6px 0 10px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
+.banner b { color: var(--warn); font-weight: 600; }
+.banner.r { background: rgba(255, 107, 91, .1); border-color: rgba(255, 107, 91, .3); }
+.banner.r b { color: var(--down); }
+
+/* Fanebar */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: var(--bar-h); }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 500; color: var(--dim); position: relative; }
+.tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
-.tabbar button[aria-selected="true"]::after { content: ""; position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--go); }
-.badge { position: absolute; top: 8px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--go); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
+.badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font: 600 11px/17px var(--f-num); text-align: center; }
 
-/* ---------- Oppsett & toast ---------- */
-.setup { padding-top: 10vh; }
-.setup h1 { font: 44px/0.95 var(--f-display); text-transform: uppercase; margin: 18px 0 12px; text-wrap: balance; }
-.setup p { color: var(--muted); max-width: 46ch; }
-.setup ol { padding-left: 20px; color: var(--muted); }
-.setup input { width: 100%; margin-top: 8px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 14px var(--f-body); }
-.toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9;
-  padding: 11px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 14px; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+/* Oppsett & toast */
+.setup { padding-top: 12vh; }
+.setup h1 { font-size: 30px; font-weight: 600; letter-spacing: -.02em; margin: 16px 0 10px; }
+.setup p, .setup ol { color: var(--muted); max-width: 46ch; }
+.setup input { width: 100%; margin-top: 6px; padding: 13px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); font: 14px var(--f-ui); }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; padding: 10px 14px; border-radius: 10px;
+  background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 600; max-width: calc(100% - 32px); }
 </style>
 </head>
 <body>
 
 <header class="top" id="top" hidden>
   <div class="top-in">
-    <div class="brand">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><circle cx="15" cy="15" r="8" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><path d="M15 15 L15 1.5 A13.5 13.5 0 0 1 27.7 10.4 Z" fill="var(--go)" fill-opacity=".55"/><circle cx="21" cy="9.5" r="2.4" fill="var(--hot)"/></svg>
-      <div><b>Restock-radar</b><small id="subtitle">Haugesund · nett</small></div>
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#3A3F4B" stroke-width="2"/><circle cx="15" cy="15" r="7" fill="none" stroke="#3A3F4B" stroke-width="2"/><path d="M15 15 L25.6 7.5" stroke="#2BD67B" stroke-width="2.4" stroke-linecap="round"/><circle cx="21.5" cy="9.5" r="2.6" fill="#FF6B5B"/></svg>
+      Restock
     </div>
-    <span class="live" id="live"><i></i><span id="liveTxt">Kobler til</span></span>
+    <span class="live" id="live"><i></i><span id="liveTxt">kobler til</span></span>
   </div>
 </header>
 
 <main class="wrap" id="app" hidden>
   <div id="banners"></div>
 
-  <section id="tab-na" role="tabpanel">
-    <div class="hero" id="hero">
-      <div class="hero-label">Akkurat nå</div>
-      <div class="hero-count"><span class="big" id="buyCount">–</span><span id="buyLabel">kan kjøpes</span></div>
-      <div class="hero-stats" id="heroStats"></div>
+  <section id="tab-marked" role="tabpanel">
+    <div class="sum">
+      <div class="sum-l">Mulig margin nå</div>
+      <div class="sum-v n" id="sumV">–</div>
+      <div class="sum-s" id="sumS"></div>
     </div>
-    <div class="sec"><div class="sec-h"><h2>Kjøp nå</h2><span>under makspris</span></div><div class="stack" id="buyList"></div></div>
-    <div class="sec" id="overSec"><div class="sec-h"><h2>Inne, over maks</h2><span>ikke kjøp</span></div><div class="stack" id="overList"></div></div>
-    <div class="sec" id="otherSec"><div class="sec-h"><h2>Annet på lager</h2><span>bundles, ETB, bokser</span></div><div id="otherList"></div></div>
-  </section>
-
-  <section id="tab-30th" role="tabpanel" hidden>
-    <div class="sec" style="margin-top:14px">
-      <div class="sec-h"><h2>30th Celebration</h2><span id="itemsCount"></span></div>
-      <div class="legend"><span><i class="in"></i>På lager</span><span><i></i>Utsolgt</span><span><i class="ul"></i>Ikke lagt ut ennå</span></div>
-      <div class="stack" id="itemList"></div>
+    <div class="filters" role="group" aria-label="Filter">
+      <button class="chip" type="button" data-f="alle" aria-pressed="true">Alle<span class="c" id="cAlle"></span></button>
+      <button class="chip" type="button" data-f="inne" aria-pressed="false">På lager<span class="c" id="cInne"></span></button>
+      <button class="chip" type="button" data-f="hg" aria-pressed="false">Haugesund<span class="c" id="cHg"></span></button>
+      <button class="chip" type="button" data-f="a" aria-pressed="false">Tier A</button>
+    </div>
+    <div class="sh"><span>30th Celebration</span><span id="itemsN"></span></div>
+    <div class="rows" id="rows"></div>
+    <div id="otherWrap" hidden>
+      <div class="sh"><span>Annet på lager</span><span>bundles, ETB, bokser</span></div>
+      <div class="rows" id="other"></div>
     </div>
   </section>
 
   <section id="tab-butikker" role="tabpanel" hidden>
-    <div class="sec" style="margin-top:14px"><div class="sec-h"><h2>Butikker i Haugesund</h2><span>fysisk lager</span></div><div class="list" id="srcHg"></div></div>
-    <div class="sec"><div class="sec-h"><h2>Nettbutikker</h2><span>kan bestilles</span></div><div class="list" id="srcNet"></div></div>
+    <div class="sh" style="margin-top:8px"><span>Butikker i Haugesund</span><span>fysisk lager</span></div>
+    <div class="list" id="srcHg"></div>
+    <div class="sh"><span>Nettbutikker</span><span>kan bestilles</span></div>
+    <div class="list" id="srcNet"></div>
   </section>
 
   <section id="tab-bot" role="tabpanel" hidden>
-    <div class="sec" style="margin-top:14px">
-      <div class="botcard">
-        <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
-        <dl class="kv" id="botKv"></dl>
-        <div class="btns">
-          <button class="btn primary" id="btnCheck" type="button">Sjekk nå</button>
-          <button class="btn" id="btnPause" type="button">Pause</button>
-          <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
-        </div>
-        <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
-      </div>
+    <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
+    <dl class="grid2" id="botKv"></dl>
+    <div class="btns">
+      <button class="btn pri" id="btnCheck" type="button">Sjekk nå</button>
+      <button class="btn" id="btnPause" type="button">Pause</button>
+      <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
     </div>
-    <div class="sec"><div class="sec-h"><h2>Tilkobling</h2></div>
-      <div class="botcard"><dl class="kv" id="connKv"></dl>
-        <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
-        <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
-      </div>
-    </div>
+    <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
+    <div class="sh" style="margin-top:28px"><span>Tilkobling</span></div>
+    <dl class="grid2" id="connKv"></dl>
+    <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
+    <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
   </section>
 </main>
 
 <section class="wrap setup" id="setup" hidden>
-  <svg width="64" height="64" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><circle cx="15" cy="15" r="8" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5"/><path d="M15 15 L15 1.5 A13.5 13.5 0 0 1 27.7 10.4 Z" fill="var(--go)" fill-opacity=".55"/><circle cx="21" cy="9.5" r="2.4" fill="var(--hot)"/></svg>
+  <svg width="44" height="44" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#3A3F4B" stroke-width="2"/><circle cx="15" cy="15" r="7" fill="none" stroke="#3A3F4B" stroke-width="2"/><path d="M15 15 L25.6 7.5" stroke="#2BD67B" stroke-width="2.4" stroke-linecap="round"/><circle cx="21.5" cy="9.5" r="2.6" fill="#FF6B5B"/></svg>
   <h1>Koble til boten din</h1>
-  <p>Appen viser lageret som Pokemon-boten på PC-en din finner. Den trenger koblingslenken fra boten første gang.</p>
+  <p>Appen viser lageret som Pokemon-boten på PC-en finner. Første gang trenger den koblingslenken fra boten.</p>
   <ol>
-    <li>Åpne <b>Pokemon-bot</b> på PC-en og velg <b>[A] App</b> → <b>Send app-lenke til telefonen</b>.</li>
-    <li>Trykk på lenken i varselet på telefonen.</li>
+    <li>Åpne Pokemon-bot på PC-en: <b>A</b> → <b>8</b> sender lenken til telefonen.</li>
+    <li>Trykk på lenken i varselet.</li>
   </ol>
-  <p>Eller lim inn lenken her:</p>
   <form id="linkForm">
-    <label for="linkInput" class="fine">Koblingslenke</label>
+    <label for="linkInput" class="fine">Eller lim inn koblingslenken her</label>
     <input id="linkInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…#db=…&amp;k=…">
-    <div class="btns"><button class="btn primary wide" type="submit">Koble til</button></div>
+    <div class="btns"><button class="btn pri wide" type="submit">Koble til</button></div>
     <p class="fine" id="linkErr" hidden>Fant ingen koblingsdata i lenken. Den skal inneholde «#db=» og «&amp;k=».</p>
   </form>
 </section>
 
 <nav class="tabbar" id="tabbar" role="tablist" hidden>
   <div class="tabbar-in">
-    <button type="button" role="tab" data-tab="na" aria-selected="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18.4 5.6"/></svg>Nå<span class="badge" id="tabBadge" hidden></span></button>
-    <button type="button" role="tab" data-tab="30th" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 7h5M8 11h5M8 15h3"/><path d="M20 7v13a1 1 0 0 1-1 1H8"/></svg>30th</button>
+    <button type="button" role="tab" data-tab="marked" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Marked<span class="badge" id="tabBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="butikker" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/><path d="M10 20v-4h4v4"/></svg>Butikker</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>Butikker</button>
     <button type="button" role="tab" data-tab="bot" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="13" r="1.2" fill="currentColor"/><circle cx="15" cy="13" r="1.2" fill="currentColor"/></svg>Bot</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1.1" fill="currentColor"/><circle cx="15" cy="13" r="1.1" fill="currentColor"/></svg>Bot</button>
   </div>
 </nav>
 
@@ -311,7 +245,8 @@ details.more p { margin: 8px 0 0; }
   'use strict';
   const $ = (id) => document.getElementById(id);
   const nf = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 });
-  const kr = (v) => (v || v === 0) && v > 0 ? nf.format(Math.round(v)) : '–';
+  const kr = (v) => (v > 0 ? nf.format(Math.round(v)) : '–');
+  const sign = (v) => (v >= 0 ? '+' : '−') + nf.format(Math.abs(Math.round(v)));
   const nb = (s) => String(s ?? '').replace(/per household/i, 'per husstand');
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const store = {
@@ -331,13 +266,15 @@ details.more p { margin: 8px 0 0; }
     return null;
   }
   let cfg = parseLink(location.hash);
-  if (cfg && !cfg.demo) { store.set('rr-cfg', JSON.stringify(cfg)); }
+  if (cfg && !cfg.demo) store.set('rr-cfg', JSON.stringify(cfg));
   if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
 
-  // ---------- Tilstand ----------
+  // ---------- Data ----------
   let tree = { data: null, bot: null };
   let liveState = 'connecting';
   let es = null, pollTimer = null;
+  let filter = store.get('rr-filter') || 'alle';
+  const openRows = new Set();
 
   function setAt(path, value, merge) {
     const parts = path.split('/').filter(Boolean);
@@ -349,8 +286,7 @@ details.more p { margin: 8px 0 0; }
     let o = tree;
     for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
     const last = parts[parts.length - 1];
-    if (merge && value && typeof value === 'object') o[last] = { ...(o[last] || {}), ...value };
-    else o[last] = value;
+    o[last] = merge && value && typeof value === 'object' ? { ...(o[last] || {}), ...value } : value;
   }
 
   function connect() {
@@ -380,7 +316,7 @@ details.more p { margin: 8px 0 0; }
     if (document.visibilityState === 'visible' && cfg && !cfg.demo && (!es || es.readyState === 2)) connect();
   });
 
-  // ---------- Kommandoer til boten ----------
+  // ---------- Kommandoer ----------
   async function send(c, okMsg) {
     if (!cfg || cfg.demo) { toast('Demo: ingen bot å sende til'); return; }
     try {
@@ -399,180 +335,199 @@ details.more p { margin: 8px 0 0; }
     if (s < 45) return 'nå nettopp';
     const m = Math.round(s / 60);
     if (m < 60) return `${m} min siden`;
-    const h = Math.floor(m / 60);
-    return `${h} t ${m % 60} min siden`;
+    return `${Math.floor(m / 60)} t ${m % 60} min siden`;
   }
-  function until(ms) {
-    if (!ms) return '–';
-    const m = Math.round((ms - Date.now()) / 60000);
-    return m <= 0 ? 'snart' : `om ${m} min`;
-  }
+  const until = (ms) => { if (!ms) return '–'; const m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? 'snart' : `om ${m} min`; };
   const clock = (ms) => ms ? new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }) : '–';
 
-  // ---------- Avledede lister ----------
-  function derive(d) {
-    const buy = [], over = [];
-    for (const it of d.items || []) {
-      for (const o of it.offers || []) {
-        if (o.state !== 'in') continue;
-        const ok = !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
-        (ok ? buy : over).push({ it, o });
-      }
-    }
-    const byPrice = (a, b) => (a.o.where === 'haugesund' ? -1 : 0) - (b.o.where === 'haugesund' ? -1 : 0) || (a.it.tier || 'Z').localeCompare(b.it.tier || 'Z') || a.o.price - b.o.price;
-    buy.sort(byPrice); over.sort(byPrice);
-    return { buy, over };
+  // ---------- Analyse per produkt ----------
+  function analyse(it) {
+    const offers = (it.offers || []).slice();
+    const inStock = offers.filter((o) => o.state === 'in');
+    const ok = (o) => !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
+    const buy = inStock.filter(ok).sort((a, b) => (a.where === 'haugesund' ? -1 : 0) - (b.where === 'haugesund' ? -1 : 0) || a.price - b.price)[0];
+    const over = inStock.filter((o) => !ok(o)).sort((a, b) => a.price - b.price)[0];
+    const finn = it.finn && it.finn.n ? it.finn.med : null;
+    const status = buy ? 'buy' : over ? 'over' : offers.some((o) => o.state === 'unlisted') ? 'unlisted' : 'out';
+    const best = buy || over;
+    const margin = best && finn && best.price > 0 ? finn - best.price : null;
+    const hg = inStock.some((o) => o.where === 'haugesund');
+    return { offers, inStock, buy, over, finn, status, best, margin, hg };
   }
+  const rank = { buy: 0, over: 1, unlisted: 2, out: 3 };
 
   // ---------- Tegning ----------
   function renderLive() {
-    const el = $('live'), t = $('liveTxt');
+    const el = $('live'), t = $('liveTxt'), b = tree.bot || {};
     el.className = 'live';
-    const map = { on: ['on', 'Live'], poll: ['on', 'Oppdateres'], demo: ['warn', 'Demo'], connecting: ['', 'Kobler til'], off: ['warn', 'Frakoblet'] };
-    const [cls, txt] = map[liveState] || map.off;
-    if (cls) el.classList.add(cls);
-    t.textContent = txt;
+    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(Math.max(b.lastOnline || 0, b.lastStore || 0) || Date.now())}`; }
+    else if (liveState === 'demo') { t.textContent = 'demo'; }
+    else if (liveState === 'off') { el.classList.add('off'); t.textContent = 'frakoblet'; }
+    else t.textContent = 'kobler til';
   }
 
-  function offerCard({ it, o }, over) {
-    const margin = it.finn && it.finn.med && o.price ? it.finn.med - o.price : null;
-    const where = o.where === 'haugesund' ? `<span class="where hg">Haugesund</span><span>${esc(o.store)}</span>` : `<span class="where">Nett</span><span>${esc(o.shop)}</span>`;
-    const tier = it.tier ? `<span class="tier ${esc(it.tier)}" title="Tier ${esc(it.tier)}">${esc(it.tier)}</span>` : '';
-    const nums = [
-      it.max ? `<div><dt>Maks</dt><dd class="${over ? 'warnc' : ''}">${kr(it.max)}</dd></div>` : '',
-      it.finn && it.finn.n ? `<div><dt>Finn</dt><dd>~${kr(it.finn.med)}</dd></div>` : `<div><dt>Finn</dt><dd>ingen funn</dd></div>`,
-      margin !== null ? `<div><dt>Margin</dt><dd class="${margin >= 0 ? 'pos' : 'neg'}">${margin >= 0 ? '+' : ''}${kr(Math.abs(margin)) === '–' ? '0' : (margin < 0 ? '−' : '') + kr(Math.abs(margin))}</dd></div>` : ''
-    ].join('');
-    const lines = (o.info && o.info.length) ? o.info : [o.note, it.limit ? `Kjøpsgrense: ${nb(it.limit)}` : ''];
-    const notes = lines.filter(Boolean).map((s) => esc(nb(s))).join('<br>');
-    return `<article class="offer ${over ? 'over' : ''}">
-      <div class="o-top">${tier}${where}</div>
-      <h3>${esc(o.product)}</h3>
-      <div class="o-row"><div class="tag">${kr(o.price)}<small>,-</small></div><dl class="nums">${nums}</dl></div>
-      ${notes ? `<p class="o-note">${notes}</p>` : ''}
-      <a class="buy" href="${esc(o.url)}" target="_blank" rel="noopener">${over ? 'Se hos' : 'Kjøp hos'} ${esc(o.shop)} ↗</a>
-    </article>`;
+  function itemRow(it, a, idx) {
+    const id = 'i' + idx;
+    const open = openRows.has(it.name);
+    const tier = it.tier ? `<span class="tier ${esc(it.tier)}">${esc(it.tier)}</span>` : '';
+    let sub, price, mline, act;
+    if (a.status === 'buy') {
+      sub = `${esc(a.buy.where === 'haugesund' ? a.buy.store : a.buy.shop)} · ${a.buy.where === 'haugesund' ? 'i butikk' : 'nett'}`;
+      price = kr(a.buy.price); mline = a.margin !== null ? `<div class="m ${a.margin >= 0 ? 'up' : 'down'}">${sign(a.margin)}</div>` : '';
+      act = `<a class="act buy" href="${esc(a.buy.url)}" target="_blank" rel="noopener">Kjøp</a>`;
+    } else if (a.status === 'over') {
+      sub = `${esc(a.over.where === 'haugesund' ? a.over.store : a.over.shop)} · over maks`;
+      price = kr(a.over.price); mline = `<div class="m down">maks ${kr(it.max)}</div>`;
+      act = `<a class="act see" href="${esc(a.over.url)}" target="_blank" rel="noopener">Se</a>`;
+    } else {
+      sub = `${a.finn ? `Finn ${kr(a.finn)}` : 'Finn –'} · maks ${kr(it.max)}`;
+      price = ''; mline = '';
+      act = `<span class="act none">${a.status === 'unlisted' ? 'ikke ute' : 'utsolgt'}</span>`;
+    }
+    const pcol = price ? `<div class="rp"><div class="p">${price}</div>${mline}</div>` : `<div class="rp"></div>`;
+    return `<div class="row${open ? ' open' : ''}" data-name="${esc(it.name)}">
+      <div class="rh" role="button" tabindex="0" aria-expanded="${open}" aria-controls="${id}">
+        <div class="rn"><div class="rt">${tier}<span>${esc(it.name)}</span></div><div class="rs">${sub}</div></div>
+        ${pcol}${act}
+      </div>
+      <div class="det" id="${id}" ${open ? '' : 'hidden'}>${details(it, a)}</div>
+    </div>`;
   }
 
-  function itemCard(it) {
-    const offers = [...(it.offers || [])].sort((a, b) => (b.state === 'in') - (a.state === 'in') || (a.price || 9e9) - (b.price || 9e9));
-    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'ikke ute' };
+  function details(it, a) {
+    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'ikke lagt ut ennå' };
     const multi = {};
-    offers.forEach((o) => (multi[o.shop] = (multi[o.shop] || 0) + 1));
+    a.offers.forEach((o) => (multi[o.shop] = (multi[o.shop] || 0) + 1));
     const short = (p) => String(p).replace(/^(pok[eé]mon:?\s*)?30th (celebration|anniversary)\s*/i, '').replace(/^[—–-]\s*/, '');
-    const chips = offers.map((o) => {
-      const ok = o.price > 0 && it.max > 0 && o.price <= it.max;
-      const name = multi[o.shop] > 1 ? `${o.shop} · ${short(o.product)}` : o.shop;
-      const st = o.state === 'in' && o.where === 'haugesund' ? `i ${o.store.replace(/^(Nille|Norli)\s*/i, '')}` : label[o.state];
-      return `<a class="chip ${o.state}" href="${esc(o.url)}" target="_blank" rel="noopener"><span class="d"></span><span>${esc(name)}</span><span class="pr ${ok ? 'ok' : ''}">${kr(o.price)}</span><span class="st">${esc(st)}</span></a>`;
+    const offers = a.offers.slice().sort((x, y) => (y.state === 'in') - (x.state === 'in') || (x.price || 9e9) - (y.price || 9e9));
+    const ofHtml = offers.map((o) => {
+      const where = o.state === 'in' && o.where === 'haugesund' ? `i ${esc(o.store)}` : label[o.state];
+      const nm = multi[o.shop] > 1 ? `${esc(o.shop)} · ${esc(short(o.product))}` : esc(o.shop);
+      const okp = o.price > 0 && it.max > 0 && o.price <= it.max;
+      return `<div class="of ${o.state}"><span class="s"></span><span class="nm">${nm}<small>${where}</small></span><span class="pr ${okp ? '' : 'mut'}">${kr(o.price)}</span><a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${o.state === 'in' ? 'Kjøp' : 'Åpne'} ↗</a></div>`;
     }).join('');
-    const cheapest = offers.filter((o) => o.price > 0).sort((a, b) => a.price - b.price)[0];
-    const meta = [
+    const kv = [
       it.max ? `Maks <b>${kr(it.max)}</b>` : '',
       it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
-      cheapest && it.finn && it.finn.med ? `Margin fra billigste <b class="${it.finn.med - cheapest.price >= 0 ? 'pos' : 'neg'}">${it.finn.med - cheapest.price >= 0 ? '+' : '−'}${kr(Math.abs(it.finn.med - cheapest.price))}</b>` : '',
-      it.limit ? `Grense <b>${esc(nb(it.limit))}</b>` : ''
+      a.finn ? `Finn <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} ann., lavest ${kr(it.finn.min)})</span>` : 'Finn <b>ingen funn</b>'
     ].filter(Boolean).join('');
-    const shopInfo = offers.filter((o) => o.limit || o.cart).map((o) => `<p><b>${esc(o.shop)}:</b> ${[o.limit, o.cart ? '🛒 ' + o.cart : ''].filter(Boolean).map((s) => esc(nb(s))).join(' · ')}</p>`).join('');
-    const more = [shopInfo, it.elsewhere ? `<p><b>Fysisk i Norli-butikker:</b> ${esc(it.elsewhere)}</p>` : '', it.note ? `<p>${esc(it.note)}</p>` : '', it.finn && it.finn.n ? `<p>Finn: ${it.finn.n} annonser, laveste ${kr(it.finn.min)} kr.</p>` : ''].join('');
-    return `<article class="item">
-      <div class="i-head"><span class="tier ${esc(it.tier)}">${esc(it.tier)}</span><h3>${esc(it.name)}</h3>
-        <div class="finn">${it.finn && it.finn.n ? `<b>~${kr(it.finn.med)}</b><small>Finn</small>` : `<b>–</b><small>Finn: ingen</small>`}</div></div>
-      <div class="i-meta">${meta}</div>
-      <div class="chips">${chips || '<span class="fine">Ikke funnet i noen butikk ennå.</span>'}</div>
-      ${more ? `<details class="more"><summary>Mer</summary>${more}</details>` : ''}
-    </article>`;
+    const info = [];
+    offers.forEach((o) => (o.info || []).forEach((s) => { if (!/klikk og send|ikke lagt ut/i.test(s) || o.state === 'in') info.push(`${o.shop}: ${nb(s)}`); }));
+    if (it.limit && !offers.some((o) => o.limit)) info.push(`Kjøpsgrense: ${nb(it.limit)}`);
+    if (it.elsewhere) info.push(`Fysisk i Norli-butikker: ${it.elsewhere}`);
+    if (it.note) info.push(it.note);
+    return `<div class="kv">${kv}</div><div class="offers">${ofHtml || '<div class="of"><span class="nm mut">Ikke funnet i noen butikk ennå</span></div>'}</div>
+      ${info.length ? `<ul class="info">${[...new Set(info)].map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}`;
   }
 
   function render() {
     renderLive();
     const d = tree.data, b = tree.bot || {};
-    if (!d) {
-      $('buyCount').textContent = '–';
-      $('buyList').innerHTML = `<div class="empty">Venter på data fra boten. Står PC-en på og kjører Pokemon-bot?</div>`;
-      return;
-    }
-    $('subtitle').textContent = `${d.stores || 'Haugesund'} · nett`;
+    if (!d) { $('rows').innerHTML = `<div class="empty">Venter på data fra boten. Står PC-en på og kjører Pokemon-bot?</div>`; return; }
 
     // Bannere
+    const stale = !b.beat || Date.now() - b.beat > 5 * 60000;
     const ban = [];
-    const stale = b.beat && Date.now() - b.beat > 5 * 60000;
-    if (!b.beat || stale) ban.push(`<div class="banner"><b>Boten svarer ikke</b> – sist hørt fra ${b.beat ? clock(b.beat) : 'aldri'}. Står PC-en på?</div>`);
+    if (stale) ban.push(`<div class="banner r"><b>Boten svarer ikke.</b> Sist hørt fra ${b.beat ? clock(b.beat) : 'aldri'}. Står PC-en på?</div>`);
     if (b.paused) ban.push(`<div class="banner"><b>Pauset.</b> Boten sjekker ingenting før du trykker Fortsett under Bot.</div>`);
     $('banners').innerHTML = ban.join('');
 
-    // Nå
-    const { buy, over } = derive(d);
-    const hgIn = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
-    $('buyCount').textContent = buy.length;
-    $('buyLabel').textContent = buy.length === 1 ? 'kan kjøpes nå' : 'kan kjøpes nå';
-    $('hero').classList.toggle('has-buy', buy.length > 0);
-    $('heroStats').innerHTML = [
-      `<span class="stat"><i style="background:var(--hot)"></i>Haugesund: ${hgIn} inne</span>`,
-      `<span class="stat"><i style="background:var(--warn)"></i>${over.length} over maks</span>`,
-      `<span class="stat"><i style="background:var(--go)"></i>Sjekket ${ago(Math.max(b.lastOnline || 0, b.lastStore || 0) || d.updated)}</span>`
-    ].join('');
-    $('buyList').innerHTML = buy.length ? buy.map((x) => offerCard(x, false)).join('') :
-      `<div class="empty">Ingenting fra 30th-listen er under makspris akkurat nå. Du får varsel på telefonen så fort noe dukker opp.</div>`;
-    $('overSec').hidden = !over.length;
-    $('overList').innerHTML = over.map((x) => offerCard(x, true)).join('');
-    const other = d.other || [];
-    $('otherSec').hidden = !other.length;
-    $('otherList').innerHTML = other.length ? `<div class="mini">${other.map((o) => `<a href="${esc(o.url)}" target="_blank" rel="noopener">
-        <span class="t">${esc(o.product)}</span><span class="p">${kr(o.price)}</span>
-        <span class="s">${o.kind === 'Haugesund' ? `Haugesund · ${esc(o.store)}` : `Nett · ${esc(o.shop)}`}${o.finn ? ` · Finn ~${kr(o.finn.med)}` : ''}${(o.info || []).length ? '<br>' + o.info.map((s) => esc(nb(s))).join(' · ') : ''}</span></a>`).join('')}</div>` : '';
-    const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
+    // Analyse
+    const items = (d.items || []).map((it) => ({ it, a: analyse(it) }));
+    items.sort((x, y) => rank[x.a.status] - rank[y.a.status] || String(x.it.tier).localeCompare(String(y.it.tier)) || (y.a.finn || 0) - (x.a.finn || 0));
+    const buyN = items.filter((x) => x.a.status === 'buy').length;
+    const overN = items.filter((x) => x.a.status === 'over').length;
+    const outN = items.length - buyN - overN;
+    const hgN = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
+    const margin = items.filter((x) => x.a.status === 'buy' && x.a.margin > 0).reduce((n, x) => n + x.a.margin, 0);
 
-    // 30th
-    const items = [...(d.items || [])].sort((a, b) => {
-      const ai = (a.offers || []).some((o) => o.state === 'in'), bi = (b.offers || []).some((o) => o.state === 'in');
-      return (bi - ai) || String(a.tier).localeCompare(String(b.tier));
-    });
-    $('itemsCount').textContent = `${items.length} produkter`;
-    $('itemList').innerHTML = items.map(itemCard).join('');
+    const sv = $('sumV');
+    sv.innerHTML = (margin > 0 ? `+${nf.format(Math.round(margin))}` : '0') + '<span class="u">kr</span>';
+    sv.className = 'sum-v n ' + (margin > 0 ? 'up' : 'zero');
+    $('sumS').innerHTML = [
+      `<span><i class="dot g"></i><b>${buyN}</b> kjøpbar</span>`,
+      `<span><i class="dot y"></i><b>${overN}</b> over maks</span>`,
+      `<span><i class="dot"></i><b>${outN}</b> utsolgt</span>`,
+      `<span><i class="dot r"></i>Haugesund <b>${hgN}</b> inne</span>`
+    ].join('');
+
+    // Filter
+    const counts = { alle: items.length, inne: items.filter((x) => x.a.inStock.length).length, hg: items.filter((x) => x.a.hg).length };
+    $('cAlle').textContent = counts.alle; $('cInne').textContent = counts.inne; $('cHg').textContent = counts.hg;
+    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.f === filter)));
+    const shown = items.filter((x) => filter === 'alle' || (filter === 'inne' && x.a.inStock.length) || (filter === 'hg' && x.a.hg) || (filter === 'a' && x.it.tier === 'A'));
+    $('itemsN').textContent = `${shown.length} produkter`;
+    $('rows').innerHTML = shown.length ? shown.map((x, i) => itemRow(x.it, x.a, i)).join('') :
+      `<div class="empty">${filter === 'hg' ? 'Ingenting fra listen er inne i Haugesund nå.' : filter === 'inne' ? 'Ingenting fra listen er på lager nå.' : 'Ingen produkter.'}</div>`;
+
+    // Annet på lager
+    const other = d.other || [];
+    $('otherWrap').hidden = !other.length;
+    $('other').innerHTML = other.map((o) => {
+      const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
+      const info = (o.info || []).filter((s) => !/ikke lagt ut/i.test(s)).map(nb).join(' · ');
+      return `<div class="row"><a class="rh" href="${esc(o.url)}" target="_blank" rel="noopener">
+        <div class="rn"><div class="rt"><span>${esc(o.product)}</span></div><div class="rs">${esc(o.kind === 'Haugesund' ? o.store : o.shop)} · ${o.kind === 'Haugesund' ? 'i butikk' : 'nett'}${info ? ' · ' + esc(info) : ''}</div></div>
+        <div class="rp"><div class="p">${kr(o.price)}</div>${m !== null ? `<div class="m ${m >= 0 ? 'up' : 'down'}">${sign(m)}</div>` : '<div class="m dim">Finn –</div>'}</div>
+        <span class="act see">Åpne</span></a></div>`;
+    }).join('');
+
+    const badge = $('tabBadge'); badge.hidden = !buyN; badge.textContent = buyN;
 
     // Butikker
     const srcRow = (s) => {
       const tag = s.url ? 'a' : 'div';
       const href = s.url ? ` href="${esc(s.url)}" target="_blank" rel="noopener"` : '';
-      const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges`;
-      return `<${tag} class="li"${href}><span class="dot ${s.failing ? 'bad' : ''}"></span><span class="lt">${esc(s.label.replace(/\s*\((butikk.*|nettbutikk)\)/i, ''))}<span class="ls">${esc(sub)}</span></span><span class="lr">${s.inStock}<small>på lager</small></span></${tag}>`;
+      const name = s.label.replace(/\s*\((butikk.*|nettbutikk)\)/i, '');
+      return `<${tag} class="li"${href}><i class="dot ${s.failing ? 'r' : 'g'}"></i><span class="lt">${esc(name)}<small>${s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges`}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></${tag}>`;
     };
-    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').map(srcRow).join('') || '<div class="li">Ingen</div>';
-    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').map(srcRow).join('') || '<div class="li">Ingen</div>';
+    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').map(srcRow).join('');
+    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').map(srcRow).join('');
 
     // Bot
-    const dead = !b.beat || stale;
     const bs = $('bstate');
-    bs.className = 'bstate' + (dead ? ' dead' : b.paused ? ' paused' : '');
-    $('bstateTxt').textContent = dead ? 'Svarer ikke' : b.paused ? 'Pauset' : 'Kjører';
+    bs.className = 'bstate' + (stale ? ' dead' : b.paused ? ' paused' : '');
+    $('bstateTxt').textContent = stale ? 'Svarer ikke' : b.paused ? 'Pauset' : 'Kjører';
     $('btnPause').textContent = b.paused ? 'Fortsett' : 'Pause';
+    const kvRow = ([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
     $('botKv').innerHTML = [
       ['Sist kontakt', b.beat ? ago(b.beat) : 'aldri'],
-      ['Butikker', b.lastStore ? `${clock(b.lastStore)} (${until(b.nextStore)})` : '–'],
-      ['Nett', b.lastOnline ? `${clock(b.lastOnline)} (${until(b.nextOnline)})` : '–'],
-      ['Intervall', `butikk ${b.storeEvery || '?'} min · nett ${b.netEvery || '?'} min`],
+      ['Butikker', b.lastStore ? `${clock(b.lastStore)} · neste ${until(b.nextStore)}` : '–'],
+      ['Nett', b.lastOnline ? `${clock(b.lastOnline)} · neste ${until(b.nextOnline)}` : '–'],
+      ['Intervall', `${b.storeEvery || '?'} min / ${b.netEvery || '?'} min`],
       ['Finn hentet', b.finnAt ? clock(b.finnAt) : '–'],
       ['Data oppdatert', d.updated ? clock(d.updated) : '–']
-    ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+    ].map(kvRow).join('');
     $('connKv').innerHTML = [
       ['Status', { on: 'Live', poll: 'Henter hvert 30. sek', demo: 'Demo', connecting: 'Kobler til', off: 'Frakoblet' }[liveState]],
-      ['Database', cfg.demo ? 'demo' : cfg.db.replace(/^https:\/\//, '')]
-    ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+      ['Database', cfg.demo ? 'demo' : cfg.db.replace(/^https:\/\//, '').replace(/\.firebasedatabase\.app$/, '')]
+    ].map(kvRow).join('');
   }
 
-  // ---------- Faner ----------
+  // ---------- Hendelser ----------
+  $('rows').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.rh'); if (!h) return;
+    const row = h.closest('.row'), name = row.dataset.name;
+    if (openRows.has(name)) openRows.delete(name); else openRows.add(name);
+    const open = openRows.has(name);
+    row.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    row.querySelector('.det').hidden = !open;
+  });
+  $('rows').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('rh')) { e.preventDefault(); e.target.click(); } });
+  document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { filter = c.dataset.f; store.set('rr-filter', filter); render(); }));
+
   function showTab(name) {
     document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
-    ['na', '30th', 'butikker', 'bot'].forEach((t) => ($('tab-' + t).hidden = t !== name));
+    ['marked', 'butikker', 'bot'].forEach((t) => ($('tab-' + t).hidden = t !== name));
     store.set('rr-tab', name);
     window.scrollTo({ top: 0 });
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
-  $('btnCheck').addEventListener('click', () => send('sjekk', 'Boten sjekker nå – svar om litt'));
+  $('btnCheck').addEventListener('click', () => send('sjekk', 'Boten sjekker nå'));
   $('btnPause').addEventListener('click', () => { const p = tree.bot && tree.bot.paused; send(p ? 'fortsett' : 'pause', p ? 'Boten fortsetter' : 'Boten pauses'); });
-  $('btnFinn').addEventListener('click', () => send('finn', 'Henter nye Finn-priser (tar et par minutter)'));
+  $('btnFinn').addEventListener('click', () => send('finn', 'Henter nye Finn-priser'));
   let unlinkArmed = false;
   $('btnUnlink').addEventListener('click', () => {
     if (!unlinkArmed) { unlinkArmed = true; $('unlinkHint').hidden = false; setTimeout(() => { unlinkArmed = false; $('unlinkHint').hidden = true; }, 4000); return; }
@@ -589,7 +544,7 @@ details.more p { margin: 8px 0 0; }
     $('setup').hidden = true;
     ['top', 'app', 'tabbar'].forEach((id) => ($(id).hidden = false));
     const t = store.get('rr-tab');
-    showTab(['na', '30th', 'butikker', 'bot'].includes(t) ? t : 'na');
+    showTab(['marked', 'butikker', 'bot'].includes(t) ? t : 'marked');
     render(); connect();
     setInterval(render, 30000);
   }
