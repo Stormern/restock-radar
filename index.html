@@ -97,6 +97,31 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .det { padding: 0 0 14px; }
 .kv { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
 .kv b { color: var(--ink); font-weight: 600; }
+.lynempty { display: grid; place-items: center; min-height: 64px; margin-top: 4px; border-radius: 12px; border: 1px dashed var(--line-2); color: var(--dim); font-size: 13px; }
+/* Finn: sortering */
+.sortbtn { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "l v i" "w w i"; align-items: center; column-gap: 8px; width: 100%; margin: 14px 0 4px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-2); text-align: left; }
+.sortbtn span { grid-area: l; font-size: 13px; color: var(--muted); }
+.sortbtn b { grid-area: v; font-size: 15px; font-weight: 700; }
+.sortbtn small { grid-area: w; font-size: 12px; color: var(--dim); margin-top: 1px; }
+.sortbtn i { grid-area: i; font-style: normal; color: var(--muted); font-size: 13px; }
+.opt { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; width: 100%; padding: 13px 0; border-bottom: 1px solid var(--line-2); text-align: left; }
+.opt:last-child { border-bottom: 0; }
+.opt .ck { color: var(--dim); font-size: 14px; padding-top: 1px; } .opt[aria-pressed="true"] .ck { color: var(--up); }
+.opt b { display: block; font-size: 15px; font-weight: 700; } .opt small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+/* Lagerstatus-merker */
+.pill { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 6px; border-radius: 4px; margin-right: 7px; vertical-align: 1px; white-space: nowrap; text-transform: uppercase; }
+.pill.in { background: var(--up); color: var(--up-ink); }
+.pill.out { background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); padding: 1px 5px; }
+.pill.rel { background: rgba(255, 203, 5, .12); border: 1px solid rgba(255, 203, 5, .45); color: var(--gold); padding: 1px 5px; }
+/* Utfoldet vare: eget kort, så det er tydelig at det hører til raden over */
+.row .det { margin: 0 0 12px; padding: 12px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.row .det .offers { background: var(--panel-2); border-color: var(--line-2); }
+.row .det .of { border-color: var(--line-2); }
+.kv .kvi { padding: 5px 9px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line-2); }
+.kv a.fl b { text-decoration: underline dotted; text-underline-offset: 3px; }
+.kv a.fl.min b { color: var(--gold); }
+.tile.lnk { display: block; border-color: rgba(255, 203, 5, .3); }
+.tile.lnk small { color: var(--gold); }
 .offers { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
 .of { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
 .of:first-child { border-top: 0; }
@@ -320,6 +345,75 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .lyn-al .lt { font-size: 14px; }
 .lyn-al .lr a { display: inline-block; padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
 .lyn-al.buy .lr a { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+/* App-skall: bare innholdet scroller – toppen og fanebaren står fast. Ingen position: fixed lenger, som iOS
+   av og til lar henge igjen midt på skjermen under scrolling. */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none; }
+body::before { display: none; }
+.top { position: relative; top: auto; flex: none; }
+#app, #setup { flex: 1 1 auto; min-height: 0; width: 100%; max-width: none; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+#app { padding-inline: max(16px, calc((100% - 528px) / 2)); padding-bottom: 24px; }
+.tabbar { position: relative; left: auto; right: auto; bottom: auto; flex: none; }
+
+/* Detaljark (glir opp nedenfra) */
+.sheet { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet-bg { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); animation: sh-fade .2s ease-out; }
+.sheet-p { position: relative; width: 100%; max-width: 560px; max-height: 86%; margin: 0 auto; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line-2); border-bottom: 0; border-radius: 18px 18px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); animation: sh-up .28s cubic-bezier(.2, .8, .2, 1); }
+.sheet-h { position: relative; padding: 20px 52px 12px 16px; border-bottom: 1px solid var(--line); }
+.sheet-h .grab { position: absolute; top: 7px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--line-2); }
+.sheet-t .t { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.sheet-t .s { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.sheet-x { position: absolute; right: 12px; top: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--panel-2); color: var(--muted); font-size: 15px; }
+.sheet-b { overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px 22px; }
+.sheet .offers, .sheet .srcs { background: var(--panel-2); border-color: var(--line-2); }
+.sheet .of, .sheet .srcs .sr { border-color: var(--line-2); }
+@keyframes sh-up { from { transform: translateY(100%); } }
+@keyframes sh-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet-p, .sheet-bg { animation: none; } }
+
+/* Kalender */
+.cl, .calh { display: grid; grid-template-columns: 38px minmax(0, 1fr) 56px 56px 58px; gap: 8px; align-items: center; width: 100%; text-align: left; }
+.cl { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.calh { font-size: 11px; color: var(--dim); padding: 12px 0 6px; border-bottom: 1px solid var(--line); }
+.calh span:nth-child(n+3), .cl .v { text-align: right; }
+.cl .v { font-size: 13.5px; padding-top: 0; }
+.cl .v small { display: block; font-size: 10px; font-weight: 500; color: var(--dim); }
+.cl .v.uk { font-size: 12px; font-style: italic; }
+.cl .cn .s .tag { margin-right: 5px; }
+.cl .db { padding: 5px 0 4px; } .cl .db b { font-size: 17px; }
+.cl.past .db small { color: var(--muted); }
+.cl .cn { min-width: 0; }
+.cl .cn .t { display: block; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl .cn .s { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl .cn .s b { color: var(--ink); font-weight: 600; }
+.mh { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 16px 0 0; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.nx { display: block; width: 100%; text-align: left; margin: 6px 0 4px; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.nx-r { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 2px; }
+.nx-t { font-size: 19px; font-weight: 700; letter-spacing: -.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nx-c { font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+.nx-s { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.nx-s b { color: var(--ink); font-weight: 600; }
+.fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: left; }
+.fold small { font-weight: 500; letter-spacing: .02em; text-transform: none; color: var(--dim); margin-left: auto; }
+.fold.sm { justify-content: center; border: 0; padding: 10px 0 12px; letter-spacing: .02em; text-transform: none; font-size: 13px; color: var(--ink); }
+.srcl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; width: 100%; margin-top: 4px; padding: 12px 0; font-size: 12.5px; color: var(--muted); text-align: left; }
+.srcl .sl-h { font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-size: 11.5px; }
+.srcl .chev { margin-left: auto; font-style: normal; color: var(--dim); }
+.cards { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 2px 16px 8px; scrollbar-width: none; }
+.cards::-webkit-scrollbar { display: none; }
+.cc { flex: none; width: 76%; max-width: 300px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.cc:first-child { border-color: rgba(255, 203, 5, .35); }
+.cc-h { display: flex; justify-content: space-between; align-items: flex-start; }
+.cc-h .db { width: 48px; }
+.cc-c { text-align: right; font-size: 11.5px; color: var(--muted); }
+.cc-c b { display: block; font-size: 16px; font-weight: 700; color: var(--gold); }
+.cc-c .ok { color: var(--up); } .cc-c .av { color: var(--warn); }
+.cc-t { font-size: 16px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cc-s { font-size: 13px; color: var(--muted); }
+.cc-m { font-size: 20px; font-weight: 700; }
+.cc-m small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.botfoot { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
+.botfoot b { color: var(--ink); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -355,34 +449,35 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     <div class="hero" id="calHero"></div>
     <div id="calUp"></div>
     <div id="calPast"></div>
-    <div class="sec"><div class="sec-t"><span>Kilder</span><span id="calChecked"></span></div>
-      <p class="fine" style="margin-top:0">Datoen for hvert sett sjekkes mot flere uavhengige kilder. Er de enige, står det <b>bekreftet</b>. Har Norli satt salgsstart, er det den som gjelder i Norge.</p>
-      <div class="src-st" id="calSrc"></div></div>
+    <div id="calSrcLine"></div>
   </section>
 
   <section id="tab-finn" role="tabpanel" hidden>
     <div class="hero" id="finnHero"></div>
-    <div class="seg" id="finnSort" role="group" aria-label="Sorter"></div>
+    <div id="finnSort"></div>
     <div id="finnList"></div>
     <p class="fine" id="finnFoot"></p>
   </section>
 
   <section id="tab-bot" role="tabpanel" hidden>
     <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
-    <dl class="grid2" id="botKv"></dl>
+    <div class="sec"><div class="sec-t"><span>Lynvarsel</span><span id="lynAlN"></span></div>
+      <div id="lynAlerts"><div class="lynempty">Ingen varsler ennå</div></div></div>
+    <div class="sec" id="lynSec" hidden><div class="sec-t"><span>Lynvakt · listen din</span><span id="lynSub"></span></div>
+      <div class="hero lyn-hero" id="lynHero"></div>
+      <div class="lb-scale" id="lynScale"></div>
+      <div id="lynList"></div>
+      <p class="fine">Hver strek går i samme takt som lynvakten på PC-en: hver gang den når enden, blir butikken sjekket. Lengden er tiden mellom sjekkene, og den grå markøren er målet på 5 sekunder. Bremser en butikk oss, blir streken <b class="warn">oransje</b>, lengre og tregere.</p>
+    </div>
+    <div class="sec"><div class="sec-t"><span>Varer utenfor listen</span><span>sjekkes rolig</span></div>
+      <p class="fine" style="margin:0 0 4px">Alt på listen din sjekkes av lynvakten over: både nettbutikkene og butikkene i Haugesund hvert 5.–15. sekund. Boten går i tillegg rolig gjennom <b>resten</b>: varer som ikke er på listen, prisene i Marked og Butikker, og Finn.</p>
+      <dl class="grid2" id="botKv"></dl></div>
     <div class="btns">
-      <button class="btn pri" id="btnCheck" type="button">Sjekk nå</button>
+      <button class="btn pri" id="btnCheck" type="button">Sjekk alt nå</button>
       <button class="btn" id="btnPause" type="button">Pause</button>
       <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
     </div>
     <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
-    <div class="sec" id="lynSec" hidden><div class="sec-t"><span>Lynvakt</span><span id="lynSub"></span></div>
-      <div class="hero lyn-hero" id="lynHero"></div>
-      <div class="lb-scale" id="lynScale"></div>
-      <div id="lynList"></div>
-      <div class="sec"><div class="sec-t"><span>Siste lynvarsler</span><span id="lynAlN"></span></div><div id="lynAlerts"></div></div>
-      <p class="fine">Hver strek går i samme takt som lynvakten på PC-en: hver gang den når enden, blir butikken sjekket. Lengden er tiden mellom sjekkene, og den grå markøren er målet på 5 sekunder. Bremser en butikk oss, blir streken <b class="warn">oransje</b>, lengre og tregere.</p>
-    </div>
     <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
     <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
     <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
@@ -420,6 +515,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   </div>
 </nav>
 
+<div class="sheet" id="sheet" hidden><div class="sheet-bg" data-close></div>
+  <div class="sheet-p" role="dialog" aria-modal="true" aria-labelledby="sheetT">
+    <div class="sheet-h"><span class="grab"></span><div class="sheet-t" id="sheetT"></div><button class="sheet-x" type="button" data-close aria-label="Lukk">✕</button></div>
+    <div class="sheet-b" id="sheetB"></div>
+  </div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
@@ -549,21 +649,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     el.className = 'live';
     const last = Math.max(b.lastOnline || 0, b.lastStore || 0);
     const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
-    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = `live ${clock(last || Date.now())}${nxt ? (nxt > Date.now() ? ` · neste ${clock(nxt)}` : ' · sjekker nå') : ''}`; }
-    else if (liveState === 'demo') t.textContent = 'demo';
+    // Med lynvakten: klokkeslettet (med sekunder) for siste sjekk av en butikk – tikker hele tiden.
+    const lc = lynLastCheck();
+    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = lc ? `live · sjekket ${clockS(lc)}` : `live ${clock(last || Date.now())}${nxt ? (nxt > Date.now() ? ` · neste ${clock(nxt)}` : ' · sjekker nå') : ''}`; }
+    else if (liveState === 'demo') { el.classList.add('on'); t.textContent = lc ? `demo · sjekket ${clockS(lc)}` : 'demo'; }
     else if (liveState === 'off') { el.classList.add('off'); t.textContent = 'frakoblet'; }
     else t.textContent = 'kobler til';
   }
 
+  // Lagerstatus som et tydelig merke først på linjen (blir aldri kuttet): PÅ LAGER, SLIPP-dato, KOMMER eller UTSOLGT.
+  function stockPill(state, release, haugesund) {
+    if (state === 'in') return `<span class="pill in">${haugesund ? 'I BUTIKK' : 'PÅ LAGER'}</span>`;
+    if (release && daysTo(release) >= 0) return `<span class="pill rel">SLIPP ${esc(fmtDate(release))}</span>`;
+    if (state === 'unlisted') return '<span class="pill rel">KOMMER</span>';
+    return '<span class="pill out">UTSOLGT</span>';
+  }
   function statusLine(x) {
     const o = x.a.main;
-    if (!o) return 'ikke funnet i noen butikk ennå';
-    const tag = o.state === 'in' ? (o.where === 'haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>') : '';
-    let st;
-    if (x.a.status === 'buy') st = o.where === 'haugesund' ? 'på lager i butikken' : 'på lager';
-    else if (x.a.status === 'over') st = `<span class="warn">over maks ${kr(x.it.max)}</span>`;
-    else st = (o.state === 'unlisted' ? 'kommer snart' : 'utsolgt') + (x.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(x.it.release))}</span>` : '');
-    return `${tag}${esc(shopOf(o))} · ${st}`;
+    if (!o) return '<span class="pill out">IKKE FUNNET</span>ingen butikk ennå';
+    const pill = stockPill(o.state, x.it.release, o.where === 'haugesund');
+    const extra = x.a.status === 'over' ? ` · <span class="warn">over maks ${kr(x.it.max)}</span>` : o.state === 'in' && o.where === 'haugesund' && o.store ? ` · ${esc(o.store)}` : '';
+    return `${pill}${esc(shopOf(o))}${extra}`;
   }
 
   // Fortjeneste i prosent av butikkprisen. Stripe: grønn ≥ 10 %, oransje 0–10 %, rød ved tap.
@@ -608,8 +714,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const kv = [
       it.max ? `Maks <b>${kr(it.max)}</b>` : '',
       it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
-      a.finn ? `Finn <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} annonser, lavest ${kr(it.finn.min)})</span>` : 'Finn <b>ingen funn</b>'
-    ].filter(Boolean).join('');
+      // Trykk på Finn-prisen for alle annonsene, eller på "billigst" for den billigste annonsen.
+      a.finn ? `<a class="fl" href="${esc(it.finn.url || '')}" target="_blank" rel="noopener">Resale <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} annonser)</span></a>` : 'Resale <b>ukjent</b> <span class="dim">(ingen på Finn)</span>',
+      a.finn ? `<a class="fl min" href="${esc(it.finn.minUrl || it.finn.url || '')}" target="_blank" rel="noopener">Billigst på Finn <b>${kr(it.finn.min)}</b> ↗</a>` : ''
+    ].filter(Boolean).map((s) => `<span class="kvi">${s}</span>`).join('');
     const info = [];
     offers.forEach((o) => (o.info || []).forEach((s) => { if (!/klikk og send|ikke lagt ut/i.test(s) || o.state === 'in') info.push(`${o.shop}: ${nb(s)}`); }));
     if (it.limit && !offers.some((o) => o.limit)) info.push(`Kjøpsgrense: ${nb(it.limit)}`);
@@ -623,7 +731,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const el = $(id);
     if (!list.length && !emptyText) { el.innerHTML = ''; return; }
     el.innerHTML = `<div class="sec"><div class="sec-t"><span>${title}</span><span>${note}</span></div>
-      <div class="cols"><span></span><span>${cols[0]}</span><span>Finn</span><span>Margin</span></div>
+      <div class="cols"><span></span><span>${cols[0]}</span><span>Resale</span><span>Margin</span></div>
       ${list.length ? list.map(row).join('') : `<div class="empty">${emptyText}</div>`}</div>`;
   }
 
@@ -669,20 +777,85 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     return out.filter((e) => ymd(e.date)).sort((a, b) => a.date.localeCompare(b.date) || (a.kind === 'sett' ? -1 : 1));
   }
 
-  function calRow(e, past) {
-    const dd = ymd(e.date), open = openCal.has(e.key);
-    let sub;
-    if (e.kind === 'sett') sub = `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter i norske butikker` : 'ingen produkter lagt ut ennå'}${e.s.price > 0 ? ` · fra ${kr(e.s.price)} kr` : ''}`;
-    else if (e.it) { const a = analyse(e.it); sub = `<span class="tag">PRODUKT</span>${a.main ? `${esc(a.main.shop)}${a.main.price > 0 ? ` ${kr(a.main.price)} kr` : ''}` : 'ikke lagt ut ennå'}${a.finn ? ` · Finn ${kr(a.finn)}` : ''}`; }
-    else sub = `<span class="tag">PRODUKT</span>${esc(e.shop)}${e.x.price > 0 ? ` · ${kr(e.x.price)} kr` : ''}`;
-    const mark = e.status === 'ok' ? `<span class="ok">✓ ${e.total} kilder</span>` : e.status === 'avvik' ? `<span class="av">${esc(e.range)}</span>` : '<span>1 kilde</span>';
-    return `<div class="cal${past ? ' past' : ''}${open ? ' open' : ''}" data-key="${esc(e.key)}">
-      <div class="cr" role="button" tabindex="0" aria-expanded="${open}">
-        <div class="db"><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small></div>
-        <div class="cn"><div class="t">${esc(e.name)}</div><div class="s">${sub}</div></div>
-        <div class="cd"><b>${countdown(daysTo(e.date))}</b>${mark}</div>
-      </div>
-      <div class="cal-det" ${open ? '' : 'hidden'}>${calDetails(e)}</div></div>`;
+  // Kalender: hver linje er kort; trykk åpner et detaljark nedenfra i stedet for å folde ut lister midt i kalenderen.
+  let calByKey = {}, calPastOpen = false, calNewsAll = false;
+  // Lignende produkt fra tidligere sett (Finn-boten), f.eks. "Ultra-Premium Collection" fra Celebrations og 151.
+  // Gir en pekepinn på resale når produktet ikke selges på Finn ennå.
+  function calRef(name) {
+    const ps = ((tree.finn && tree.finn.products) || []).filter((p) => p && !p.watched && p.med > 0 && p.name);
+    const base = String(name || '').replace(/\s*\(.*?\)\s*/g, ' ').trim().toLowerCase();
+    let type = '';
+    ps.forEach((p) => { const t = p.name.toLowerCase(); if ((base === t || base.endsWith(' ' + t)) && t.length > type.length) type = t; });
+    if (!type) return null;
+    const list = ps.filter((p) => p.name.toLowerCase() === type).sort((a, b) => (b.n || 0) - (a.n || 0));
+    const meds = list.map((p) => p.med).sort((a, b) => a - b);
+    return { type: list[0].name, list, med: meds[Math.floor((meds.length - 1) / 2)] };
+  }
+  // Pris (butikk), resale (Finn nå) og margin for en linje i kalenderen. Mangler resale, brukes tidligere sett som pekepinn.
+  function calVals(e) {
+    let price = 0, res = 0, ref = null;
+    if (e.kind === 'sett') { price = e.s.price || 0; ref = calRef('Elite Trainer Box'); }
+    else if (e.it) { const a = analyse(e.it); price = a.main && a.main.price > 0 ? a.main.price : 0; res = a.finn || 0; if (!res) ref = calRef(e.name); }
+    else { price = e.x.price || 0; ref = calRef(e.name); }
+    return { price, res, ref, m: price && res ? res - price : null, mRef: price && !res && ref && e.kind !== 'sett' ? ref.med - price : null };
+  }
+  function calCells(v) {
+    const pc = v.price ? `<span class="v">${krU(v.price)}</span>` : '<span class="v dim uk">ukjent</span>';
+    const rc = v.res ? `<span class="v">${krU(v.res)}</span>` : v.ref ? `<span class="v dim">≈${krU(v.ref.med)}<small>tidl. sett</small></span>` : '<span class="v dim uk">ukjent</span>';
+    const mc = v.m !== null ? marginCell(v.m, v.price) : v.mRef !== null ? `<span class="v mg dim">≈${sign(v.mRef)}<span class="u"> kr</span></span>` : '<span class="v mg dim">–</span>';
+    return pc + rc + mc;
+  }
+  function calSub(e) {
+    const v = calVals(e);
+    const res = v.res ? `resale <b>${kr(v.res)} kr</b>` : v.ref ? `resale ukjent · tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : 'resale ukjent';
+    if (e.kind === 'sett') return `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter` : 'ikke lagt ut ennå'}${v.price ? ` · fra <b>${kr(v.price)} kr</b>` : ''}${v.ref ? ` · ETB tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : ''}`;
+    return `${v.price ? `pris <b>${kr(v.price)} kr</b>` : 'pris ukjent'} · ${res}`;
+  }
+  const calMark = (e) => (e.status === 'avvik' ? `<span class="av">${esc(e.range)}</span>` : e.status === 'ok' ? '<span class="ok">✓ bekreftet</span>' : '');
+  function calLine(e) {
+    const dd = ymd(e.date), n = daysTo(e.date), mk = calMark(e);
+    return `<button type="button" class="cl${n < 0 ? ' past' : ''}" data-cal="${esc(e.key)}"><span class="db"><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small></span><span class="cn"><span class="t">${esc(e.name)}</span><span class="s">${e.kind === 'sett' ? '<span class="tag">SETT</span>' : ''}${countdown(n)}${mk ? ` · ${mk}` : ''}</span></span>${calCells(calVals(e))}</button>`;
+  }
+  // Øverst i detaljarket: nøkkeltall som i en aksjeterminal, resale over tid og tidligere sett.
+  function calTerminal(e) {
+    const v = calVals(e);
+    const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
+    let h = `<div class="tiles">${[
+      tile(e.kind === 'sett' ? 'Fra (butikk)' : 'Butikkpris', v.price ? `${kr(v.price)} kr` : 'ukjent', v.price ? 'billigst i Norge' : 'ikke lagt ut ennå'),
+      v.res && e.it && e.it.finn && e.it.finn.url
+        ? `<a class="tile lnk" href="${esc(e.it.finn.url)}" target="_blank" rel="noopener"><span>Resale nå</span><b>${kr(v.res)} kr</b><small>se annonsene på Finn ↗</small></a>`
+        : tile('Resale nå', v.res ? `${kr(v.res)} kr` : 'ukjent', v.res ? 'typisk pris på Finn' : v.ref ? `tidl. sett ≈ ${kr(v.ref.med)} kr` : 'ingen annonser ennå'),
+      tile('Margin', v.m !== null ? `${sign(v.m)} kr` : v.mRef !== null ? `≈${sign(v.mRef)} kr` : '–', v.m !== null ? 'mot Finn nå' : v.mRef !== null ? 'mot tidligere sett' : 'mangler pris', v.m !== null ? (v.m >= 0 ? 'up' : 'down') : ''),
+      tile('Slipp', countdown(daysTo(e.date)), esc(longDate(e.date)))
+    ].join('')}</div>`;
+    const fp = e.it && ((tree.finn && tree.finn.products) || []).find((p) => p && p.watched && p.name === e.name);
+    if (fp) h += `<div class="prod-t">Resale over tid</div>${finnChart(fp)}`;
+    // Hver linje åpner annonsene på Finn (eller den billigste annonsen hvis søket mangler).
+    if (v.ref) h += `<div class="prod-t">${esc(v.ref.type)} fra tidligere sett</div><div class="offers">${v.ref.list.slice(0, 5).map((p) => {
+      const u = p.url || ((p.cheap || [])[0] || {}).url || '';
+      return `<div class="of"><span class="s"></span><span class="on">${esc(p.set)}<small>${p.n || 0} annonser på Finn nå</small></span><span class="pr">${krU(p.med)}</span>${u ? `<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">Finn ↗</a>` : '<span></span>'}</div>`;
+    }).join('')}</div>`;
+    return h;
+  }
+  function calSrcLine(n) {
+    const src = (n && n.src) || [];
+    return src.length ? `<button type="button" class="srcl" data-tog="src"><span class="sl-h">Kilder</span>${src.map((x) => `<span><i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i>${esc(x.label)}</span>`).join('')}<i class="chev">›</i></button>` : '';
+  }
+  function openSheet(titleHtml, bodyHtml) {
+    $('sheetT').innerHTML = titleHtml; $('sheetB').innerHTML = bodyHtml; $('sheetB').scrollTop = 0; $('sheet').hidden = false;
+  }
+  function closeSheet() { $('sheet').hidden = true; }
+  function openCalSheet(e) {
+    openSheet(`<div class="t">${esc(e.name)}</div><div class="s">${esc(longDate(e.date))} · ${countdown(daysTo(e.date))}${e.status === 'avvik' ? ` · kildene sier ${esc(e.range)}` : ''}</div>`, calTerminal(e) + calDetails(e));
+  }
+  function srcSheet() {
+    const n = tree.news || {};
+    openSheet(`<div class="t">Kilder for datoene</div><div class="s">${n.checked ? `sjekket ${clock(n.checked)}${n.next ? ` · neste ${clock(n.next)}` : ''}` : ''}</div>`,
+      `<p class="fine" style="margin-top:0">Datoen for hvert sett sjekkes mot flere uavhengige kilder. Er de enige, står det <b>bekreftet</b>. Har Norli satt salgsstart, er det den som gjelder i Norge.</p>
+       <div class="src-st">${(n.src || []).map((x) => `<i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i><span>${esc(x.label)}</span><span class="tm">${x.err ? 'feil' : x.ok ? `ok · ${agoShort(x.ok)}` : '–'}</span>${x.err ? `<span class="er">${esc(x.err)}</span>` : ''}`).join('')}</div>`);
+  }
+  function calPastHtml(past) {
+    return past.length ? `<div class="sec"><button type="button" class="fold" data-tog="past" aria-expanded="${calPastOpen}">Nylig sluppet <small>${past.length} siste 60 dager ${calPastOpen ? '▴' : '▾'}</small></button>${calPastOpen ? past.map(calLine).join('') : ''}</div>` : '';
   }
 
   function calDetails(e) {
@@ -727,21 +900,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   function renderCal() {
     const n = tree.news, all = calEntries();
+    calByKey = {}; all.forEach((e) => (calByKey[e.key] = e));
     const up = all.filter((e) => daysTo(e.date) >= 0);
     const past = all.filter((e) => daysTo(e.date) < 0 && daysTo(e.date) >= -60).reverse();
+    // Neste slipp: én kort boks. Trykk for detaljer.
     const hero = $('calHero');
-    hero.className = 'hero';
+    hero.className = '';
     if (up.length) {
       const e = up[0];
-      const chip = e.status === 'ok' ? `<span class="chip ok">✓ Bekreftet av ${e.total} kilder</span>` : e.status === 'avvik' ? `<span class="chip av">Kildene sier ${esc(e.range)}</span>` : '<span class="chip">1 kilde så langt</span>';
-      const extra = e.kind === 'sett' ? `<span class="chip">${e.s.n || 0} produkter lagt ut i Norge</span>` : '';
-      hero.innerHTML = `<div class="hero-l">Neste slipp</div><div class="hero-t">${esc(e.name)}</div><div class="hero-d">${esc(longDate(e.date))}<span>${countdown(daysTo(e.date))}</span></div><div class="chips">${chip}${extra}</div>`;
-    } else if (!n) hero.innerHTML = '<div class="hero-t">Venter på kalenderen</div><div class="hero-s">Boten henter slippdatoer første gang den kjører med den nye versjonen.</div>';
-    else hero.innerHTML = '<div class="hero-t">Ingen kjente slipp framover</div><div class="hero-s">Boten sier fra så snart et nytt sett dukker opp.</div>';
-    $('calUp').innerHTML = `<div class="sec"><div class="sec-t"><span>Kommende</span><span>${up.length} slipp · tidligst øverst</span></div>${up.length ? up.map((e) => calRow(e, false)).join('') : '<div class="empty">Ingen kjente slipp framover ennå.</div>'}</div>`;
-    $('calPast').innerHTML = past.length ? `<div class="sec"><div class="sec-t"><span>Nylig sluppet</span><span>siste 60 dager</span></div>${past.map((e) => calRow(e, true)).join('')}</div>` : '';
-    $('calChecked').textContent = n && n.checked ? `sjekket ${clock(n.checked)}${n.next ? ` · neste ${clock(n.next)}` : ''}` : '';
-    $('calSrc').innerHTML = ((n && n.src) || []).map((x) => `<i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i><span>${esc(x.label)}</span><span class="tm">${x.err ? 'feil' : x.ok ? `ok · ${agoShort(x.ok)}` : '–'}</span>${x.err ? `<span class="er">${esc(x.err)}</span>` : ''}`).join('');
+      hero.innerHTML = `<button type="button" class="nx" data-cal="${esc(e.key)}"><span class="hero-l">Neste slipp</span><span class="nx-r"><span class="nx-t">${esc(e.name)}</span><span class="nx-c">${countdown(daysTo(e.date))}</span></span><span class="nx-s">${esc(longDate(e.date))} · ${calSub(e)}</span></button>`;
+    } else hero.innerHTML = `<div class="hero"><div class="hero-t">${n ? 'Ingen kjente slipp framover' : 'Venter på kalenderen'}</div><div class="hero-s">Boten sier fra så snart et nytt sett dukker opp.</div></div>`;
+    // Resten måned for måned, tidligst øverst.
+    let html = '', cur = '';
+    const yr = new Date().getFullYear();
+    up.slice(1).forEach((e) => {
+      const d = ymd(e.date), m = MONL[d.getMonth()] + (d.getFullYear() !== yr ? ` ${d.getFullYear()}` : '');
+      if (m !== cur) { html += `<div class="mh">${m}</div>`; cur = m; }
+      html += calLine(e);
+    });
+    $('calUp').innerHTML = html ? `<div class="calh"><span></span><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${html}` : '';
+    $('calPast').innerHTML = calPastHtml(past);
+    $('calSrcLine').innerHTML = calSrcLine(n);
   }
 
   // ---------- Siste endringer (øverst i Kalender) ----------
@@ -768,7 +947,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       ...evs.map((e) => ({ t: e.t, h: item(ICON[e.kind] || '•', e.title, e.text, e.t, e.url, e.t > newsSeenAtOpen) })),
       ...arts.map((a) => ({ t: a.t, h: item('📰', a.title, a.source, a.t, a.url, false) }))
     ].sort((x, y) => y.t - x.t).slice(0, 6);
-    $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${list.map((x) => x.h).join('')}</div>` : '';
+    const shown = calNewsAll ? list : list.slice(0, 3);
+    $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${shown.map((x) => x.h).join('')}${list.length > 3 ? `<button type="button" class="fold sm" data-tog="news">${calNewsAll ? 'Vis færre' : `Vis alle ${list.length}`}</button>` : ''}</div>` : '';
   }
 
   // ---------- Finn ----------
@@ -777,7 +957,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   let finnById = {};
   let finnSort = store.get('rr-finn-sort') || 'best';
   let movePeriod = [7, 30, 90].includes(+store.get('rr-finn-period')) ? +store.get('rr-finn-period') : 30;
-  const FSORT = [['best', 'Best', (p) => p.score], ['margin', 'Fortjeneste', (p) => p.margin], ['sold', 'Selges mest', (p) => p.soldWeek], ['listed', 'Legges ut mest', (p) => p.newWeek]];
+  // Sortering: [nøkkel, navn, forklaring, verdi]. Velges fra et ark med forklaring på hvert valg.
+  const FSORT = [
+    ['best', 'Signal', 'P/L vektet mot volum – beste trade nå', (p) => p.score],
+    ['margin', 'P/L', 'Gevinst i kr per stk (resale − butikk)', (p) => p.margin],
+    ['pct', 'ROI %', 'Avkastning i prosent av innkjøpspris', (p) => p.pct],
+    ['sold', 'Volum', 'Omsatt per uke – annonser som forsvinner', (p) => p.soldWeek],
+    ['listed', 'Likviditet', 'Nye annonser per uke – aktivitet i markedet', (p) => p.newWeek]
+  ];
+  function finnSortSheet() {
+    openSheet('<div class="t">Screener</div><div class="s">Ranger markedet etter</div>',
+      FSORT.map(([k, label, why]) => `<button type="button" class="opt" data-fsort="${k}" aria-pressed="${finnSort === k}"><span class="ck">${finnSort === k ? '●' : '○'}</span><span><b>${label}</b><small>${why}</small></span></button>`).join(''));
+  }
   const nfx = (v) => (v === null || v === undefined || isNaN(v) ? '–' : nf.format(Math.round(v)));
 
   // Prisgraf i aksjestil: resale-linjen er grønn der prisen stiger og rød der den faller. Butikkprisen
@@ -875,12 +1066,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   function finnDetails(p) {
     const m = p.margin, has = m !== null && m !== undefined;
     const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
+    const cheapest = (p.cheap || []).filter((a) => a.url && a.p > 0).sort((a, b) => a.p - b.p)[0];
     const tiles = [
       tile('Fortjeneste', has ? `${sign(m)} kr` : '–', has && p.pct !== null && p.pct !== undefined ? `${p.pct < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p.pct)))} % per stk` : 'per stk', has ? (m >= 0 ? 'up' : 'down') : ''),
       p.track >= 3 ? tile('Selges', `ca. ${nfx(p.soldWeek)}/uke`, p.days ? `typisk ${nfx(p.days)} dager` : 'trolig solgt')
         : tile('Selges', 'måles nå', `boten har fulgt i ${Math.max(1, Math.ceil(p.track || 0))} d`),
       tile('Ute nå', nfx(p.n), `${nfx(p.newWeek)} nye/uke${p.res ? ` · ${p.res} reservert` : ''}`),
-      tile('Billigst nå', p.min ? `${nfx(p.min)} kr` : '–', 'på Finn')
+      // Billigste annonse: trykk for å åpne den på Finn.
+      cheapest ? `<a class="tile lnk" href="${esc(cheapest.url)}" target="_blank" rel="noopener"><span>Billigst nå</span><b>${nfx(cheapest.p)} kr</b><small>åpne annonsen ↗</small></a>`
+        : tile('Billigst nå', p.min ? `${nfx(p.min)} kr` : '–', 'på Finn')
     ].join('');
     const cheap = (p.cheap || []).map((a) => `<div class="of"><span class="s"></span><span class="on">${esc(a.t)}${a.r ? '<span class="rtag">RESERVERT</span>' : ''}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Åpne ↗</a></div>`).join('');
     const btn = (href, txt, pri) => `<a class="btn wide${pri ? ' pri' : ''}" style="display:block;text-align:center" href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
@@ -914,7 +1108,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   function renderFinn() {
     const f = tree.finn, hero = $('finnHero');
-    $('finnSort').innerHTML = FSORT.map(([k, label]) => `<button type="button" data-sort="${k}" aria-pressed="${finnSort === k}">${label}</button>`).join('');
+    const fs = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
+    $('finnSort').innerHTML = `<button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><small>${fs[2]}</small><i>▾</i></button>`;
     const ps = ((f && f.products) || []).filter(Boolean);
     finnById = {}; ps.forEach((p) => (finnById[p.id] = p));
     hero.className = 'hero';
@@ -944,7 +1139,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>`
         : '<div class="hero-t" style="margin-top:6px">Samler priser</div><div class="hero-s">Her ser du hva som stiger og faller mest på Finn når boten har fulgt prisene i noen dager. Historikken lagres og bygges på over tid.</div>');
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
-    const list = ps.slice().sort((a, b) => (key[2](b) ?? -1e9) - (key[2](a) ?? -1e9));
+    const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
     $('finnList').innerHTML = list.map(finnRow).join('');
     $('finnFoot').textContent = `Resale = typisk pris på Finn nå (aktive annonser). Butikk = laveste pris i norske butikker. Fortjeneste = resale minus butikk. «Trolig solgt» = annonser som forsvant innen 30 dager. ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
   }
@@ -969,7 +1164,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     const al = (L.alerts || []).filter(Boolean);
     $('lynAlN').textContent = al.length ? `${al.length} siste` : '';
     $('lynAlerts').innerHTML = al.length ? al.map((a) => `<div class="li lyn-al${a.buy ? ' buy' : ''}"><i class="dot ${a.buy ? 'g' : 'y'}"></i><span class="lt">${esc(a.text)}<small>${clock(a.t)} · ${a.buy ? 'under makspris' : 'over makspris'}</small></span><span class="lr">${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener">${a.buy ? 'Kjøp' : 'Åpne'} ↗</a>` : ''}</span></div>`).join('')
-      : '<div class="empty">Ingen lynvarsler ennå. De kommer her i samme sekund som noe på listen din kommer på lager.</div>';
+      : '<div class="lynempty">Ingen varsler ennå</div>';
   }
   // Én runde for en butikk = ventetid + butikkens svartid. Lynvakten sender når forrige sjekk ble ferdig (last)
   // og når neste starter (next), så strekene går i samme takt som PC-en og synkes på nytt hvert 30. sekund.
@@ -1035,9 +1230,25 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     lynRaf = requestAnimationFrame(lynTick);
   }
   function lynStart() { if (!lynRaf) lynRaf = requestAnimationFrame(lynTick); }
+  // Siste sjekk av en butikk, regnet ut fra hver butikks takt (synkes med PC-en hvert 30. sekund). 0 = lynvakten kjører ikke.
+  function lynLastCheck() {
+    const L = tree.lyn;
+    if (!L || !L.stores || !L.updated || Date.now() - L.updated > 120000) return 0;
+    const now = Date.now(), every = L.every || 5;
+    return L.stores.reduce((best, s) => {
+      if (s.status === 'feil') return best;
+      const c = lynCycle(s, every);
+      if (!(c.p > 0) || !c.t) return best;
+      return Math.max(best, now - ((((now - c.t) % c.p) + c.p) % c.p));
+    }, 0);
+  }
+  const clockS = (ms) => new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  setInterval(() => { if (!document.hidden) renderLive(); }, 500);
   document.addEventListener('visibilitychange', lynStart);
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => setTimeout(lynStart)));
 
+  // Lynvaktens vanlige tempo (median sekunder mellom sjekkene), eller null hvis den ikke kjører.
+  function lynPace() { const L = tree.lyn; if (!L || !L.stores || !L.updated || Date.now() - L.updated > 120000) return null; return lynSummary(L).avg || null; }
   function render() {
     renderLive();
     renderCal();
@@ -1078,24 +1289,23 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
       hero.className = 'hero';
       hero.innerHTML = `<div class="hero-t">Ingenting å kjøpe akkurat nå</div>${stats}
-        <div class="hero-n">${nxt ? `<div>⏱ Neste sjekk: <b>${nxt > Date.now() ? `${clock(nxt)}</b> (${until(nxt)})` : 'pågår nå</b>'}</div>` : ''}${best ? `<div style="margin-top:8px">⭐ Neste som kommer på lager:<br><b>${esc(best.it.name)}</b>${best.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(best.it.release))}</span> (${countdown(daysTo(best.it.release))})` : ''}<br>Billigst: ${esc(best.a.main.shop)} ${kr(best.a.main.price)} kr → ${best.a.finn ? `Finn ${kr(best.a.finn)} kr = <span class="${best.a.margin >= 0 ? 'up' : 'down'}">${sign(best.a.margin)} kr</span>` : 'Finn: ingen funn'}</div>` : ''}</div>`;
+        <div class="hero-n">${lynPace() ? `<div>⚡ Lynvakten sjekker listen din hvert <b>${sec1(lynPace())} sekund</b></div>` : nxt ? `<div>⏱ Neste sjekk: <b>${nxt > Date.now() ? `${clock(nxt)}</b> (${until(nxt)})` : 'pågår nå</b>'}</div>` : ''}${best ? `<div style="margin-top:8px">⭐ Neste som kommer på lager:<br><b>${esc(best.it.name)}</b>${best.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(best.it.release))}</span> (${countdown(daysTo(best.it.release))})` : ''}<br>Billigst: ${esc(best.a.main.shop)} ${kr(best.a.main.price)} kr → ${best.a.finn ? `Finn ${kr(best.a.finn)} kr = <span class="${best.a.margin >= 0 ? 'up' : 'down'}">${sign(best.a.margin)} kr</span>` : 'Finn: ingen funn'}</div>` : ''}</div>`;
     }
 
     section('secBuy', 'Kan kjøpes', 'under makspris', ['Pris'], buy, buy.length ? '' : '');
     // Inne nå: alt annet som er på lager – varer over makspris og varer som ikke er på listen din – samlet, best fortjeneste øverst.
     const otherIn = (d.other || []).map((o) => {
       const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
-      const tag = o.kind === 'Haugesund' ? '<span class="tag hg">BUTIKK</span>' : '<span class="tag">NETT</span>';
       return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
-        <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${tag}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
+        <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${stockPill('in', '', o.kind === 'Haugesund')}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
         <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
         <span class="v">${krU(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? krU(o.finn.med) : '–'}</span>
         ${marginCell(m, o.price)}</div></div>` };
     });
     const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
     $('secIn').innerHTML = inNow.length ? `<div class="sec"><div class="sec-t"><span>Inne nå</span><span>over makspris eller ikke på listen</span></div>
-      <div class="cols"><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${inNow.map((x) => x.h).join('')}</div>` : '';
-    section('secWatch', 'Følger med', `${watch.length} ikke inne`, ['Billigst'], watch, '');
+      <div class="cols"><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${inNow.map((x) => x.h).join('')}</div>` : '';
+    section('secWatch', 'Watchlist', `${watch.length} utsolgt`, ['Billigst'], watch, '');
 
     $('secOther').innerHTML = '';
 
@@ -1125,8 +1335,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       return `<div class="shop${open ? ' open' : ''}" data-src="${esc(key)}">
         <div class="li" role="button" tabindex="0" aria-expanded="${open}"><i class="dot ${s.failing ? 'y' : s.inStock ? 'g' : 'r'}"></i><span class="lt">${esc(name)}<small>${sub}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></div>
         <div class="shop-det" ${open ? '' : 'hidden'}>
-          ${s.url ? `<a class="go" href="${esc(s.url)}" target="_blank" rel="noopener">Åpne ${esc(name)} ↗</a>` : ''}
-          ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Finn</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
+          ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
         </div></div>`;
     };
     // Butikker med noe på lager alltid øverst (flest først); ellers samme rekkefølge som før.
@@ -1141,12 +1350,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     $('btnPause').textContent = b.paused ? 'Fortsett' : 'Pause';
     const kvRow = ([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
     $('botKv').innerHTML = [
-      ['Sist kontakt', b.beat ? ago(b.beat) : 'aldri'],
-      ['Butikker', b.lastStore ? `${clock(b.lastStore)} · neste ${until(b.nextStore)}` : '–'],
-      ['Nett', b.lastOnline ? `${clock(b.lastOnline)} · neste ${until(b.nextOnline)}` : '–'],
-      ['Intervall', `${b.storeEvery || '?'} min / ${b.netEvery || '?'} min`],
-      ['Finn hentet', b.finnAt ? clock(b.finnAt) : '–'],
-      ['Data oppdatert', d.updated ? clock(d.updated) : '–']
+      ['Nettbutikker', b.lastOnline ? `hvert ${b.netEvery || '?'}. min · sist ${clock(b.lastOnline)}` : '–'],
+      ['Butikker i Haugesund', b.lastStore ? `hvert ${b.storeEvery || '?'}. min · sist ${clock(b.lastStore)}` : '–'],
+      ['Finn-priser', b.finnAt ? `sist ${clock(b.finnAt)}` : '–'],
+      ['Kontakt med PC-en', b.beat ? ago(b.beat) : 'aldri']
     ].map(kvRow).join('');
     renderLyn();
     $('connKv').innerHTML = [
@@ -1181,18 +1388,26 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
   $('tab-kalender').addEventListener('click', (e) => {
     if (e.target.closest('a')) return;
-    const h = e.target.closest('.cr'); if (!h) return;
-    const c = h.closest('.cal'), key = c.dataset.key;
-    if (openCal.has(key)) openCal.delete(key); else openCal.add(key);
-    const open = openCal.has(key);
-    c.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
-    c.querySelector('.cal-det').hidden = !open;
+    const t = e.target.closest('[data-tog]');
+    if (t) {
+      if (t.dataset.tog === 'past') { calPastOpen = !calPastOpen; renderCal(); }
+      else if (t.dataset.tog === 'news') { calNewsAll = !calNewsAll; renderNews(); }
+      else if (t.dataset.tog === 'src') srcSheet();
+      return;
+    }
+    const c = e.target.closest('[data-cal]');
+    if (c && calByKey[c.dataset.cal]) openCalSheet(calByKey[c.dataset.cal]);
   });
+  $('sheet').addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) { closeSheet(); return; }
+    const fs = e.target.closest('[data-fsort]');
+    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
   $('tab-finn').addEventListener('click', (e) => {
-    const sb = e.target.closest('[data-sort]');
-    if (sb) { finnSort = sb.dataset.sort; store.set('rr-finn-sort', finnSort); renderFinn(); return; }
+    if (e.target.closest('[data-sortmenu]')) { finnSortSheet(); return; }
     const pb = e.target.closest('[data-per]');
     if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
     // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
@@ -1200,7 +1415,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     if (go) {
       const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(go.dataset.go)}"]`);
       if (card && !openFinn.has(go.dataset.go)) card.querySelector('.fh').click();
-      if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
+      if (card) { const sc = $('app'); sc.scrollTo({ top: card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8, behavior: 'smooth' }); }
       return;
     }
     if (e.target.closest('a')) return;
@@ -1224,7 +1439,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     store.set('rr-tab', name);
     // "NY"-merket gjelder det som kom siden sist du åpnet Kalender.
     if (name === 'kalender') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
-    window.scrollTo({ top: 0 });
+    $('app').scrollTo({ top: 0 });
+    closeSheet();
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
