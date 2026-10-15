@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Restock-radar</title>
+<title>PikaJew</title>
 <meta name="description" content="Pokémon-restock i Haugesund og nettbutikker – live fra boten din.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Restock">
+<meta name="apple-mobile-web-app-title" content="PikaJew">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0B0C0F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +33,7 @@
 html, body { margin: 0; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.4 var(--f); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
   padding-top: env(safe-area-inset-top, 0px); }
+body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 8; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
 [hidden] { display: none !important; }
@@ -166,8 +167,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <header class="top" id="top" hidden>
   <div class="top-in">
     <div class="logo">
-      <svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#3A3F4B" stroke-width="2"/><circle cx="15" cy="15" r="7" fill="none" stroke="#3A3F4B" stroke-width="2"/><path d="M15 15 L25.6 7.5" stroke="#2BD67B" stroke-width="2.4" stroke-linecap="round"/><circle cx="21.5" cy="9.5" r="2.6" fill="#FF6B5B"/></svg>
-      Restock
+      <img src="icon-180.png" width="22" height="22" alt="" style="border-radius:6px">
+      PikaJew
     </div>
     <span class="live" id="live"><i></i><span id="liveTxt">kobler til</span></span>
   </div>
