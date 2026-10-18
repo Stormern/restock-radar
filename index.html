@@ -148,6 +148,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .fbar2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 4px; }
 .fbar2 .sortbtn { margin: 0; grid-template-areas: "l i" "v i" "w i"; grid-template-columns: 1fr auto; }
 .fbar2 .sortbtn small:empty { display: none; }
+.fbar2 .sortbtn i { transition: transform .3s ease; }
+.fbar2 [data-movesheet][aria-expanded="true"] { border-color: var(--muted); }
+.fbar2 [data-movesheet][aria-expanded="true"] i { transform: rotate(180deg); }
+/* Bevegelser glir ned under knappene og skyver listen ned (høyde 0 → full, med en liten glid og fade). */
+.mvdrop { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2, .8, .2, 1); }
+.mvdrop.open { grid-template-rows: 1fr; }
+.mvclip { overflow: hidden; min-height: 0; }
+.mvin { margin-top: 8px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-2); opacity: 0; transform: translateY(-10px); transition: opacity .28s ease, transform .38s cubic-bezier(.2, .8, .2, 1); }
+.mvdrop.open .mvin { opacity: 1; transform: none; }
+.mvin .mvh { font-size: 12.5px; }
+.mvnone { padding: 10px 0 4px; color: var(--muted); font-size: 13.5px; }
+/* Glidningen kjører også med «Reduser bevegelse» på – den er kort og rolig, og brukeren vil se den. */
 .opt { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; width: 100%; padding: 13px 0; border-bottom: 1px solid var(--line-2); text-align: left; }
 .opt:last-child { border-bottom: 0; }
 .opt .ck { color: var(--dim); font-size: 14px; padding-top: 1px; } .opt[aria-pressed="true"] .ck { color: var(--up); }
@@ -1181,14 +1193,7 @@ body::before { display: none; }
       <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
   }
 
-  let finnMv = null;
-  function openMoveSheet() {
-    if (!finnMv) return;
-    const { ups, downs, mv, perBtns, perNote } = finnMv;
-    openSheet(`<div class="t">Bevegelser</div><div class="s">Finn-pris siste ${movePeriod} dager${perNote}</div>`,
-      `<div class="mvh" style="justify-content:flex-start;margin-bottom:6px">${perBtns}</div>`
-      + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>` : '<div class="empty">Ingen bevegelser ennå</div>'));
-  }
+  let mvOpen = false;   // Bevegelser-menyen under knappene i Finn
   // Åpne et produkt i Finn-listen og scroll dit (fra en bevegelse).
   function goFinn(id) {
     const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(id)}"]`);
@@ -1225,10 +1230,13 @@ body::before { display: none; }
     const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
     const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
       <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
-    // To knapper øverst: Sortering og Bevegelser. Bevegelsene åpnes i et ark nedenfra (openMoveSheet).
-    finnMv = { ups, downs, mv, perBtns, perNote };
+    // To knapper øverst: Sortering og Bevegelser. Bevegelsene glir ned rett under knappene (mvOpen).
     $('finnSort').innerHTML = `<div class="fbar2"><button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><i>▾</i></button>
-      <button type="button" class="sortbtn" data-movesheet><span>Bevegelser</span><b>${per} d</b><small>${ups.length || downs.length ? `<span class="up">▲ ${ups.length}</span> <span class="down">▼ ${downs.length}</span>` : 'ingen ennå'}</small><i>▾</i></button></div>`;
+      <button type="button" class="sortbtn" data-movesheet aria-expanded="${mvOpen}"><span>Bevegelser</span><b>${per} d</b><small>${ups.length || downs.length ? `<span class="up">▲ ${ups.length}</span> <span class="down">▼ ${downs.length}</span>` : 'ingen ennå'}</small><i>▾</i></button></div>
+      <div class="mvdrop${mvOpen ? ' open' : ''}" id="mvDrop"><div class="mvclip"><div class="mvin">
+        <div class="mvh"><span class="dim">Finn-pris siste ${per} dager${perNote}</span>${perBtns}</div>
+        ${ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>` : '<div class="mvnone">Ingen bevegelser ennå</div>'}
+      </div></div></div>`;
     hero.hidden = true;
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
@@ -1562,18 +1570,21 @@ body::before { display: none; }
   $('sheet').addEventListener('click', (e) => {
     if (e.target.closest('[data-close]')) { closeSheet(); return; }
     const fs = e.target.closest('[data-fsort]');
-    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); return; }
-    const pb = e.target.closest('[data-per]');
-    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); openMoveSheet(); return; }
-    const go = e.target.closest('[data-go]');
-    if (go) { closeSheet(); goFinn(go.dataset.go); }
+    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); }
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
   $('tab-finn').addEventListener('click', (e) => {
     if (e.target.closest('[data-sortmenu]')) { finnSortSheet(); return; }
-    if (e.target.closest('[data-movesheet]')) { openMoveSheet(); return; }
+    // Bevegelser: menyen glir ned/opp under knappene (uten å tegne siden på nytt, så overgangen blir myk).
+    const mb = e.target.closest('[data-movesheet]');
+    if (mb) { mvOpen = !mvOpen; $('mvDrop').classList.toggle('open', mvOpen); mb.setAttribute('aria-expanded', String(mvOpen)); return; }
+    const pb = e.target.closest('[data-per]');
+    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
+    // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
+    const go = e.target.closest('[data-go]');
+    if (go) { goFinn(go.dataset.go); return; }
     if (e.target.closest('a')) return;
     const h = e.target.closest('.fh'); if (!h) return;
     const card = h.closest('.fp'), id = card.dataset.id;
