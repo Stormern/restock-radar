@@ -152,15 +152,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .fbar2 > .fdrop:not(.open) { box-shadow: none; pointer-events: none; }
 .fbar2 .sortbtn { margin: 0; grid-template-areas: "l i" "v i" "w i"; grid-template-columns: 1fr auto; }
 .fbar2 .sortbtn small:empty { display: none; }
-.fbar2 .sortbtn i { transition: transform .3s ease; }
+.fbar2 .sortbtn i { transition: transform .2s ease; }
 .fbar2 .sortbtn[aria-expanded="true"] i { transform: rotate(180deg); }
 /* Åpen knapp «utvides»: bunnen blir rett og går i ett med menyen under (knappen ligger over menyens toppkant). */
 .fbar2 .sortbtn[aria-expanded="true"] { position: relative; z-index: 6; margin-bottom: -1px; border-radius: 12px 12px 0 0; border-bottom-color: var(--panel); }
 /* Menyen glir ned under knappene og skyver listen ned (høyde 0 → full, med en liten glid og fade). */
-.fdrop { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2, .8, .2, 1); }
+.fdrop { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s cubic-bezier(.2, .8, .2, 1); }
 .fdrop.open { grid-template-rows: 1fr; }
 .mvclip { overflow: hidden; min-height: 0; border-radius: 0 0 12px 12px; }
-.mvin { padding: 4px 12px 10px; border-radius: 0 0 12px 12px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line-2); opacity: 0; transform: translateY(-10px); transition: opacity .28s ease, transform .38s cubic-bezier(.2, .8, .2, 1); }
+.mvin { padding: 4px 12px 10px; border-radius: 0 0 12px 12px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line-2); opacity: 0; transform: translateY(-10px); transition: opacity .16s ease, transform .22s cubic-bezier(.2, .8, .2, 1); }
 .fdrop.open .mvin { opacity: 1; transform: none; }
 .fdrop .opt { grid-template-columns: 16px 1fr; gap: 8px; padding: 10px 0; }
 .fdrop .opt b { font-size: 14px; } .fdrop .opt small { font-size: 11.5px; }
