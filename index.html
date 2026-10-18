@@ -144,6 +144,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .sortbtn b { grid-area: v; font-size: 15px; font-weight: 700; }
 .sortbtn small { grid-area: w; font-size: 12px; color: var(--dim); margin-top: 1px; }
 .sortbtn i { grid-area: i; font-style: normal; color: var(--muted); font-size: 13px; }
+/* Finn: to knapper side om side – Sortering og Bevegelser. */
+.fbar2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 4px; }
+.fbar2 .sortbtn { margin: 0; grid-template-areas: "l i" "v i" "w i"; grid-template-columns: 1fr auto; }
+.fbar2 .sortbtn small:empty { display: none; }
 .opt { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; width: 100%; padding: 13px 0; border-bottom: 1px solid var(--line-2); text-align: left; }
 .opt:last-child { border-bottom: 0; }
 .opt .ck { color: var(--dim); font-size: 14px; padding-top: 1px; } .opt[aria-pressed="true"] .ck { color: var(--up); }
@@ -1177,13 +1181,28 @@ body::before { display: none; }
       <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
   }
 
+  let finnMv = null;
+  function openMoveSheet() {
+    if (!finnMv) return;
+    const { ups, downs, mv, perBtns, perNote } = finnMv;
+    openSheet(`<div class="t">Bevegelser</div><div class="s">Finn-pris siste ${movePeriod} dager${perNote}</div>`,
+      `<div class="mvh" style="justify-content:flex-start;margin-bottom:6px">${perBtns}</div>`
+      + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>` : '<div class="empty">Ingen bevegelser ennå</div>'));
+  }
+  // Åpne et produkt i Finn-listen og scroll dit (fra en bevegelse).
+  function goFinn(id) {
+    const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(id)}"]`);
+    if (card && !openFinn.has(id)) card.querySelector('.fh').click();
+    if (card) { const sc = $('app'); sc.scrollTo({ top: card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8, behavior: 'smooth' }); }
+  }
+
   function renderFinn() {
     const f = tree.finn, hero = $('finnHero');
     const fs = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     $('finnSort').innerHTML = `<button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><small>${fs[2]}</small><i>▾</i></button>`;
     const ps = ((f && f.products) || []).filter(Boolean);
     finnById = {}; ps.forEach((p) => (finnById[p.id] = p));
-    hero.className = 'hero';
+    hero.className = 'hero'; hero.hidden = false;
     if (!ps.length) {
       hero.innerHTML = '<div class="hero-t">Venter på Finn-data</div><div class="hero-s">Boten samler Finn-annonser første gang den kjører med den nye versjonen. Salgsfart blir sikrere etter noen dager.</div>';
       $('finnList').innerHTML = ''; $('finnFoot').textContent = ''; return;
@@ -1206,9 +1225,11 @@ body::before { display: none; }
     const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
     const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
       <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
-    hero.innerHTML = `<div class="mvh"><div class="hero-l">Bevegelser${perNote ? ` <span class="dim">${perNote}</span>` : ''}</div>${perBtns}</div>`
-      + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>`
-        : '<div class="hero-n" style="border-top:0;margin-top:4px;padding-top:0">Ingen bevegelser ennå</div>');
+    // To knapper øverst: Sortering og Bevegelser. Bevegelsene åpnes i et ark nedenfra (openMoveSheet).
+    finnMv = { ups, downs, mv, perBtns, perNote };
+    $('finnSort').innerHTML = `<div class="fbar2"><button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><i>▾</i></button>
+      <button type="button" class="sortbtn" data-movesheet><span>Bevegelser</span><b>${per} d</b><small>${ups.length || downs.length ? `<span class="up">▲ ${ups.length}</span> <span class="down">▼ ${downs.length}</span>` : 'ingen ennå'}</small><i>▾</i></button></div>`;
+    hero.hidden = true;
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
     $('finnList').innerHTML = list.map(finnRow).join('');
@@ -1541,23 +1562,18 @@ body::before { display: none; }
   $('sheet').addEventListener('click', (e) => {
     if (e.target.closest('[data-close]')) { closeSheet(); return; }
     const fs = e.target.closest('[data-fsort]');
-    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); }
+    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); return; }
+    const pb = e.target.closest('[data-per]');
+    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); openMoveSheet(); return; }
+    const go = e.target.closest('[data-go]');
+    if (go) { closeSheet(); goFinn(go.dataset.go); }
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
   $('tab-finn').addEventListener('click', (e) => {
     if (e.target.closest('[data-sortmenu]')) { finnSortSheet(); return; }
-    const pb = e.target.closest('[data-per]');
-    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
-    // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
-    const go = e.target.closest('[data-go]');
-    if (go) {
-      const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(go.dataset.go)}"]`);
-      if (card && !openFinn.has(go.dataset.go)) card.querySelector('.fh').click();
-      if (card) { const sc = $('app'); sc.scrollTo({ top: card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8, behavior: 'smooth' }); }
-      return;
-    }
+    if (e.target.closest('[data-movesheet]')) { openMoveSheet(); return; }
     if (e.target.closest('a')) return;
     const h = e.target.closest('.fh'); if (!h) return;
     const card = h.closest('.fp'), id = card.dataset.id;
