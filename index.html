@@ -145,18 +145,30 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .sortbtn small { grid-area: w; font-size: 12px; color: var(--dim); margin-top: 1px; }
 .sortbtn i { grid-area: i; font-style: normal; color: var(--muted); font-size: 13px; }
 /* Finn: to knapper side om side – Sortering og Bevegelser. */
-.fbar2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 4px; }
+.fbar2 { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 0; }
+/* Menyen legger seg oppå listen (ikke skyver den ned), like bred som knappen sin, med skygge under. */
+.fbar2 > .fdrop { position: absolute; top: calc(100% - 1px); width: calc(50% - 4px); z-index: 5; border-radius: 0 0 12px 12px; box-shadow: 0 14px 28px rgba(0, 0, 0, .6); }
+.fbar2 > .fdrop.l { left: 0; } .fbar2 > .fdrop.r { right: 0; }
+.fbar2 > .fdrop:not(.open) { box-shadow: none; pointer-events: none; }
 .fbar2 .sortbtn { margin: 0; grid-template-areas: "l i" "v i" "w i"; grid-template-columns: 1fr auto; }
 .fbar2 .sortbtn small:empty { display: none; }
 .fbar2 .sortbtn i { transition: transform .3s ease; }
-.fbar2 [data-movesheet][aria-expanded="true"] { border-color: var(--muted); }
-.fbar2 [data-movesheet][aria-expanded="true"] i { transform: rotate(180deg); }
-/* Bevegelser glir ned under knappene og skyver listen ned (høyde 0 → full, med en liten glid og fade). */
-.mvdrop { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2, .8, .2, 1); }
-.mvdrop.open { grid-template-rows: 1fr; }
-.mvclip { overflow: hidden; min-height: 0; }
-.mvin { margin-top: 8px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-2); opacity: 0; transform: translateY(-10px); transition: opacity .28s ease, transform .38s cubic-bezier(.2, .8, .2, 1); }
-.mvdrop.open .mvin { opacity: 1; transform: none; }
+.fbar2 .sortbtn[aria-expanded="true"] i { transform: rotate(180deg); }
+/* Åpen knapp «utvides»: bunnen blir rett og går i ett med menyen under (knappen ligger over menyens toppkant). */
+.fbar2 .sortbtn[aria-expanded="true"] { position: relative; z-index: 6; margin-bottom: -1px; border-radius: 12px 12px 0 0; border-bottom-color: var(--panel); }
+/* Menyen glir ned under knappene og skyver listen ned (høyde 0 → full, med en liten glid og fade). */
+.fdrop { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2, .8, .2, 1); }
+.fdrop.open { grid-template-rows: 1fr; }
+.mvclip { overflow: hidden; min-height: 0; border-radius: 0 0 12px 12px; }
+.mvin { padding: 4px 12px 10px; border-radius: 0 0 12px 12px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line-2); opacity: 0; transform: translateY(-10px); transition: opacity .28s ease, transform .38s cubic-bezier(.2, .8, .2, 1); }
+.fdrop.open .mvin { opacity: 1; transform: none; }
+.fdrop .opt { grid-template-columns: 16px 1fr; gap: 8px; padding: 10px 0; }
+.fdrop .opt b { font-size: 14px; } .fdrop .opt small { font-size: 11.5px; }
+.fdrop .opt:last-child { border-bottom: 0; }
+.fdrop .per { padding: 6px 0 2px; }
+.fdrop .mv { grid-template-columns: 14px minmax(0, 1fr) auto; gap: 6px; }
+.fdrop .mv .mn { font-size: 13px; } .fdrop .mv .mc { font-size: 13px; }
+#finnSort { margin-bottom: 8px; }
 .mvin .mvh { font-size: 12.5px; }
 .mvnone { padding: 10px 0 4px; color: var(--muted); font-size: 13.5px; }
 /* Glidningen kjører også med «Reduser bevegelse» på – den er kort og rolig, og brukeren vil se den. */
@@ -1193,7 +1205,13 @@ body::before { display: none; }
       <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
   }
 
-  let mvOpen = false;   // Bevegelser-menyen under knappene i Finn
+  // Menyen som er åpen under knappene i Finn: 'sort', 'mv' eller null. Byttes uten å tegne siden på nytt, så den glir.
+  let finnDrop = null;
+  function setFinnDrop(k) {
+    finnDrop = k;
+    document.querySelectorAll('#finnSort [data-drop]').forEach((b) => b.setAttribute('aria-expanded', String(b.dataset.drop === k)));
+    document.querySelectorAll('#finnSort .fdrop').forEach((d) => d.classList.toggle('open', d.dataset.for === k));
+  }
   // Åpne et produkt i Finn-listen og scroll dit (fra en bevegelse).
   function goFinn(id) {
     const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(id)}"]`);
@@ -1204,7 +1222,7 @@ body::before { display: none; }
   function renderFinn() {
     const f = tree.finn, hero = $('finnHero');
     const fs = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
-    $('finnSort').innerHTML = `<button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><small>${fs[2]}</small><i>▾</i></button>`;
+    $('finnSort').innerHTML = '';
     const ps = ((f && f.products) || []).filter(Boolean);
     finnById = {}; ps.forEach((p) => (finnById[p.id] = p));
     hero.className = 'hero'; hero.hidden = false;
@@ -1230,13 +1248,17 @@ body::before { display: none; }
     const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
     const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
       <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
-    // To knapper øverst: Sortering og Bevegelser. Bevegelsene glir ned rett under knappene (mvOpen).
-    $('finnSort').innerHTML = `<div class="fbar2"><button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><i>▾</i></button>
-      <button type="button" class="sortbtn" data-movesheet aria-expanded="${mvOpen}"><span>Bevegelser</span><b>${per} d</b><small>${ups.length || downs.length ? `<span class="up">▲ ${ups.length}</span> <span class="down">▼ ${downs.length}</span>` : 'ingen ennå'}</small><i>▾</i></button></div>
-      <div class="mvdrop${mvOpen ? ' open' : ''}" id="mvDrop"><div class="mvclip"><div class="mvin">
-        <div class="mvh"><span class="dim">Finn-pris siste ${per} dager${perNote}</span>${perBtns}</div>
+    // To knapper øverst: Sortert på og Bevegelser. Hver av dem utvides nedover med en meny rett under seg (finnDrop).
+    const exp = (k) => `aria-expanded="${finnDrop === k}"`;
+    const sortOpts = FSORT.map(([k, label, why]) => `<button type="button" class="opt" data-fsort="${k}" aria-pressed="${finnSort === k}"><span class="ck">${finnSort === k ? '●' : '○'}</span><span><b>${label}</b><small>${why}</small></span></button>`).join('');
+    // Menyen ligger i samme kolonne som knappen og er like bred – knappen blir bare lengre.
+    $('finnSort').innerHTML = `<div class="fbar2"><button type="button" class="sortbtn" data-drop="sort" ${exp('sort')}><span>Sortert på</span><b>${fs[1]}</b><i>▾</i></button>
+      <button type="button" class="sortbtn" data-drop="mv" ${exp('mv')}><span>Bevegelser</span><b>${per} d</b><small>${ups.length || downs.length ? `<span class="up">▲ ${ups.length}</span> <span class="down">▼ ${downs.length}</span>` : 'ingen ennå'}</small><i>▾</i></button>
+      <div class="fdrop l${finnDrop === 'sort' ? ' open' : ''}" data-for="sort"><div class="mvclip"><div class="mvin">${sortOpts}</div></div></div>
+      <div class="fdrop r${finnDrop === 'mv' ? ' open' : ''}" data-for="mv"><div class="mvclip"><div class="mvin">
+        ${perBtns}
         ${ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>` : '<div class="mvnone">Ingen bevegelser ennå</div>'}
-      </div></div></div>`;
+      </div></div></div></div>`;
     hero.hidden = true;
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
@@ -1572,14 +1594,23 @@ body::before { display: none; }
     const fs = e.target.closest('[data-fsort]');
     if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); }
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSheet(); if (finnDrop) setFinnDrop(null); } });
+  // Trykk utenfor menyen i Finn lukker den (den ligger oppå listen).
+  // Trykket i innholdet bare lukker menyen (åpner ikke det som ligger under); fanebaren virker som vanlig.
+  document.addEventListener('click', (e) => {
+    if (!finnDrop || e.target.closest('#finnSort')) return;
+    setFinnDrop(null);
+    if (e.target.closest('#app')) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
   $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
 
   $('tab-finn').addEventListener('click', (e) => {
-    if (e.target.closest('[data-sortmenu]')) { finnSortSheet(); return; }
-    // Bevegelser: menyen glir ned/opp under knappene (uten å tegne siden på nytt, så overgangen blir myk).
-    const mb = e.target.closest('[data-movesheet]');
-    if (mb) { mvOpen = !mvOpen; $('mvDrop').classList.toggle('open', mvOpen); mb.setAttribute('aria-expanded', String(mvOpen)); return; }
+    // Sortert på / Bevegelser: menyen glir ned under knappen (og den andre lukkes).
+    const db = e.target.closest('[data-drop]');
+    if (db) { setFinnDrop(finnDrop === db.dataset.drop ? null : db.dataset.drop); return; }
+    // Valgt sortering: listen sorteres med en gang, og menyen glir opp igjen.
+    const fsb = e.target.closest('[data-fsort]');
+    if (fsb) { finnSort = fsb.dataset.fsort; store.set('rr-finn-sort', finnSort); renderFinn(); void $('finnSort').offsetHeight; setFinnDrop(null); return; }
     const pb = e.target.closest('[data-per]');
     if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
     // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
