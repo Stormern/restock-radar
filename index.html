@@ -165,6 +165,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .fdrop .opt { grid-template-columns: 16px 1fr; gap: 8px; padding: 10px 0; }
 .fdrop .opt b { font-size: 14px; } .fdrop .opt small { font-size: 11.5px; }
 .fdrop .opt:last-child { border-bottom: 0; }
+.mseg.dt { margin: 0 0 10px; padding: 3px; gap: 3px; border-radius: 11px; }
+.mseg.dt button { padding: 7px 2px; font-size: 12.5px; gap: 5px; border-radius: 8px; }
+.mseg.dt button b { min-width: 18px; padding: 1px 6px; font-size: 11px; }
+.mseg button[data-dtab="stats"] { --mc: #2BD67B; } .mseg button[data-dtab="sales"] { --mc: #2BD67B; } .mseg button[data-dtab="shops"] { --mc: #FF9F43; } .mseg button[data-dtab="list"] { --mc: #3D8BFF; }
+.dt-more { display: block; width: 100%; padding: 10px 0 2px; font-size: 13px; font-weight: 600; color: var(--muted); text-align: center; }
 .fdrop .per { padding: 6px 0 2px; }
 .fdrop .mv { grid-template-columns: 14px minmax(0, 1fr) auto; gap: 6px; }
 .fdrop .mv .mn { font-size: 13px; } .fdrop .mv .mc { font-size: 13px; }
@@ -382,7 +387,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tabbar button[data-tab="kalender"] { --tc: #F5C518; } .tabbar button[data-tab="finn"] { --tc: #3D8BFF; } .tabbar button[data-tab="bot"] { --tc: #B18CFF; }
 .tabbar button svg { color: var(--tc); box-sizing: content-box; padding: 3px 14px; border-radius: 999px; }
 .tabbar button[aria-selected="true"] { color: var(--tc); }
-.tabbar button[aria-selected="true"] svg { background: color-mix(in srgb, var(--tc) 22%, transparent); }
+/* Én pille som glir mellom fanene (som i Instagram): spretten bevegelse, strekker seg litt i farten og skifter farge. */
+.tabbar-in { position: relative; }
+.tabbar button { z-index: 1; }
+.tabpill { position: absolute; left: 0; top: 0; width: 50px; height: 28px; pointer-events: none; z-index: 0; transition: transform .45s cubic-bezier(.3, 1.35, .5, 1); }
+.tabpill i { display: block; width: 100%; height: 100%; border-radius: 999px; background-color: rgba(255, 255, 255, .12); transition: background-color .35s ease; }
+.tabpill.noanim, .tabpill.noanim i { transition: none; }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
 
 /* Oppsett & toast */
@@ -490,7 +500,16 @@ body::before { display: none; }
 .cc-m small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
 .botfoot { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
 .botfoot b { color: var(--ink); font-weight: 600; }
-</style>
+/* Flytende glass-fanebar (som Instagram på iOS 26) */
+body { position: relative; }
+.tabbar { position: absolute; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); padding: 0; border: 1px solid rgba(255, 255, 255, .10); border-radius: 999px;
+  background: rgba(24, 26, 32, .55); backdrop-filter: blur(22px) saturate(170%); -webkit-backdrop-filter: blur(22px) saturate(170%); box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .08); }
+.tabbar-in { max-width: none; padding: 0 6px; }
+#app { padding-bottom: calc(var(--bar-h) + 40px + env(safe-area-inset-bottom, 0px)); }
+.tabpill i { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }.tabbar-in { height: 56px; }
+.tabbar button { font-size: 0; gap: 0; }
+.tabbar button svg { width: 24px; height: 24px; padding: 7px 18px; }
+.tabbar button .badge { font-size: 10px; }</style>
 </head>
 <body>
 
@@ -576,6 +595,7 @@ body::before { display: none; }
 
 <nav class="tabbar" id="tabbar" role="tablist" hidden>
   <div class="tabbar-in">
+    <span class="tabpill" id="tabPill" aria-hidden="true"><i></i></span>
     <button type="button" role="tab" data-tab="marked" aria-selected="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Marked<span class="badge" id="tabBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="butikker" aria-selected="false">
@@ -1160,6 +1180,7 @@ body::before { display: none; }
   function dShort(ms) { const d = Math.floor((Date.now() - ms) / 86400000); return d <= 0 ? 'I dag' : d === 1 ? 'I går' : new Date(ms).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }).replace('.', ''); }
 
   // Kort detaljvisning: fire nøkkeltall, grafen, siste salg og de billigste annonsene.
+  const finnDetTab = {}, finnDetMore = {};
   function finnDetails(p) {
     const m = profit(p), has = m !== null && m !== undefined, pc = pctOf(p, m);
     const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
@@ -1176,11 +1197,19 @@ body::before { display: none; }
     const btn = (href, txt, pri) => `<a class="btn wide${pri ? ' pri' : ''}" style="display:block;text-align:center" href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
     // Alle norske butikker som selger produktet: på lager først (grønn), så billigste.
     const shops = (p.offers || []).map((o) => `<div class="of ${o.in ? 'in' : 'out'}"><span class="s"></span><span class="on">${esc(o.shop)}<small>${o.in ? 'på lager' : 'ikke på lager'}</small></span><span class="pr">${krU(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.in ? 'Kjøp' : 'Åpne'} ↗</a></div>`).join('');
-    return `<div class="tiles">${tiles}</div>${finnChart(p)}
-      ${sold ? `<div class="prod-t">Siste salg på Finn · bekreftet solgt</div><div class="offers">${sold}</div>` : ''}
-      ${shops ? `<div class="prod-t">Kjøp i butikk · ${(p.offers || []).length} butikker</div><div class="offers">${shops}</div>` : ''}
-      ${cheap ? `<div class="prod-t">Billigst på Finn nå</div><div class="offers">${cheap}</div>` : ''}
-      <div class="btns">${p.url ? btn(p.url, 'Se alle annonser på Finn ↗') : ''}</div>`;
+    // Lister: maks 4 rader til du trykker «Vis alle».
+    const cap = (rows, n) => { const all = finnDetMore[p.id], list = rows.slice(0, all ? rows.length : 4).join(''); return list + (!all && rows.length > 4 ? `<button type="button" class="dt-more" data-dmore="1">Vis alle ${rows.length}</button>` : ''); };
+    const soldR = (p.soldLast || []).map((a) => `<div class="of in"><span class="s"></span><span class="on">${dShort(a.at)}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Se ↗</a></div>`);
+    const shopR = (p.offers || []).map((o) => `<div class="of ${o.in ? 'in' : 'out'}"><span class="s"></span><span class="on">${esc(o.shop)}<small>${o.in ? 'på lager' : 'ikke på lager'}</small></span><span class="pr">${krU(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.in ? 'Kjøp' : 'Åpne'} ↗</a></div>`);
+    const listR = (p.cheap || []).map((a) => `<div class="of"><span class="s"></span><span class="on">${esc(a.t)}${a.r ? '<span class="rtag">RESERVERT</span>' : ''}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Åpne ↗</a></div>`);
+    const seg = (tabs, cur) => `<div class="mseg dt" style="--n:${tabs.length}">${tabs.map(([k, l, n]) => `<button type="button" data-dtab="${k}" aria-pressed="${k === cur}">${l}${n ? `<b>${n}</b>` : ''}</button>`).join('')}</div>`;
+    const ch = finnChart(p), chart = /Prisgrafen vises/.test(ch) ? '' : ch;   // ingen forklaringstekst når grafen mangler data
+    const finnBtn = `<div class="btns">${p.url ? btn(p.url, 'Se alle annonser på Finn ↗') : ''}</div>`;    const cur = finnDetTab[p.id] || 'stats';
+    const body = cur === 'stats' ? `<div class="tiles">${tiles}</div>${chart}`
+      : cur === 'sales' ? `<div class="offers">${soldR.length ? cap(soldR) : '<div class="of"><span class="on mut">Ingen bekreftede salg ennå</span></div>'}</div>`
+      : cur === 'shops' ? `<div class="offers">${cap(shopR)}</div>`
+      : `<div class="offers">${cap(listR)}</div>${finnBtn}`;
+    return seg([['stats', 'Stats'], ['sales', 'Sales', soldR.length], ['shops', 'Shops', shopR.length], ['list', 'Listings', listR.length]], cur) + body;
   }
 
   // Tre streker – Butikk, Solgt (bekreftet) og Ber om (annonser ute nå).
@@ -1616,7 +1645,14 @@ body::before { display: none; }
     // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
     const go = e.target.closest('[data-go]');
     if (go) { goFinn(go.dataset.go); return; }
-    if (e.target.closest('a')) return;
+    // Knappene inne i et åpent produkt: bytt fane (og «Vis alle») uten å lukke kortet.
+    const dt = e.target.closest('[data-dtab],[data-dmore]');
+    if (dt) {
+      const card = dt.closest('.fp'), id = card.dataset.id;
+      if (dt.dataset.dtab) finnDetTab[id] = dt.dataset.dtab; else finnDetMore[id] = true;
+      card.querySelector('.fdet').innerHTML = finnDetails(finnById[id]);
+      return;
+    }    if (e.target.closest('a')) return;
     const h = e.target.closest('.fh'); if (!h) return;
     const card = h.closest('.fp'), id = card.dataset.id;
     if (openFinn.has(id)) openFinn.delete(id); else openFinn.add(id);
@@ -1639,7 +1675,26 @@ body::before { display: none; }
     if (name === 'kalender') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
     $('app').scrollTo({ top: 0 });
     closeSheet();
+    movePill(true);
   }
+  // Pillen bak valgt fane glir dit (som i Instagram): litt sprett, strekker seg i farten og skifter til fanens farge.
+  let pillAt = null;
+  function movePill(anim) {
+    const pill = $('tabPill'), b = document.querySelector('.tabbar button[aria-selected="true"]');
+    if (!pill || !b || !b.offsetWidth) return;
+    const r = b.querySelector('svg').getBoundingClientRect(), p = pill.parentElement.getBoundingClientRect();
+    const x = Math.round(r.left - p.left), y = Math.round(r.top - p.top);
+    pill.classList.toggle('noanim', !anim || pillAt === null);
+    pill.style.width = `${r.width}px`; pill.style.height = `${r.height}px`;
+    pill.style.transform = `translate(${x}px, ${y}px)`;
+    const m = /#([0-9a-f]{6})/i.exec(getComputedStyle(b).getPropertyValue('--tc')), n = m ? parseInt(m[1], 16) : 0xffffff;
+    pill.firstElementChild.style.backgroundColor = `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, .22)`;
+    if (anim && pillAt !== null && pillAt !== x && pill.firstElementChild.animate) {
+      pill.firstElementChild.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(1.35)', offset: 0.4 }, { transform: 'scaleX(1)' }], { duration: 450, easing: 'ease-out' });
+    }
+    pillAt = x;
+  }
+  addEventListener('resize', () => movePill(false));
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
   document.querySelectorAll('[data-segs]').forEach((bar) => {
     applySegs(bar.closest('section'));
@@ -1683,6 +1738,7 @@ body::before { display: none; }
   function start() {
     $('setup').hidden = true;
     ['top', 'app', 'tabbar'].forEach((id) => ($(id).hidden = false));
+    requestAnimationFrame(() => movePill(false));
     const t = store.get('rr-tab');
     showTab(TABS.includes(t) ? t : 'marked');
     render(); connect();
