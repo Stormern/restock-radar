@@ -63,6 +63,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .hero-s b { color: var(--ink); font-weight: 600; }
 .hero-n { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 .hero-n b { color: var(--ink); font-weight: 600; }
+.hero-h { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero-h .st { padding: 3px 7px; border-radius: 5px; letter-spacing: .05em; }
+.hero-h .st.off { color: var(--down); background: rgba(255, 107, 91, .12); } .hero-h .st.on { color: var(--up); background: rgba(43, 214, 123, .12); }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.kpi { padding: 10px 12px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); }
+.kpi b { display: block; font-size: 26px; font-weight: 700; line-height: 1.1; } .kpi span { font-size: 12px; color: var(--muted); }
+.nx2 { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: baseline; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.nx2 b { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hero .cta { display: flex; justify-content: center; margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--up); color: var(--up-ink); font-weight: 700; font-size: 15px; }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--dim); }
 .dot.g { background: var(--up); } .dot.y { background: var(--warn); } .dot.r { background: var(--down); }
@@ -262,6 +270,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .bar b { text-align: right; font-weight: 600; color: var(--ink); font-size: 12.5px; }
 .fstat { margin: 7px 0 0 32px; font-size: 12.5px; color: var(--muted); }
 .fstat b { color: var(--ink); font-weight: 600; }
+.v.rs small { display: block; font-size: 11px; font-weight: 600; margin-top: 1px; }
+.bar.ask i { background: var(--line-2); } .bar.ask b { color: var(--muted); font-weight: 500; }
 .fdet { margin: 12px 0 2px 32px; }
 .chart { width: 100%; height: auto; display: block; margin: 4px 0 10px; }
 .chart .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
@@ -690,6 +700,8 @@ body::before { display: none; }
     const pt = p === null ? '' : `<small>${p < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p)))} %</small>`;
     return `<span class="v mg ${m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${sign(m)}<span class="u"> kr</span>${pt}</span>`;
   };
+  // Resale-tallet med et lite merke under: «solgt · 3» (bekreftet solgt på Finn) eller «ber om» (det annonsene koster nå).
+  const resCell = (v, sold) => (v ? `<span class="v rs">${krU(v)}<small class="${sold ? 'up' : 'dim'}">${sold ? `solgt · ${sold}` : 'ber om'}</small></span>` : '<span class="v dim">–</span>');
 
   function row(x) {
     const { it, a } = x;
@@ -702,7 +714,7 @@ body::before { display: none; }
     return `<div class="row ${cls}${open ? ' open' : ''}" data-name="${esc(it.name)}">
       <div class="rh" role="button" tabindex="0" aria-expanded="${open}">
         <div class="nm"><div class="t">${esc(it.name)}</div><div class="s">${statusLine(x)}</div>${btn}</div>
-        ${pc}<span class="v ${a.finn ? '' : 'dim'}">${a.finn ? krU(a.finn) : '–'}</span>${mg}
+        ${pc}${resCell(a.finn, it.finn && it.finn.sold)}${mg}
       </div>
       <div class="det" ${open ? '' : 'hidden'}>${details(it, a)}</div>
     </div>`;
@@ -724,7 +736,7 @@ body::before { display: none; }
       it.max ? `Maks <b>${kr(it.max)}</b>` : '',
       it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
       // Trykk på Finn-prisen for alle annonsene, eller på "billigst" for den billigste annonsen.
-      a.finn ? `<a class="fl" href="${esc(it.finn.url || '')}" target="_blank" rel="noopener">Resale <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.n} annonser)</span></a>` : 'Resale <b>ukjent</b> <span class="dim">(ingen på Finn)</span>',
+      a.finn ? `<a class="fl" href="${esc(it.finn.url || '')}" target="_blank" rel="noopener">${it.finn.sold ? `Solgt for <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.sold} salg · ber om ${kr(it.finn.ask)})</span>` : `Resale <b>${kr(a.finn)}</b> <span class="dim">(ber om · ${it.finn.n} annonser)</span>`}</a>` : 'Resale <b>ukjent</b> <span class="dim">(ingen på Finn)</span>',
       a.finn ? `<a class="fl min" href="${esc(it.finn.minUrl || it.finn.url || '')}" target="_blank" rel="noopener">Billigst på Finn <b>${kr(it.finn.min)}</b> ↗</a>` : ''
     ].filter(Boolean).map((s) => `<span class="kvi">${s}</span>`).join('');
     const info = [];
@@ -802,21 +814,21 @@ body::before { display: none; }
   }
   // Pris (butikk), resale (Finn nå) og margin for en linje i kalenderen. Mangler resale, brukes tidligere sett som pekepinn.
   function calVals(e) {
-    let price = 0, res = 0, ref = null;
+    let price = 0, res = 0, ref = null, sold = 0;
     if (e.kind === 'sett') { price = e.s.price || 0; ref = calRef('Elite Trainer Box'); }
-    else if (e.it) { const a = analyse(e.it); price = a.main && a.main.price > 0 ? a.main.price : 0; res = a.finn || 0; if (!res) ref = calRef(e.name); }
+    else if (e.it) { const a = analyse(e.it); price = a.main && a.main.price > 0 ? a.main.price : 0; res = a.finn || 0; sold = (e.it.finn && e.it.finn.sold) || 0; if (!res) ref = calRef(e.name); }
     else { price = e.x.price || 0; ref = calRef(e.name); }
-    return { price, res, ref, m: price && res ? res - price : null, mRef: price && !res && ref && e.kind !== 'sett' ? ref.med - price : null };
+    return { price, res, ref, sold, m: price && res ? res - price : null, mRef: price && !res && ref && e.kind !== 'sett' ? ref.med - price : null };
   }
   function calCells(v) {
     const pc = v.price ? `<span class="v">${krU(v.price)}</span>` : '<span class="v dim uk">ukjent</span>';
-    const rc = v.res ? `<span class="v">${krU(v.res)}</span>` : v.ref ? `<span class="v dim">≈${krU(v.ref.med)}<small>tidl. sett</small></span>` : '<span class="v dim uk">ukjent</span>';
+    const rc = v.res ? resCell(v.res, v.sold) : v.ref ? `<span class="v dim">≈${krU(v.ref.med)}<small>tidl. sett</small></span>` : '<span class="v dim uk">ukjent</span>';
     const mc = v.m !== null ? marginCell(v.m, v.price) : v.mRef !== null ? `<span class="v mg dim">≈${sign(v.mRef)}<span class="u"> kr</span></span>` : '<span class="v mg dim">–</span>';
     return pc + rc + mc;
   }
   function calSub(e) {
     const v = calVals(e);
-    const res = v.res ? `resale <b>${kr(v.res)} kr</b>` : v.ref ? `resale ukjent · tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : 'resale ukjent';
+    const res = v.res ? `${v.sold ? 'solgt for' : 'resale'} <b>${kr(v.res)} kr</b>` : v.ref ? `resale ukjent · tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : 'resale ukjent';
     if (e.kind === 'sett') return `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter` : 'ikke lagt ut ennå'}${v.price ? ` · fra <b>${kr(v.price)} kr</b>` : ''}${v.ref ? ` · ETB tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : ''}`;
     return `${v.price ? `pris <b>${kr(v.price)} kr</b>` : 'pris ukjent'} · ${res}`;
   }
@@ -832,8 +844,8 @@ body::before { display: none; }
     let h = `<div class="tiles">${[
       tile(e.kind === 'sett' ? 'Fra (butikk)' : 'Butikkpris', v.price ? `${kr(v.price)} kr` : 'ukjent', v.price ? 'billigst i Norge' : 'ikke lagt ut ennå'),
       v.res && e.it && e.it.finn && e.it.finn.url
-        ? `<a class="tile lnk" href="${esc(e.it.finn.url)}" target="_blank" rel="noopener"><span>Resale nå</span><b>${kr(v.res)} kr</b><small>se annonsene på Finn ↗</small></a>`
-        : tile('Resale nå', v.res ? `${kr(v.res)} kr` : 'ukjent', v.res ? 'typisk pris på Finn' : v.ref ? `tidl. sett ≈ ${kr(v.ref.med)} kr` : 'ingen annonser ennå'),
+        ? `<a class="tile lnk" href="${esc(e.it.finn.url)}" target="_blank" rel="noopener"><span>${v.sold ? 'Solgt for' : 'Resale nå'}</span><b>${kr(v.res)} kr</b><small>${v.sold ? `${v.sold} salg · ` : 'ber om · '}se annonsene ↗</small></a>`
+        : tile(v.sold ? 'Solgt for' : 'Resale nå', v.res ? `${kr(v.res)} kr` : 'ukjent', v.res ? (v.sold ? `${v.sold} salg på Finn` : 'det folk ber om på Finn') : v.ref ? `tidl. sett ≈ ${kr(v.ref.med)} kr` : 'ingen annonser ennå'),
       tile('Margin', v.m !== null ? `${sign(v.m)} kr` : v.mRef !== null ? `≈${sign(v.mRef)} kr` : '–', v.m !== null ? 'mot Finn nå' : v.mRef !== null ? 'mot tidligere sett' : 'mangler pris', v.m !== null ? (v.m >= 0 ? 'up' : 'down') : ''),
       tile('Slipp', countdown(daysTo(e.date)), esc(longDate(e.date)))
     ].join('')}</div>`;
@@ -965,9 +977,9 @@ body::before { display: none; }
   // Sortering: [nøkkel, navn, forklaring, verdi]. Velges fra et ark med forklaring på hvert valg.
   const FSORT = [
     ['best', 'Signal', 'P/L vektet mot volum – beste trade nå', (p) => p.score],
-    ['margin', 'P/L', 'Gevinst i kr per stk (resale − butikk)', (p) => p.margin],
-    ['pct', 'ROI %', 'Avkastning i prosent av innkjøpspris', (p) => p.pct],
-    ['sold', 'Volum', 'Omsatt per uke – annonser som forsvinner', (p) => p.soldWeek],
+    ['margin', 'P/L', 'Gevinst i kr per stk (solgt − butikk)', (p) => profit(p)],
+    ['pct', 'ROI %', 'Avkastning i prosent av innkjøpspris', (p) => pctOf(p, profit(p))],
+    ['sold', 'Volum', 'Solgt per uke – bekreftet solgt på Finn', (p) => p.soldWeek],
     ['listed', 'Likviditet', 'Nye annonser per uke – aktivitet i markedet', (p) => p.newWeek]
   ];
   function finnSortSheet() {
@@ -1067,47 +1079,57 @@ body::before { display: none; }
       + (s > 0 ? ` · Butikk <b>${nf.format(s)} kr</b> · <span class="${m >= 0 ? 'up' : 'down'}">${sign(m)} kr</span>` : '');
   }
 
-  // Kort detaljvisning: fire nøkkeltall, grafen og de billigste annonsene.
+  // Solgt = Finn sier selv «Solgt» på annonsen (bekreftede salg siste 30 dager). Ber om = det annonsene ute nå koster.
+  function hasSold(p) { return p.soldN > 0 && p.sold > 0; }
+  // Fortjeneste regnes fra salgsprisen når den finnes, ellers fra det folk ber om (anslag).
+  function profit(p) { return hasSold(p) && p.smargin !== null && p.smargin !== undefined ? p.smargin : p.margin; }
+  function pctOf(p, m) { const sp = p.store && p.store.price > 0 ? p.store.price : 0; return sp && m !== null && m !== undefined ? Math.round((m / sp) * 100) : null; }
+  function pctTxt(v) { return v === null ? '' : `${v < 0 ? '−' : ''}${nf.format(Math.abs(v))} %`; }
+  function dShort(ms) { const d = Math.floor((Date.now() - ms) / 86400000); return d <= 0 ? 'I dag' : d === 1 ? 'I går' : new Date(ms).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }).replace('.', ''); }
+
+  // Kort detaljvisning: fire nøkkeltall, grafen, siste salg og de billigste annonsene.
   function finnDetails(p) {
-    const m = p.margin, has = m !== null && m !== undefined;
+    const m = profit(p), has = m !== null && m !== undefined, pc = pctOf(p, m);
     const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
     const cheapest = (p.cheap || []).filter((a) => a.url && a.p > 0).sort((a, b) => a.p - b.p)[0];
     const tiles = [
-      tile('Fortjeneste', has ? `${sign(m)} kr` : '–', has && p.pct !== null && p.pct !== undefined ? `${p.pct < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p.pct)))} % per stk` : 'per stk', has ? (m >= 0 ? 'up' : 'down') : ''),
-      p.track >= 3 ? tile('Selges', `ca. ${nfx(p.soldWeek)}/uke`, p.days ? `typisk ${nfx(p.days)} dager` : 'trolig solgt')
-        : tile('Selges', 'måles nå', `boten har fulgt i ${Math.max(1, Math.ceil(p.track || 0))} d`),
-      tile('Ute nå', nfx(p.n), `${nfx(p.newWeek)} nye/uke${p.res ? ` · ${p.res} reservert` : ''}`),
-      // Billigste annonse: trykk for å åpne den på Finn.
+      tile('Fortjeneste', has ? `${sign(m)} kr` : '–', has ? `${pctTxt(pc)} · ${hasSold(p) ? `fra ${p.soldN} salg` : 'anslag'}` : 'per stk', has ? (m >= 0 ? 'up' : 'down') : ''),
+      tile('Solgt for', hasSold(p) ? `${nfx(p.sold)} kr` : '–', hasSold(p) ? `${p.soldN} salg siste 30 d` : 'ingen salg ennå', hasSold(p) ? 'up' : ''),
+      tile('Ber om', p.med ? `${nfx(p.med)} kr` : '–', `${nfx(p.n)} annonser ute`),
       cheapest ? `<a class="tile lnk" href="${esc(cheapest.url)}" target="_blank" rel="noopener"><span>Billigst nå</span><b>${nfx(cheapest.p)} kr</b><small>åpne annonsen ↗</small></a>`
         : tile('Billigst nå', p.min ? `${nfx(p.min)} kr` : '–', 'på Finn')
     ].join('');
+    const sold = (p.soldLast || []).map((a) => `<div class="of in"><span class="s"></span><span class="on">${dShort(a.at)}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Se ↗</a></div>`).join('');
     const cheap = (p.cheap || []).map((a) => `<div class="of"><span class="s"></span><span class="on">${esc(a.t)}${a.r ? '<span class="rtag">RESERVERT</span>' : ''}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Åpne ↗</a></div>`).join('');
     const btn = (href, txt, pri) => `<a class="btn wide${pri ? ' pri' : ''}" style="display:block;text-align:center" href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
     // Alle norske butikker som selger produktet: på lager først (grønn), så billigste.
     const shops = (p.offers || []).map((o) => `<div class="of ${o.in ? 'in' : 'out'}"><span class="s"></span><span class="on">${esc(o.shop)}<small>${o.in ? 'på lager' : 'ikke på lager'}</small></span><span class="pr">${krU(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.in ? 'Kjøp' : 'Åpne'} ↗</a></div>`).join('');
     return `<div class="tiles">${tiles}</div>${finnChart(p)}
+      ${sold ? `<div class="prod-t">Siste salg på Finn · bekreftet solgt</div><div class="offers">${sold}</div>` : ''}
       ${shops ? `<div class="prod-t">Kjøp i butikk · ${(p.offers || []).length} butikker</div><div class="offers">${shops}</div>` : ''}
       ${cheap ? `<div class="prod-t">Billigst på Finn nå</div><div class="offers">${cheap}</div>` : ''}
       <div class="btns">${p.url ? btn(p.url, 'Se alle annonser på Finn ↗') : ''}</div>`;
   }
 
+  // Tre streker – Butikk, Solgt (bekreftet) og Ber om (annonser ute nå).
   function finnRow(p, i) {
     const open = openFinn.has(p.id);
     const sp = p.store && p.store.price > 0 ? p.store.price : null;
-    const max = Math.max(sp || 0, p.med || 0) || 1;
-    const m = p.margin;
-    const has = m !== null && m !== undefined;
+    const max = Math.max(sp || 0, p.med || 0, p.sold || 0) || 1;
+    const m = profit(p), has = m !== null && m !== undefined, pc = pctOf(p, m), ok = hasSold(p);
+    const bar = (cls, label, v) => `<div class="bar ${cls}"><span>${label}</span><i style="width:${v ? ((v / max) * 100).toFixed(1) : 0}%"></i><b>${v ? `${nfx(v)}<span class="u"> kr</span>` : '–'}</b></div>`;
     return `<div class="fp${open ? ' open' : ''}" data-id="${esc(p.id)}">
       <div class="fh" role="button" tabindex="0" aria-expanded="${open}"><span class="rk">${i + 1}</span>
         <div class="fn"><div class="t">${esc(p.name)}</div><div class="s">${esc(p.set)}${p.odd ? '<span class="ltag">BUTIKKPRIS USIKKER</span>' : ''}</div></div>
-        <span class="fm ${!has ? 'dim' : m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${has ? `${sign(m)}<span class="u"> kr</span>` : '–'}${has && p.pct !== null && p.pct !== undefined ? `<small>${p.pct < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p.pct)))} %</small>` : ''}</span></div>
+        <span class="fm ${!has ? 'dim' : m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${has ? `${sign(m)}<span class="u"> kr</span>` : '–'}${has ? `<small>${ok ? pctTxt(pc) : 'anslag'}</small>` : ''}</span></div>
       <div class="bars">
-        <div class="bar"><span>Butikk</span><i style="width:${sp ? ((sp / max) * 100).toFixed(1) : 0}%"></i><b>${sp ? `${nfx(sp)}<span class="u"> kr</span>` : '–'}</b></div>
-        <div class="bar ${p.med && sp ? (p.med >= sp ? 'up' : 'down') : ''}"><span>Resale</span><i style="width:${p.med ? ((p.med / max) * 100).toFixed(1) : 0}%"></i><b>${p.med ? `${nfx(p.med)}<span class="u"> kr</span>` : '–'}</b></div>
+        ${bar('', 'Butikk', sp)}
+        ${bar(ok && sp ? (p.sold >= sp ? 'up' : 'down') : '', 'Solgt', ok ? p.sold : 0)}
+        ${bar('ask', 'Ber om', p.med)}
       </div>
-      <div class="fstat">${p.track >= 3
-        ? `🔥 <b>${nfx(p.soldWeek)}</b> trolig solgt/uke · <b>${nfx(p.n)}</b> ute nå · <b>${nfx(p.newWeek)}</b> nye/uke`
-        : `📈 <b>${nfx(p.newWeek)}</b> nye/uke · <b>${nfx(p.n)}</b> ute nå · <span class="dim">salg måles fra i dag</span>`}</div>
+      <div class="fstat">${ok
+        ? `✅ <b>${p.soldN}</b> solgt siste 30 d · <b>${nfx(p.n)}</b> ute nå · <b>${nfx(p.newWeek)}</b> nye/uke`
+        : `<span class="dim">Ingen bekreftede salg ennå</span> · <b>${nfx(p.n)}</b> ute nå`}</div>
       <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
   }
 
@@ -1146,7 +1168,7 @@ body::before { display: none; }
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
     $('finnList').innerHTML = list.map(finnRow).join('');
-    $('finnFoot').textContent = `Resale = typisk pris på Finn nå (aktive annonser). Butikk = laveste pris i norske butikker. Fortjeneste = resale minus butikk. «Trolig solgt» = annonser som forsvant innen 30 dager. ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
+    $('finnFoot').textContent = `Solgt = annonser Finn selv har merket «Solgt» siste 30 dager (siste pris). Ber om = typisk pris på annonsene ute nå. Butikk = laveste pris i norske butikker. Fortjeneste = solgt minus butikk (ber om når det ikke er solgt noen ennå). ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
   }
 
   // ---------- Lynvakt (egen rask vakt på PC-en, sender status hvert 30. sekund) ----------
@@ -1307,7 +1329,7 @@ body::before { display: none; }
     // Bannere
     const stale = !b.beat || Date.now() - b.beat > 5 * 60000;
     const ban = [];
-    if (stale) ban.push(`<div class="banner r"><b>Boten svarer ikke.</b> Sist hørt fra ${b.beat ? clock(b.beat) : 'aldri'}. Står PC-en på?</div>`);
+    // Frakoblet vises i hjørnet av toppkortet (LIVE / FRAKOBLET), ikke som eget banner.
     if (b.paused) ban.push(`<div class="banner"><b>Pauset.</b> Boten sjekker ingenting før du trykker Fortsett under Bot.</div>`);
     $('banners').innerHTML = ban.join('');
 
@@ -1321,22 +1343,23 @@ body::before { display: none; }
 
     // Toppboks
     const hero = $('hero');
-    const stats = `<div class="hero-s"><span><i class="dot g"></i><b>${buy.length}</b> kan kjøpes</span><span><i class="dot y"></i><b>${over.length}</b> over maks</span><span><i class="dot r"></i><b>${hgN}</b> i Haugesund</span></div>`;
+    // Status øverst i kortet, så tre store tall og én linje om neste slipp – ingen forklaringstekst.
+    const head = `<div class="hero-h"><span>Marked</span>${stale ? `<span class="st off">FRAKOBLET · ${b.beat ? clock(b.beat) : 'aldri'}</span>` : '<span class="st on">LIVE</span>'}</div>`;
+    const kpi = (n, l, c) => `<div class="kpi"><b class="${n ? c : ''}">${n}</b><span>${l}</span></div>`;
+    const stats = `<div class="kpis">${kpi(buy.length, 'kan kjøpes', 'up')}${kpi(over.length, 'over maks', 'warn')}${kpi(hgN, 'i Haugesund', 'up')}</div>`;
     if (buy.length) {
       const total = buy.reduce((n, x) => n + Math.max(0, x.a.margin || 0), 0);
       const top = buy[0];
       hero.className = 'hero buy';
-      hero.innerHTML = `<div class="hero-l">Mulig margin nå</div><div class="hero-v">+${nf.format(Math.round(total))}<span>kr</span></div>${stats}
+      hero.innerHTML = `${head}<div class="hero-l" style="margin-top:10px">Mulig margin nå</div><div class="hero-v">+${nf.format(Math.round(total))}<span>kr</span></div>${stats}
         <a class="cta" href="${esc(top.a.main.url)}" target="_blank" rel="noopener">Kjøp ${esc(top.it.name)} hos ${esc(top.a.main.shop)} ↗</a>`;
     } else {
       // Nærmeste slippdato først; slippes flere samme dag, den med best fortjeneste.
       const soon = watch.filter((x) => x.it.release && daysTo(x.it.release) >= 0)
         .sort((p, q) => p.it.release.localeCompare(q.it.release) || (q.a.margin ?? -1e9) - (p.a.margin ?? -1e9))[0];
       const best = soon || watch.filter((x) => x.a.margin > 0)[0];
-      const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
       hero.className = 'hero';
-      hero.innerHTML = `<div class="hero-t">Ingenting å kjøpe akkurat nå</div>${stats}
-        <div class="hero-n">${lynPace() ? `<div>⚡ Lynvakten sjekker listen din hvert <b>${sec1(lynPace())} sekund</b></div>` : nxt ? `<div>⏱ Neste sjekk: <b>${nxt > Date.now() ? `${clock(nxt)}</b> (${until(nxt)})` : 'pågår nå</b>'}</div>` : ''}${best ? `<div style="margin-top:8px">⭐ Neste som kommer på lager:<br><b>${esc(best.it.name)}</b>${best.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(best.it.release))}</span> (${countdown(daysTo(best.it.release))})` : ''}<br>Billigst: ${esc(best.a.main.shop)} ${kr(best.a.main.price)} kr → ${best.a.finn ? `Finn ${kr(best.a.finn)} kr = <span class="${best.a.margin >= 0 ? 'up' : 'down'}">${sign(best.a.margin)} kr</span>` : 'Finn: ingen funn'}</div>` : ''}</div>`;
+      hero.innerHTML = `${head}${stats}${best ? `<div class="nx2"><span>Neste slipp</span><b>${esc(best.it.name)}</b>${best.it.release ? `<span class="rel">${esc(fmtDate(best.it.release))}</span>` : ''}</div>` : ''}`;
     }
 
     section('secBuy', 'Kan kjøpes', 'under makspris', ['Pris'], buy, buy.length ? '' : '');
@@ -1346,7 +1369,7 @@ body::before { display: none; }
       return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
         <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${stockPill('in', '', o.kind === 'Haugesund')}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
         <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
-        <span class="v">${krU(o.price)}</span><span class="v ${o.finn ? '' : 'dim'}">${o.finn ? krU(o.finn.med) : '–'}</span>
+        <span class="v">${krU(o.price)}</span>${resCell(o.finn && o.finn.med, 0)}
         ${marginCell(m, o.price)}</div></div>` };
     });
     const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
@@ -1375,7 +1398,7 @@ body::before { display: none; }
         const over = it.max > 0 && it.price > it.max;
         return `<a class="sp ${it.state}" href="${esc(it.url)}" target="_blank" rel="noopener"><span class="s"></span>
           <span class="spn">${esc(it.name)}<small>${esc(st)}${rel}</small></span>
-          <span class="v ${over ? 'warn' : ''}">${krU(it.price)}</span><span class="v ${it.finn ? '' : 'dim'}">${it.finn ? krU(it.finn) : '–'}</span>
+          <span class="v ${over ? 'warn' : ''}">${krU(it.price)}</span>${resCell(it.finn, it.fsold)}
           <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : `${sign(m)}<span class="u"> kr</span>`}</span></a>`;
       }).join('');
       const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges · <b>trykk for å se</b>`;
