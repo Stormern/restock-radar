@@ -101,9 +101,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .row.buy .go { background: var(--up); border-color: var(--up); color: var(--up-ink); }
 .empty { padding: 14px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
 /* Marked: knapper som velger liste (Kan kjøpes / Inne nå / Watchlist). Hver har sin farge; valgt knapp får farget bakgrunn. */
-.mseg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 14px 0 4px; padding: 4px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.mseg { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 4px; margin: 14px 0 4px; padding: 4px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
 .mseg button { display: flex; justify-content: center; align-items: center; gap: 7px; padding: 9px 4px; border-radius: 9px; border: 1px solid transparent; font-size: 13.5px; font-weight: 700; color: #C9CED8; }
-.mseg button[data-ms="buy"] { --mc: #2BD67B; } .mseg button[data-ms="in"] { --mc: #F5A524; } .mseg button[data-ms="watch"] { --mc: #8FB8FF; }
+.mseg button[data-ms="buy"] { --mc: #2BD67B; }
+.mseg button[data-seg="hg"] { --mc: #FF9F43; } .mseg button[data-seg="net"] { --mc: #8FB8FF; }
+.mseg button[data-seg="slipp"] { --mc: #F5C518; } .mseg button[data-seg="endr"] { --mc: #8FB8FF; }
+.mseg button[data-seg="lynv"] { --mc: #2BD67B; } .mseg button[data-seg="gj"] { --mc: #8FB8FF; } .mseg button[data-seg="ctl"] { --mc: #B18CFF; }
+.mseg button b:empty { display: none; }
+[data-pane] > .sec:first-child { margin-top: 10px; } [data-pane] .sec-t.hide { display: none; }
+/* Lynvarsel: alltid øverst i Kalender, tydelig gul boks. Lyser sterkere når det har kommet varsler. */
+.lynbox { margin: 6px 0 4px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(180deg, rgba(255, 212, 59, .10), rgba(255, 212, 59, .03)); border: 1px solid rgba(255, 212, 59, .40); }
+.lynbox.on { border-color: #FFD43B; box-shadow: 0 0 0 1px rgba(255, 212, 59, .35), 0 0 18px rgba(255, 212, 59, .18); }
+.lynbox-h { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #FFD43B; }
+.lynbox-h span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+.lynbox-h svg { width: 15px; height: 15px; }
+.lynbox-h #lynAlN { color: var(--muted); font-weight: 600; letter-spacing: .02em; text-transform: none; }
+.lynbox .la-empty { padding: 8px 0 2px; color: var(--muted); font-size: 13.5px; } .mseg button[data-ms="in"] { --mc: #F5A524; } .mseg button[data-ms="watch"] { --mc: #8FB8FF; }
 .mseg button b { min-width: 22px; padding: 2px 7px; border-radius: 999px; font-size: 12.5px; font-weight: 800; text-align: center; color: var(--mc); background: color-mix(in srgb, var(--mc) 16%, transparent); }
 .mseg button[aria-pressed="true"] { color: var(--ink); background: color-mix(in srgb, var(--mc) 16%, var(--panel-2)); border-color: color-mix(in srgb, var(--mc) 45%, transparent); }
 .mseg button[aria-pressed="true"] b { color: #0B0C0F; background: var(--mc); }
@@ -476,18 +489,17 @@ body::before { display: none; }
   </section>
 
   <section id="tab-butikker" role="tabpanel" hidden>
-    <div class="sec"><div class="sec-t"><span>Butikker i Haugesund</span><span>fysisk lager</span></div><div id="srcHg"></div></div>
-    <div class="sec"><div class="sec-t"><span>Nettbutikker</span><span>kan bestilles</span></div><div id="srcNet"></div></div>
+    <div class="mseg" data-segs="shop" style="--n:2"><button type="button" data-seg="hg">Haugesund<b></b></button><button type="button" data-seg="net">Nettbutikker<b></b></button></div>
+    <div data-pane="hg"><div class="sec"><div id="srcHg"></div></div></div>
+    <div data-pane="net"><div class="sec"><div id="srcNet"></div></div></div>
   </section>
 
   <section id="tab-kalender" role="tabpanel" hidden>
-    <div class="sec lasec"><div class="sec-t"><span>⚡ Lynvarsel</span><span id="lynAlN"></span></div>
+    <div class="lynbox" id="lynBox"><div class="lynbox-h"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12L13 2z" fill="currentColor"/></svg> Lynvarsel</span><span id="lynAlN"></span></div>
       <div id="lynAlerts"><div class="la-empty">Ingen lynvarsler ennå</div></div></div>
-    <div id="calNews"></div>
-    <div class="hero" id="calHero"></div>
-    <div id="calUp"></div>
-    <div id="calPast"></div>
-    <div id="calSrcLine"></div>
+    <div class="mseg" data-segs="cal" style="--n:2"><button type="button" data-seg="slipp">Slipp<b></b></button><button type="button" data-seg="endr">Endringer<b></b></button></div>
+    <div data-pane="slipp"><div class="hero" id="calHero"></div><div id="calUp"></div><div id="calPast"></div><div id="calSrcLine"></div></div>
+    <div data-pane="endr"><div id="calNews"></div></div>
   </section>
 
   <section id="tab-finn" role="tabpanel" hidden>
@@ -499,24 +511,22 @@ body::before { display: none; }
 
   <section id="tab-bot" role="tabpanel" hidden>
     <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
-    <div class="sec" id="lynSec" hidden><div class="sec-t"><span>Lynvakt · listen din</span><span id="lynSub"></span></div>
+    <div class="mseg" data-segs="bot"><button type="button" data-seg="lynv">Lynvakt<b></b></button><button type="button" data-seg="gj">Gjennomgang<b></b></button><button type="button" data-seg="ctl">Kontroll<b></b></button></div>
+    <div data-pane="lynv"><div class="sec" id="lynSec" hidden><div class="sec-t hide"><span>Lynvakt · listen din</span><span id="lynSub"></span></div>
       <div class="hero lyn-hero" id="lynHero"></div>
       <div class="lb-scale" id="lynScale"></div>
       <div id="lynList"></div>
-      <p class="fine">Hver strek går i samme takt som lynvakten på PC-en: hver gang den når enden, blir butikken sjekket. Lengden er tiden mellom sjekkene, og den grå markøren er målet på 5 sekunder. Bremser en butikk oss, blir streken <b class="warn">oransje</b>, lengre og tregere.</p>
+    </div></div>
+    <div data-pane="gj"><div class="sec"><div class="sec-t hide"><span>Rolig gjennomgang</span></div><dl class="grid2" id="botKv"></dl></div></div>
+    <div data-pane="ctl">
+      <div class="btns">
+        <button class="btn pri" id="btnCheck" type="button">Sjekk alt nå</button>
+        <button class="btn" id="btnPause" type="button">Pause</button>
+        <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
+      </div>
+      <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
+      <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>      <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
     </div>
-    <div class="sec"><div class="sec-t"><span>Rolig gjennomgang</span><span>detaljer + Finn</span></div>
-      <p class="fine" style="margin:0 0 4px">Lagerstatus og varsler kommer fra lynvakten over – listen din og Pokémon-varer utenfor listen hos Norli og Nille, på nett og i Haugesund, hvert 3.–16. sekund. Boten går i tillegg rolig gjennom alt for <b>detaljer</b> (kjøpsgrenser, slippdatoer, kurvtest) og henter Finn-priser:</p>
-      <dl class="grid2" id="botKv"></dl></div>
-    <div class="btns">
-      <button class="btn pri" id="btnCheck" type="button">Sjekk alt nå</button>
-      <button class="btn" id="btnPause" type="button">Pause</button>
-      <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
-    </div>
-    <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
-    <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
-    <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
-    <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
   </section>
 </main>
 
@@ -962,6 +972,22 @@ body::before { display: none; }
   // Boksen vises ikke når ingenting har skjedd. Merket på Kalender-knappen teller det du ikke har sett.
   const ICON = { sett: '🆕', dato: '📅', ut: '🏷️', bestill: '🛒', snart: '⏰' };
   let newsSeenAtOpen = +(store.get('rr-news-seen') || 0);
+  // Knapper øverst på Butikker, Kalender og Bot: tallene settes når sidene tegnes.
+  const segN = {};
+  function paintSegs() {
+    segN.lynv = document.querySelectorAll('#lynList .lb').length || undefined;
+    document.querySelectorAll('[data-seg]').forEach((b) => {
+      const el = b.querySelector('b'), n = segN[b.dataset.seg];
+      if (el) el.textContent = n === undefined || n === null ? '' : n;
+    });
+  }
+  function applySegs(sec) {
+    const bar = sec.querySelector('[data-segs]'); if (!bar) return;
+    const keys = [...bar.querySelectorAll('[data-seg]')].map((b) => b.dataset.seg);
+    let cur = store.get('rr-seg-' + bar.dataset.segs); if (!keys.includes(cur)) cur = keys[0];
+    bar.querySelectorAll('[data-seg]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.seg === cur)));
+    sec.querySelectorAll('[data-pane]').forEach((p) => { p.hidden = p.dataset.pane !== cur; });
+  }
   function renderNews() {
     const n = tree.news || {};
     const cut = Date.now() - 14 * 864e5;
@@ -982,6 +1008,7 @@ body::before { display: none; }
       ...arts.map((a) => ({ t: a.t, h: item('📰', a.title, a.source, a.t, a.url, false) }))
     ].sort((x, y) => y.t - x.t).slice(0, 6);
     const shown = calNewsAll ? list : list.slice(0, 3);
+    segN.endr = list.length;
     $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${shown.map((x) => x.h).join('')}${list.length > 3 ? `<button type="button" class="fold sm" data-tog="news">${calNewsAll ? 'Vis færre' : `Vis alle ${list.length}`}</button>` : ''}</div>` : '';
   }
 
@@ -1207,6 +1234,7 @@ body::before { display: none; }
   function lynAlerts(L) {
     const al = (L.alerts || []).filter(Boolean);
     // Enkel liste øverst i Kalender: klokkeslett, vare og butikk – trykk for å åpne. Høyst 5.
+    $('lynBox').classList.toggle('on', al.length > 0);
     $('lynAlN').textContent = al.length ? `${al.length} siste` : '';
     $('lynAlerts').innerHTML = al.length ? al.slice(0, 5).map((a) => `<a class="la${a.buy ? ' buy' : ''}" href="${esc(a.url || '#')}" target="_blank" rel="noopener"><span class="tm">${clock(a.t)}</span><span class="tx">${esc(a.text)}<small>${a.mail ? `via e-post · varslet ${a.lag != null ? `${a.lag} s` : ''} etter at e-posten kom` : a.nl ? 'utenfor listen' : a.buy ? 'under makspris – kjøp' : 'over makspris'}</small></span><span class="ar">↗</span></a>`).join('')
       : '<div class="la-empty">Ingen lynvarsler ennå</div>';
@@ -1417,6 +1445,10 @@ body::before { display: none; }
       if (k === ms && !n) $(id).innerHTML = `<div class="empty">${k === 'buy' ? 'Ingenting i buy zone akkurat nå.' : k === 'in' ? 'Ingenting på lager akkurat nå.' : 'Watchlisten er tom.'}</div>`;
     });
 
+    segN.hg = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
+    segN.net = (d.sources || []).filter((s) => s.kind !== 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
+    segN.slipp = document.querySelectorAll('#calUp .cl').length;
+    paintSegs();
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
     // Butikker
@@ -1551,6 +1583,13 @@ body::before { display: none; }
     closeSheet();
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  document.querySelectorAll('[data-segs]').forEach((bar) => {
+    applySegs(bar.closest('section'));
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-seg]'); if (!b) return;
+      store.set('rr-seg-' + bar.dataset.segs, b.dataset.seg); applySegs(bar.closest('section')); paintSegs(); $('app').scrollTo({ top: 0 });
+    });
+  });
   $('mSeg').addEventListener('click', (e) => {
     const b = e.target.closest('[data-ms]');
     if (!b) return;
