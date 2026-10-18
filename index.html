@@ -326,6 +326,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--dim); position: relative; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-selected="true"] { color: var(--ink); }
+/* Hver fane har sin farge (Finn = Finn-blå). Ikonene er alltid farget; valgt fane får en myk pille i samme farge. */
+.tabbar button[data-tab="marked"] { --tc: #2BD67B; } .tabbar button[data-tab="butikker"] { --tc: #FF9F43; }
+.tabbar button[data-tab="kalender"] { --tc: #F5C518; } .tabbar button[data-tab="finn"] { --tc: #3D8BFF; } .tabbar button[data-tab="bot"] { --tc: #B18CFF; }
+.tabbar button svg { color: var(--tc); box-sizing: content-box; padding: 3px 14px; border-radius: 999px; }
+.tabbar button[aria-selected="true"] { color: var(--tc); }
+.tabbar button[aria-selected="true"] svg { background: color-mix(in srgb, var(--tc) 22%, transparent); }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
 
 /* Oppsett & toast */
@@ -1513,6 +1519,17 @@ body::before { display: none; }
     closeSheet();
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  // iPhone (appen lagt på hjem-skjermen): iOS gir appen statuslinjens høyde for lite, så fanebaren ble stående
+  // med et tomt felt under seg. I hjem-skjerm-modus fyller appen hele skjermen, så bruk skjermhøyden direkte.
+  function fitStandalone() {
+    if (!(navigator.standalone || matchMedia('(display-mode: standalone)').matches)) return;
+    const full = innerHeight > innerWidth ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+    document.documentElement.style.height = `${Math.max(full, innerHeight)}px`;
+  }
+  fitStandalone();
+  addEventListener('resize', fitStandalone);
+  addEventListener('orientationchange', () => setTimeout(fitStandalone, 300));
 
   $('btnCheck').addEventListener('click', () => send('sjekk', 'Boten sjekker nå'));
   $('btnPause').addEventListener('click', () => { const p = tree.bot && tree.bot.paused; send(p ? 'fortsett' : 'pause', p ? 'Boten fortsetter' : 'Boten pauses'); });
