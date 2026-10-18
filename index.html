@@ -390,9 +390,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* Én pille som glir mellom fanene (som i Instagram): spretten bevegelse, strekker seg litt i farten og skifter farge. */
 .tabbar-in { position: relative; }
 .tabbar button { z-index: 1; }
-.tabpill { position: absolute; left: 0; top: 0; width: 50px; height: 28px; pointer-events: none; z-index: 0; transition: transform .45s cubic-bezier(.3, 1.35, .5, 1); }
-.tabpill i { display: block; width: 100%; height: 100%; border-radius: 999px; background-color: rgba(255, 255, 255, .12); transition: background-color .35s ease; }
-.tabpill.noanim, .tabpill.noanim i { transition: none; }
+.tabpill { position: absolute; left: 0; top: 0; width: 50px; height: 28px; pointer-events: none; z-index: 0; }
+.tabpill i { display: block; width: 100%; height: 100%; border-radius: 999px; background-color: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); transition: background-color .3s ease, transform .2s ease; }
+/* Mens du drar fingeren bortover baren: pillen blir en litt større, lysere «linse» som følger fingeren. */
+.tabpill.drag i { transform: scale(1.12); background-color: rgba(255, 255, 255, .2) !important; box-shadow: 0 0 0 1px rgba(255, 255, 255, .18), 0 6px 18px rgba(0, 0, 0, .35); }
+.tabbar-in { touch-action: none; }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
 
 /* Oppsett & toast */
@@ -1677,24 +1679,63 @@ body { position: relative; }
     closeSheet();
     movePill(true);
   }
-  // Pillen bak valgt fane glir dit (som i Instagram): litt sprett, strekker seg i farten og skifter til fanens farge.
-  let pillAt = null;
+  // Pillen bak valgt fane (som Instagram på iOS 26): den strekker seg over til den nye fanen som en væske – forkanten
+  // går først, bakkanten tar igjen – og skifter til fanens farge. Du kan også dra fingeren bortover baren (se under).
+  let pillAt = null, pillY = 0, pillW = 50;
+  function pillColor(b) {
+    const m = /#([0-9a-f]{6})/i.exec(getComputedStyle(b).getPropertyValue('--tc')), n = m ? parseInt(m[1], 16) : 0xffffff;
+    $('tabPill').firstElementChild.style.backgroundColor = `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, .3)`;
+  }
   function movePill(anim) {
     const pill = $('tabPill'), b = document.querySelector('.tabbar button[aria-selected="true"]');
     if (!pill || !b || !b.offsetWidth) return;
     const r = b.querySelector('svg').getBoundingClientRect(), p = pill.parentElement.getBoundingClientRect();
-    const x = Math.round(r.left - p.left), y = Math.round(r.top - p.top);
-    pill.classList.toggle('noanim', !anim || pillAt === null);
-    pill.style.width = `${r.width}px`; pill.style.height = `${r.height}px`;
+    const x = Math.round(r.left - p.left), y = Math.round(r.top - p.top), w = Math.round(r.width);
+    pillY = y; pillW = w;
+    pill.style.width = `${w}px`; pill.style.height = `${Math.round(r.height)}px`;
     pill.style.transform = `translate(${x}px, ${y}px)`;
-    const m = /#([0-9a-f]{6})/i.exec(getComputedStyle(b).getPropertyValue('--tc')), n = m ? parseInt(m[1], 16) : 0xffffff;
-    pill.firstElementChild.style.backgroundColor = `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, .22)`;
-    if (anim && pillAt !== null && pillAt !== x && pill.firstElementChild.animate) {
-      pill.firstElementChild.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(1.35)', offset: 0.4 }, { transform: 'scaleX(1)' }], { duration: 450, easing: 'ease-out' });
+    pillColor(b);
+    const from = pillAt;
+    if (anim && from !== null && Math.abs(from - x) > 2 && pill.animate) {
+      // Midtveis: forkanten har kommet 3/4 av veien, bakkanten 1/4 – pillen flytter seg og strekkes samtidig.
+      // Til slutt tar bakkanten igjen, og pillen setter seg med litt sprett.
+      const d = Math.abs(x - from), left = x > from ? from + d * 0.25 : from - d * 0.75, span = w + d * 0.5;
+      pill.animate([
+        { transform: `translate(${from}px, ${y}px)`, width: `${w}px`, easing: 'cubic-bezier(.5, 0, .2, 1)' },
+        { transform: `translate(${left}px, ${y}px)`, width: `${span}px`, offset: 0.45, easing: 'cubic-bezier(.3, 1.4, .5, 1)' },
+        { transform: `translate(${x}px, ${y}px)`, width: `${w}px` }
+      ], { duration: 560 });
+      pill.firstElementChild.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(.82)', offset: 0.45 }, { transform: 'scaleY(1.08)', offset: 0.75 }, { transform: 'scaleY(1)' }], { duration: 560, easing: 'ease-out' });
     }
     pillAt = x;
   }
   addEventListener('resize', () => movePill(false));
+  // Dra fingeren bortover fanebaren: pillen følger fingeren som en linse, og fanen under fingeren velges når du slipper.
+  (() => {
+    const bar = document.querySelector('.tabbar-in'), pill = $('tabPill');
+    if (!bar || !pill) return;
+    let drag = null, skipClick = false;
+    const under = (cx) => [...bar.querySelectorAll('button')].find((b) => { const r = b.getBoundingClientRect(); return cx >= r.left && cx < r.right; });
+    bar.addEventListener('pointerdown', (e) => { drag = { x0: e.clientX, moved: false, id: e.pointerId }; });
+    bar.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      if (!drag.moved) { if (Math.abs(e.clientX - drag.x0) < 8) return; drag.moved = true; try { bar.setPointerCapture(drag.id); } catch {} pill.classList.add('drag'); }
+      const p = bar.getBoundingClientRect(), x = Math.max(0, Math.min(p.width - pillW, e.clientX - p.left - pillW / 2));
+      pill.style.transform = `translate(${x}px, ${pillY}px)`; pillAt = x;
+      const b = under(e.clientX); if (b) pillColor(b);
+    });
+    const end = (e) => {
+      if (!drag) return;
+      const moved = drag.moved; drag = null; pill.classList.remove('drag');
+      if (!moved) return;
+      skipClick = true; setTimeout(() => { skipClick = false; }, 400);   // klikket som kommer etter et drag, skal ikke telle
+      const b = under(e.clientX) || document.querySelector('.tabbar button[aria-selected="true"]');
+      if (b) showTab(b.dataset.tab);
+    };
+    bar.addEventListener('pointerup', end);
+    bar.addEventListener('pointercancel', end);
+    bar.addEventListener('click', (e) => { if (skipClick) { skipClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  })();
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
   document.querySelectorAll('[data-segs]').forEach((bar) => {
     applySegs(bar.closest('section'));
