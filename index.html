@@ -391,9 +391,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tabbar-in { position: relative; }
 .tabbar button { z-index: 1; }
 .tabpill { position: absolute; left: 0; top: 0; width: 50px; height: 28px; pointer-events: none; z-index: 0; }
-.tabpill i { display: block; width: 100%; height: 100%; border-radius: 999px; background-color: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); transition: background-color .3s ease, transform .2s ease; }
+.tabpill i { display: block; width: 100%; height: 100%; border-radius: 999px; background: rgba(255, 255, 255, .15); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .06); transition: transform .2s ease, background-color .2s ease; }
 /* Mens du drar fingeren bortover baren: pillen blir en litt større, lysere «linse» som følger fingeren. */
-.tabpill.drag i { transform: scale(1.12); background-color: rgba(255, 255, 255, .2) !important; box-shadow: 0 0 0 1px rgba(255, 255, 255, .18), 0 6px 18px rgba(0, 0, 0, .35); }
+.tabpill.drag i { transform: scale(1.1); background: rgba(255, 255, 255, .22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 6px 18px rgba(0, 0, 0, .35); }
+/* Valgt ikon blir tydeligere (som Instagram fyller det valgte ikonet). */
+.tabbar button svg { transition: transform .25s ease; }
+.tabbar button[aria-selected="true"] svg { stroke-width: 2.5; transform: scale(1.08); }
 .tabbar-in { touch-action: none; }
 .badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
 
@@ -1679,33 +1682,22 @@ body { position: relative; }
     closeSheet();
     movePill(true);
   }
-  // Pillen bak valgt fane (som Instagram på iOS 26): den strekker seg over til den nye fanen som en væske – forkanten
-  // går først, bakkanten tar igjen – og skifter til fanens farge. Du kan også dra fingeren bortover baren (se under).
-  let pillAt = null, pillY = 0, pillW = 50;
-  function pillColor(b) {
-    const m = /#([0-9a-f]{6})/i.exec(getComputedStyle(b).getPropertyValue('--tc')), n = m ? parseInt(m[1], 16) : 0xffffff;
-    $('tabPill').firstElementChild.style.backgroundColor = `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, .3)`;
-  }
+  // Pillen bak valgt fane, som i Instagram (iOS 26): en stor, lys glass-kapsel som fyller nesten hele ruten og glir
+  // som én stiv kapsel til den nye fanen. Mens den er i fart, løftes den litt og blir mer gjennomsiktig.
+  // Du kan også dra fingeren bortover baren (se under).
+  let pillAt = null, pillY = 0, pillW = 60;
   function movePill(anim) {
     const pill = $('tabPill'), b = document.querySelector('.tabbar button[aria-selected="true"]');
     if (!pill || !b || !b.offsetWidth) return;
-    const r = b.querySelector('svg').getBoundingClientRect(), p = pill.parentElement.getBoundingClientRect();
-    const x = Math.round(r.left - p.left), y = Math.round(r.top - p.top), w = Math.round(r.width);
+    const r = b.getBoundingClientRect(), p = pill.parentElement.getBoundingClientRect();
+    const x = Math.round(r.left - p.left + 3), y = 5, w = Math.round(r.width - 6), h = Math.round(p.height - 10);
     pillY = y; pillW = w;
-    pill.style.width = `${w}px`; pill.style.height = `${Math.round(r.height)}px`;
+    pill.style.width = `${w}px`; pill.style.height = `${h}px`;
     pill.style.transform = `translate(${x}px, ${y}px)`;
-    pillColor(b);
     const from = pillAt;
     if (anim && from !== null && Math.abs(from - x) > 2 && pill.animate) {
-      // Midtveis: forkanten har kommet 3/4 av veien, bakkanten 1/4 – pillen flytter seg og strekkes samtidig.
-      // Til slutt tar bakkanten igjen, og pillen setter seg med litt sprett.
-      const d = Math.abs(x - from), left = x > from ? from + d * 0.25 : from - d * 0.75, span = w + d * 0.5;
-      pill.animate([
-        { transform: `translate(${from}px, ${y}px)`, width: `${w}px`, easing: 'cubic-bezier(.5, 0, .2, 1)' },
-        { transform: `translate(${left}px, ${y}px)`, width: `${span}px`, offset: 0.45, easing: 'cubic-bezier(.3, 1.4, .5, 1)' },
-        { transform: `translate(${x}px, ${y}px)`, width: `${w}px` }
-      ], { duration: 560 });
-      pill.firstElementChild.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(.82)', offset: 0.45 }, { transform: 'scaleY(1.08)', offset: 0.75 }, { transform: 'scaleY(1)' }], { duration: 560, easing: 'ease-out' });
+      pill.animate([{ transform: `translate(${from}px, ${y}px)` }, { transform: `translate(${x}px, ${y}px)` }], { duration: 380, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+      pill.firstElementChild.animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.08)', opacity: 0.7, offset: 0.35 }, { transform: 'scale(1)', opacity: 1 }], { duration: 380, easing: 'ease-out' });
     }
     pillAt = x;
   }
@@ -1722,7 +1714,6 @@ body { position: relative; }
       if (!drag.moved) { if (Math.abs(e.clientX - drag.x0) < 8) return; drag.moved = true; try { bar.setPointerCapture(drag.id); } catch {} pill.classList.add('drag'); }
       const p = bar.getBoundingClientRect(), x = Math.max(0, Math.min(p.width - pillW, e.clientX - p.left - pillW / 2));
       pill.style.transform = `translate(${x}px, ${pillY}px)`; pillAt = x;
-      const b = under(e.clientX); if (b) pillColor(b);
     });
     const end = (e) => {
       if (!drag) return;
