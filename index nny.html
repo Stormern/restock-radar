@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PikaJew</title>
+<meta name="description" content="Pokémon-restock i Haugesund og nettbutikker – live fra boten din.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png?v=3">
+<link rel="icon" type="image/png" href="icon-192.png?v=3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PikaJew">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B0C0F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: børs-tabell – smart toppboks, tre seksjoner (kan kjøpes / inne nå / følger med) med faste kolonner Pris · Finn · Margin. Alltid mørk. */
+:root {
+  --bg: #0B0C0F; --panel: #121419; --panel-2: #181B21; --line: #22252D; --line-2: #2C3039;
+  --ink: #ECEEF3; --muted: #8C92A1; --dim: #5D6271;
+  --up: #2BD67B; --up-soft: rgba(43, 214, 123, .10); --up-ink: #052914;
+  --warn: #F5A524; --warn-soft: rgba(245, 165, 36, .10);
+  --down: #FF6B5B; --gold: #FFCB05;
+  --f: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --cols: minmax(0, 1fr) 62px 62px 68px;
+  --bar-h: 52px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; font-variant-numeric: tabular-nums; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.4 var(--f); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top, 0px); }
+body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 8; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+[hidden] { display: none !important; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 calc(var(--bar-h) + 24px + env(safe-area-inset-bottom, 0px)); }
+.up { color: var(--up); } .down { color: var(--down); } .warn { color: var(--warn); } .mut { color: var(--muted); } .dim { color: var(--dim); }
+
+/* Topp */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(11, 12, 15, .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.top-in { max-width: 560px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 23px; letter-spacing: -.015em; color: var(--gold); }
+.logo img { width: 36px; height: 36px; border-radius: 10px; flex: none; }
+.live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex: none; }
+.live.on i { background: var(--up); animation: ping 2.2s infinite; }
+.live.off i { background: var(--down); }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(43, 214, 123, .5); } 70% { box-shadow: 0 0 0 7px rgba(43, 214, 123, 0); } 100% { box-shadow: 0 0 0 0 rgba(43, 214, 123, 0); } }
+@media (prefers-reduced-motion: reduce) { .live.on i { animation: none; } }
+
+/* Toppboks */
+.hero { margin: 6px 0 4px; padding: 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.hero.buy { background: var(--up-soft); border-color: rgba(43, 214, 123, .35); }
+.hero-l { font-size: 13px; color: var(--muted); }
+.hero-t { font-size: 19px; font-weight: 600; letter-spacing: -.01em; margin-top: 2px; }
+.hero-v { font-size: 44px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05; color: var(--up); }
+.hero-v span { font-size: 20px; font-weight: 500; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.hero-s { margin-top: 8px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.hero-s b { color: var(--ink); font-weight: 600; }
+.hero-n { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.hero-n b { color: var(--ink); font-weight: 600; }
+.hero .cta { display: flex; justify-content: center; margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--up); color: var(--up-ink); font-weight: 700; font-size: 15px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: var(--dim); }
+.dot.g { background: var(--up); } .dot.y { background: var(--warn); } .dot.r { background: var(--down); }
+
+/* Seksjoner og kolonner */
+.sec { margin-top: 22px; }
+.sec-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.sec-t span:last-child { font-weight: 500; letter-spacing: .02em; text-transform: none; color: var(--dim); }
+.cols { display: grid; grid-template-columns: var(--cols); gap: 8px; font-size: 11px; color: var(--dim); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.cols span { text-align: right; }
+.row { border-bottom: 1px solid var(--line); }
+.rh { display: grid; grid-template-columns: var(--cols); gap: 8px; align-items: start; padding: 11px 0; cursor: pointer; }
+/* Stripe etter fortjeneste: grønn ≥ 10 %, oransje 0–10 %, rød ved tap */
+.row.m-good .rh, .row.m-thin .rh, .row.m-loss .rh { padding-left: 10px; margin-left: -10px; }
+.row.m-good .rh { box-shadow: inset 3px 0 0 var(--up); }
+.row.m-thin .rh { box-shadow: inset 3px 0 0 var(--warn); }
+.row.m-loss .rh { box-shadow: inset 3px 0 0 var(--down); }
+.u { font-size: .74em; font-weight: 500; opacity: .75; }
+.v.mg small { display: block; font-size: 11px; font-weight: 500; opacity: .8; margin-top: 1px; }
+.nm { min-width: 0; }
+.nm .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; margin-right: 6px; vertical-align: 1px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--ink); }
+.tag.hg { background: var(--down); border-color: var(--down); color: #2A0905; }
+.v { text-align: right; font-size: 14.5px; font-weight: 500; padding-top: 1px; white-space: nowrap; }
+.v.mg { font-weight: 600; }
+.go { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 7px 11px; border-radius: 8px; font-size: 13px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
+.row.buy .go { background: var(--up); border-color: var(--up); color: var(--up-ink); }
+.empty { padding: 14px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
+
+/* Utfolding */
+.det { padding: 0 0 14px; }
+.kv { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+.kv b { color: var(--ink); font-weight: 600; }
+.lynempty { display: grid; place-items: center; min-height: 64px; margin-top: 4px; border-radius: 12px; border: 1px dashed var(--line-2); color: var(--dim); font-size: 13px; }
+/* Lynvarsel (øverst i Kalender) */
+.lasec { margin-top: 10px; }
+.la { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.la .tm { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.la .tx { min-width: 0; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.la .tx small { display: block; font-size: 11.5px; font-weight: 500; color: var(--dim); }
+.la.buy .tx small { color: var(--up); }
+.la .ar { color: var(--muted); font-size: 14px; }
+.la-empty { font-size: 13px; color: var(--dim); padding: 2px 0 4px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+/* Finn: sortering */
+.sortbtn { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "l v i" "w w i"; align-items: center; column-gap: 8px; width: 100%; margin: 14px 0 4px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-2); text-align: left; }
+.sortbtn span { grid-area: l; font-size: 13px; color: var(--muted); }
+.sortbtn b { grid-area: v; font-size: 15px; font-weight: 700; }
+.sortbtn small { grid-area: w; font-size: 12px; color: var(--dim); margin-top: 1px; }
+.sortbtn i { grid-area: i; font-style: normal; color: var(--muted); font-size: 13px; }
+.opt { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; width: 100%; padding: 13px 0; border-bottom: 1px solid var(--line-2); text-align: left; }
+.opt:last-child { border-bottom: 0; }
+.opt .ck { color: var(--dim); font-size: 14px; padding-top: 1px; } .opt[aria-pressed="true"] .ck { color: var(--up); }
+.opt b { display: block; font-size: 15px; font-weight: 700; } .opt small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+/* Lagerstatus-merker */
+.pill { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 6px; border-radius: 4px; margin-right: 7px; vertical-align: 1px; white-space: nowrap; text-transform: uppercase; }
+.pill.in { background: var(--up); color: var(--up-ink); }
+.pill.out { background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); padding: 1px 5px; }
+.pill.rel { background: rgba(255, 203, 5, .12); border: 1px solid rgba(255, 203, 5, .45); color: var(--gold); padding: 1px 5px; }
+/* Utfoldet vare: eget kort, så det er tydelig at det hører til raden over */
+.row .det { margin: 0 0 12px; padding: 12px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.row .det .offers { background: var(--panel-2); border-color: var(--line-2); }
+.row .det .of { border-color: var(--line-2); }
+.kv .kvi { padding: 5px 9px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line-2); }
+.kv a.fl b { text-decoration: underline dotted; text-underline-offset: 3px; }
+.kv a.fl.min b { color: var(--gold); }
+.tile.lnk { display: block; border-color: rgba(255, 203, 5, .3); }
+.tile.lnk small { color: var(--gold); }
+.offers { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+.of { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.of:first-child { border-top: 0; }
+.of .s { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.of.in .s { background: var(--up); }
+.of.unlisted .s { background: transparent; border: 1.5px dashed var(--muted); }
+.of .on { min-width: 0; font-size: 13.5px; }
+.of .on small { display: block; font-size: 12px; color: var(--muted); }
+.of .pr { font-size: 13.5px; font-weight: 500; }
+.of .lk { padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); white-space: nowrap; }
+.of.in .lk { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+.info { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+.info li::before { content: "› "; color: var(--dim); }
+
+/* Butikker & bot */
+.shop .li { cursor: pointer; }
+.shop .lt small b { color: var(--muted); font-weight: 500; }
+.shop.open .li { border-bottom-color: transparent; }
+.shop-det { padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+.shop-det .go { margin: 0 0 12px; }
+.cols5, .sp { display: grid; grid-template-columns: 10px minmax(0, 1fr) 58px 58px 64px; gap: 8px; align-items: center; }
+.cols5 { font-size: 11px; color: var(--dim); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.cols5 span:not(:first-child):not(:nth-child(2)) { text-align: right; }
+.sp { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sp .s { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.sp.in .s { background: var(--up); }
+.sp.unlisted .s { background: transparent; border: 1.5px dashed var(--muted); }
+.sp .spn { min-width: 0; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp .spn small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp .v { font-size: 13.5px; }
+.rel { color: var(--gold); }
+.li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.li .lt { font-size: 14.5px; font-weight: 600; }
+.li .lt small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.li .lr { font-size: 16px; font-weight: 600; text-align: right; }
+.li .lr small { display: block; font-size: 11px; color: var(--dim); font-weight: 400; }
+.bstate { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; padding: 12px 0 4px; }
+.bstate i { width: 10px; height: 10px; border-radius: 50%; background: var(--up); }
+.bstate.paused i { background: var(--warn); } .bstate.dead i { background: var(--down); }
+.grid2 { display: grid; grid-template-columns: auto 1fr; gap: 9px 16px; margin: 10px 0 0; font-size: 14px; }
+.grid2 dt { color: var(--muted); } .grid2 dd { margin: 0; text-align: right; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.btn { padding: 13px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line-2); font-weight: 700; font-size: 14.5px; }
+.btn.pri { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.wide { grid-column: 1 / -1; }
+.fine { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
+.btn:focus-visible, .rh:focus-visible, .go:focus-visible, .lk:focus-visible, .cta:focus-visible, .tabbar button:focus-visible, .cr:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* Kalender */
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.chip.ok { color: var(--up); background: var(--up-soft); border-color: rgba(43, 214, 123, .35); }
+.chip.av { color: var(--warn); background: var(--warn-soft); border-color: rgba(245, 165, 36, .35); }
+.hero-d { font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-top: 2px; }
+.hero-d span { font-size: 17px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 8px; }
+.hero .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cal { border-bottom: 1px solid var(--line); }
+.cr { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; cursor: pointer; }
+.db { text-align: center; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); padding: 6px 0 5px; }
+.db b { display: block; font-size: 19px; font-weight: 700; line-height: 1.05; }
+.db small { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); margin-top: 1px; }
+.cal.past .db small { color: var(--muted); }
+.cr .cn { min-width: 0; }
+.cr .cn .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr .cn .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd { text-align: right; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.cd b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.cd .ok { color: var(--up); } .cd .av { color: var(--warn); }
+.cal-det { padding: 0 0 14px; }
+.srcs { border-radius: 10px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; margin-bottom: 12px; }
+.srcs .sr { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.srcs .sr:first-child { border-top: 0; }
+.srcs .sr .mk { font-weight: 700; text-align: center; }
+.srcs .sr.same .mk { color: var(--up); } .srcs .sr.diff .mk { color: var(--warn); } .srcs .sr.none { color: var(--dim); }
+.srcs .sr small { color: var(--muted); font-size: 12px; }
+.srcs .sh { padding: 9px 12px 0; font-size: 12px; color: var(--muted); }
+.prod-t { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.of.ready .s { background: var(--up); }
+.of.ready .lk { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+
+/* Siste endringer (øverst i Kalender, bare når noe har skjedd) */
+.chg { margin: 6px 0 14px; padding: 2px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.chg .sec-t { margin: 10px 0 0; }
+.chg .nw:last-child { border-bottom: 0; }
+.nw { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.nw .ic { font-size: 17px; line-height: 1.3; text-align: center; }
+.nw .tt { display: block; font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.nw .tx { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.pn { font-size: 13.5px; font-weight: 600; margin: 12px 0 6px; }
+.nw .tm { font-size: 12px; color: var(--dim); white-space: nowrap; padding-top: 2px; }
+.nw.new .tt::after { content: "NY"; margin-left: 7px; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; background: var(--gold); color: #2A2100; vertical-align: 2px; }
+.src-st { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 10px; align-items: center; font-size: 13px; margin-top: 8px; }
+.src-st .tm { color: var(--muted); text-align: right; }
+.src-st .er { grid-column: 2 / -1; font-size: 12px; color: var(--warn); margin-top: -4px; }
+
+/* Finn */
+.mvh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mvh .hero-l { min-width: 0; }
+.per { display: flex; gap: 4px; flex: none; }
+.per button { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); border: 1px solid var(--line-2); }
+.per button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.mvs { display: grid; margin-top: 8px; }
+.mv { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); text-align: left; width: 100%; }
+.mv:first-child { border-top: 0; }
+.mv .ma { font-size: 13px; text-align: center; } .mv .ma.up, .mv .mc.up { color: var(--up); } .mv .ma.down, .mv .mc.down { color: var(--down); }
+.mv .mn { min-width: 0; font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mv .mn small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.mv .mc { text-align: right; font-weight: 700; font-size: 15px; white-space: nowrap; }
+.mv .mc small { display: block; font-size: 11.5px; font-weight: 500; opacity: .8; }
+.seg { display: flex; gap: 6px; overflow-x: auto; margin: 14px -16px 2px; padding: 0 16px 2px; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--panel); border: 1px solid var(--line-2); color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.fp { border-bottom: 1px solid var(--line); padding: 12px 0; }
+.fh { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: start; cursor: pointer; }
+.fh .rk { font-size: 15px; font-weight: 700; color: var(--dim); padding-top: 1px; text-align: center; }
+.fp:nth-child(-n+3) .fh .rk { color: var(--ink); }
+.fh .fn { min-width: 0; }
+.fh .fn .t { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fh .fn .s { font-size: 12.5px; color: var(--muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fh .fm { text-align: right; font-size: 16px; font-weight: 700; white-space: nowrap; }
+.fh .fm small { display: block; font-size: 11px; font-weight: 500; opacity: .8; }
+.bars { margin: 8px 0 0 32px; display: grid; gap: 4px; }
+.bar { display: grid; grid-template-columns: 44px minmax(0, 1fr) 52px; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.bar i { display: block; height: 8px; border-radius: 4px; background: var(--line-2); min-width: 3px; }
+.bar.up i { background: var(--up); }
+.bar.down i { background: var(--down); }
+.bar.up b { color: var(--up); } .bar.down b { color: var(--down); }
+.ltag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 1px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; background: var(--panel-2); border: 1px solid var(--line-2); color: var(--muted); }
+.bar b { text-align: right; font-weight: 600; color: var(--ink); font-size: 12.5px; }
+.fstat { margin: 7px 0 0 32px; font-size: 12.5px; color: var(--muted); }
+.fstat b { color: var(--ink); font-weight: 600; }
+.v.rs small { display: block; font-size: 11px; font-weight: 600; margin-top: 1px; }
+.bar.ask i { background: var(--line-2); } .bar.ask b { color: var(--muted); font-weight: 500; }
+.fdet { margin: 12px 0 2px 32px; }
+.chart { width: 100%; height: auto; display: block; margin: 4px 0 10px; }
+.chart .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ln.up { stroke: var(--up); } .chart .ln.down { stroke: var(--down); }
+.chart .ar.up { fill: rgba(43, 214, 123, .10); } .chart .ar.down { fill: rgba(255, 107, 91, .10); }
+.chart .st { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 4 4; }
+.chart text { fill: var(--dim); font-size: 10px; font-family: var(--f); }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: -4px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--up) 50%, var(--down) 50%); vertical-align: 3px; margin-right: 5px; }
+.legend i.st { background: none; border-top: 2px dashed var(--muted); height: 0; }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.tile { padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); min-width: 0; }
+.tile span { display: block; font-size: 12px; color: var(--muted); }
+.tile b { display: block; font-size: 17px; font-weight: 700; margin-top: 2px; white-space: nowrap; }
+.tile small { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.chart.pc { touch-action: pan-y; cursor: crosshair; margin-bottom: 4px; }
+.chart .gd { stroke: var(--line); stroke-width: 1; }
+.chart .sg { stroke-width: 2.6; stroke-linecap: round; }
+.chart .sg.up { stroke: var(--up); } .chart .sg.down { stroke: var(--down); } .chart .sg.flat { stroke: var(--muted); }
+.chart .pt { fill: var(--ink); }
+.chart .pt.end.up, .chart .td { fill: var(--up); } .chart .pt.end.down { fill: var(--down); }
+.chart .pv { fill: var(--ink); font-size: 10.5px; font-weight: 600; }
+.chart .pv.end { font-size: 12px; font-weight: 700; }
+.chart .pv.end.up { fill: var(--up); } .chart .pv.end.down { fill: var(--down); }
+.chart .sl { fill: var(--muted); font-size: 10px; }
+.chart .pv, .chart .sl { paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.chart .tl { stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.chart .td { stroke: var(--bg); stroke-width: 2; }
+.ctip { font-size: 12.5px; color: var(--muted); min-height: 18px; margin-bottom: 6px; }
+.ctip b { color: var(--ink); font-weight: 600; }
+.legend i.u { background: var(--up); } .legend i.d { background: var(--down); }
+
+.chart .sp2 { fill: none; stroke: #A9B1C6; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .pt.st2, .chart .td2 { fill: #A9B1C6; }
+.chart .pv.st2 { fill: #A9B1C6; font-size: 11px; font-weight: 600; }
+.chart .ar.up { fill: rgba(43, 214, 123, .14); } .chart .ar.down { fill: rgba(255, 107, 91, .16); }
+.chart .td2 { stroke: var(--bg); stroke-width: 2; }
+.legend i.bp { background: #A9B1C6; } .legend i.fa { background: rgba(43, 214, 123, .45); height: 8px; vertical-align: 0; }
+.legend { flex-wrap: wrap; row-gap: 4px; }
+.offers .rtag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 1px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .35); color: var(--warn); }
+
+/* Bannere */
+.banner { margin: 6px 0 8px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; background: var(--warn-soft); border: 1px solid rgba(245, 165, 36, .3); }
+.banner b { color: var(--warn); }
+.banner.r { background: rgba(255, 107, 91, .1); border-color: rgba(255, 107, 91, .3); }
+.banner.r b { color: var(--down); }
+
+/* Fanebar */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding-bottom: env(safe-area-inset-bottom, 0px); background: rgba(11, 12, 15, .92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
+.tabbar-in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--bar-h); }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--dim); position: relative; }
+.tabbar button svg { width: 22px; height: 22px; }
+.tabbar button[aria-selected="true"] { color: var(--ink); }
+.badge { position: absolute; top: 7px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--up); color: var(--up-ink); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
+
+/* Oppsett & toast */
+.setup { padding-top: 12vh; }
+.setup h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 16px 0 10px; }
+.setup p, .setup ol { color: var(--muted); max-width: 46ch; }
+.setup input { width: 100%; margin-top: 6px; padding: 13px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); font: 14px var(--f); }
+.toast { position: fixed; left: 50%; bottom: calc(var(--bar-h) + 16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 9; padding: 10px 14px; border-radius: 10px;
+  background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 700; max-width: calc(100% - 32px); }
+/* Lynvakt */
+.lyn-hero .hero-v.warn { color: var(--warn); } .lyn-hero .hero-v.down { color: var(--down); }
+.lyn-hero .hero-v span { font-size: 16px; }
+.lyn-pill { float: right; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--up-soft); color: var(--up); }
+.lyn-pill.paused { background: var(--warn-soft); color: var(--warn); } .lyn-pill.dead { background: rgba(255, 107, 91, .12); color: var(--down); }
+.lb { --c: var(--up); --c-soft: rgba(43, 214, 123, .22); display: grid; grid-template-columns: 104px minmax(0, 1fr) 52px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.lb.y { --c: var(--warn); --c-soft: rgba(245, 165, 36, .22); } .lb.r { --c: var(--down); --c-soft: rgba(255, 107, 91, .22); }
+.lb .n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb .n small { display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.lb .bar { position: relative; height: 8px; border-radius: 4px; background: var(--panel-2); }
+.lb .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--c); transition: width .8s ease, background-color .4s; }
+.lb .bar em { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--muted); border-radius: 1px; }
+.lb .bar .f, .lb .bar .g { display: none; }
+/* fill: svak strek = tiden mellom sjekkene, sterk farge fylles opp og tømmes når butikken sjekkes */
+.lb.m-fill .bar i { background: var(--c-soft); overflow: hidden; }
+.lb.m-fill .bar .f { display: block; position: absolute; inset: 0; background: var(--c); border-radius: 4px; transform-origin: left center; transform: scaleX(0); }
+/* dot: et lys løper langs streken og når enden hver gang butikken sjekkes */
+.lb.m-dot .bar .g { display: block; position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 3px var(--c); left: 0; }
+.lb .v { text-align: right; font-weight: 600; }
+.lb.ping .v { animation: lyn-v .7s ease-out; }
+.lb.ping .bar i { animation: lyn-glow .7s ease-out; }
+@keyframes lyn-v { 0% { color: #fff; transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes lyn-glow { 0% { box-shadow: 0 0 0 3px var(--c-soft), 0 0 12px var(--c); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .lb.ping .v, .lb.ping .bar i { animation: none; } }
+.lb-scale { display: grid; grid-template-columns: 104px minmax(0, 1fr) 52px; gap: 10px; font-size: 11px; color: var(--dim); padding: 2px 0 6px; border-bottom: 1px solid var(--line); }
+.lb-scale span:nth-child(2) { display: flex; justify-content: space-between; }
+.lyn-al .lt { font-size: 14px; }
+.lyn-al .lr a { display: inline-block; padding: 6px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
+.lyn-al.buy .lr a { background: var(--up); color: var(--up-ink); border-color: var(--up); }
+/* App-skall: bare innholdet scroller – toppen og fanebaren står fast. Ingen position: fixed lenger, som iOS
+   av og til lar henge igjen midt på skjermen under scrolling. */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none; }
+body::before { display: none; }
+.top { position: relative; top: auto; flex: none; }
+#app, #setup { flex: 1 1 auto; min-height: 0; width: 100%; max-width: none; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+#app { padding-inline: max(16px, calc((100% - 528px) / 2)); padding-bottom: 24px; }
+.tabbar { position: relative; left: auto; right: auto; bottom: auto; flex: none; }
+
+/* Detaljark (glir opp nedenfra) */
+.sheet { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet-bg { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); animation: sh-fade .2s ease-out; }
+.sheet-p { position: relative; width: 100%; max-width: 560px; max-height: 86%; margin: 0 auto; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line-2); border-bottom: 0; border-radius: 18px 18px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); animation: sh-up .28s cubic-bezier(.2, .8, .2, 1); }
+.sheet-h { position: relative; padding: 20px 52px 12px 16px; border-bottom: 1px solid var(--line); }
+.sheet-h .grab { position: absolute; top: 7px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--line-2); }
+.sheet-t .t { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.sheet-t .s { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.sheet-x { position: absolute; right: 12px; top: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--panel-2); color: var(--muted); font-size: 15px; }
+.sheet-b { overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px 22px; }
+.sheet .offers, .sheet .srcs { background: var(--panel-2); border-color: var(--line-2); }
+.sheet .of, .sheet .srcs .sr { border-color: var(--line-2); }
+@keyframes sh-up { from { transform: translateY(100%); } }
+@keyframes sh-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet-p, .sheet-bg { animation: none; } }
+
+/* Kalender */
+.cl, .calh { display: grid; grid-template-columns: 38px minmax(0, 1fr) 56px 56px 58px; gap: 8px; align-items: center; width: 100%; text-align: left; }
+.cl { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.calh { font-size: 11px; color: var(--dim); padding: 12px 0 6px; border-bottom: 1px solid var(--line); }
+.calh span:nth-child(n+3), .cl .v { text-align: right; }
+.cl .v { font-size: 13.5px; padding-top: 0; }
+.cl .v small { display: block; font-size: 10px; font-weight: 500; color: var(--dim); }
+.cl .v.uk { font-size: 12px; font-style: italic; }
+.cl .cn .s .tag { margin-right: 5px; }
+.cl .db { padding: 5px 0 4px; } .cl .db b { font-size: 17px; }
+.cl.past .db small { color: var(--muted); }
+.cl .cn { min-width: 0; }
+.cl .cn .t { display: block; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl .cn .s { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl .cn .s b { color: var(--ink); font-weight: 600; }
+.mh { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 16px 0 0; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.nx { display: block; width: 100%; text-align: left; margin: 6px 0 4px; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.nx-r { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 2px; }
+.nx-t { font-size: 19px; font-weight: 700; letter-spacing: -.01em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nx-c { font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+.nx-s { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.nx-s b { color: var(--ink); font-weight: 600; }
+.fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: left; }
+.fold small { font-weight: 500; letter-spacing: .02em; text-transform: none; color: var(--dim); margin-left: auto; }
+.fold.sm { justify-content: center; border: 0; padding: 10px 0 12px; letter-spacing: .02em; text-transform: none; font-size: 13px; color: var(--ink); }
+.srcl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; width: 100%; margin-top: 4px; padding: 12px 0; font-size: 12.5px; color: var(--muted); text-align: left; }
+.srcl .sl-h { font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; font-size: 11.5px; }
+.srcl .chev { margin-left: auto; font-style: normal; color: var(--dim); }
+.cards { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; margin: 0 -16px; padding: 2px 16px 8px; scrollbar-width: none; }
+.cards::-webkit-scrollbar { display: none; }
+.cc { flex: none; width: 76%; max-width: 300px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.cc:first-child { border-color: rgba(255, 203, 5, .35); }
+.cc-h { display: flex; justify-content: space-between; align-items: flex-start; }
+.cc-h .db { width: 48px; }
+.cc-c { text-align: right; font-size: 11.5px; color: var(--muted); }
+.cc-c b { display: block; font-size: 16px; font-weight: 700; color: var(--gold); }
+.cc-c .ok { color: var(--up); } .cc-c .av { color: var(--warn); }
+.cc-t { font-size: 16px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cc-s { font-size: 13px; color: var(--muted); }
+.cc-m { font-size: 20px; font-weight: 700; }
+.cc-m small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.botfoot { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
+.botfoot b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="top" id="top" hidden>
+  <div class="top-in">
+    <div class="logo">
+      <img src="icon-180.png?v=3" width="36" height="36" alt="">
+      PikaJew
+    </div>
+    <span class="live" id="live"><i></i><span id="liveTxt">kobler til</span></span>
+  </div>
+</header>
+
+<main class="wrap" id="app" hidden>
+  <div id="banners"></div>
+
+  <section id="tab-marked" role="tabpanel">
+    <div class="hero" id="hero"></div>
+    <div id="secBuy"></div>
+    <div id="secIn"></div>
+    <div id="secWatch"></div>
+    <div id="secOther"></div>
+  </section>
+
+  <section id="tab-butikker" role="tabpanel" hidden>
+    <div class="sec"><div class="sec-t"><span>Butikker i Haugesund</span><span>fysisk lager</span></div><div id="srcHg"></div></div>
+    <div class="sec"><div class="sec-t"><span>Nettbutikker</span><span>kan bestilles</span></div><div id="srcNet"></div></div>
+  </section>
+
+  <section id="tab-kalender" role="tabpanel" hidden>
+    <div class="sec lasec"><div class="sec-t"><span>⚡ Lynvarsel</span><span id="lynAlN"></span></div>
+      <div id="lynAlerts"><div class="la-empty">Ingen lynvarsler ennå</div></div></div>
+    <div id="calNews"></div>
+    <div class="hero" id="calHero"></div>
+    <div id="calUp"></div>
+    <div id="calPast"></div>
+    <div id="calSrcLine"></div>
+  </section>
+
+  <section id="tab-finn" role="tabpanel" hidden>
+    <div class="hero" id="finnHero"></div>
+    <div id="finnSort"></div>
+    <div id="finnList"></div>
+    <p class="fine" id="finnFoot"></p>
+  </section>
+
+  <section id="tab-bot" role="tabpanel" hidden>
+    <div class="bstate" id="bstate"><i></i><span id="bstateTxt">–</span></div>
+    <div class="sec" id="lynSec" hidden><div class="sec-t"><span>Lynvakt · listen din</span><span id="lynSub"></span></div>
+      <div class="hero lyn-hero" id="lynHero"></div>
+      <div class="lb-scale" id="lynScale"></div>
+      <div id="lynList"></div>
+      <p class="fine">Hver strek går i samme takt som lynvakten på PC-en: hver gang den når enden, blir butikken sjekket. Lengden er tiden mellom sjekkene, og den grå markøren er målet på 5 sekunder. Bremser en butikk oss, blir streken <b class="warn">oransje</b>, lengre og tregere.</p>
+    </div>
+    <div class="sec"><div class="sec-t"><span>Rolig gjennomgang</span><span>detaljer + Finn</span></div>
+      <p class="fine" style="margin:0 0 4px">Lagerstatus og varsler kommer fra lynvakten over – listen din og Pokémon-varer utenfor listen hos Norli og Nille, på nett og i Haugesund, hvert 3.–16. sekund. Boten går i tillegg rolig gjennom alt for <b>detaljer</b> (kjøpsgrenser, slippdatoer, kurvtest) og henter Finn-priser:</p>
+      <dl class="grid2" id="botKv"></dl></div>
+    <div class="btns">
+      <button class="btn pri" id="btnCheck" type="button">Sjekk alt nå</button>
+      <button class="btn" id="btnPause" type="button">Pause</button>
+      <button class="btn wide" id="btnFinn" type="button">Hent nye Finn-priser</button>
+    </div>
+    <p class="fine">Knappene sender beskjed til boten på PC-en. Den svarer innen ca. 10 sekunder.</p>
+    <div class="sec"><div class="sec-t"><span>Tilkobling</span></div><dl class="grid2" id="connKv"></dl></div>
+    <div class="btns"><button class="btn wide" id="btnUnlink" type="button">Koble fra denne telefonen</button></div>
+    <p class="fine" id="unlinkHint" hidden>Trykk én gang til for å koble fra.</p>
+  </section>
+</main>
+
+<section class="wrap setup" id="setup" hidden>
+  <svg width="44" height="44" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#3A3F4B" stroke-width="2"/><circle cx="15" cy="15" r="7" fill="none" stroke="#3A3F4B" stroke-width="2"/><path d="M15 15 L25.6 7.5" stroke="#2BD67B" stroke-width="2.4" stroke-linecap="round"/><circle cx="21.5" cy="9.5" r="2.6" fill="#FF6B5B"/></svg>
+  <h1>Koble til boten din</h1>
+  <p>Appen viser lageret som Pokemon-boten på PC-en finner. Første gang trenger den koblingslenken fra boten.</p>
+  <ol>
+    <li>Åpne Pokemon-bot på PC-en: <b>A</b> → <b>8</b> sender lenken til telefonen.</li>
+    <li>Trykk på lenken i varselet.</li>
+  </ol>
+  <form id="linkForm">
+    <label for="linkInput" class="fine">Eller lim inn koblingslenken her</label>
+    <input id="linkInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…#db=…&amp;k=…">
+    <div class="btns"><button class="btn pri wide" type="submit">Koble til</button></div>
+    <p class="fine" id="linkErr" hidden>Fant ingen koblingsdata i lenken. Den skal inneholde «#db=» og «&amp;k=».</p>
+  </form>
+</section>
+
+<nav class="tabbar" id="tabbar" role="tablist" hidden>
+  <div class="tabbar-in">
+    <button type="button" role="tab" data-tab="marked" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg>Marked<span class="badge" id="tabBadge" hidden></span></button>
+    <button type="button" role="tab" data-tab="butikker" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>Butikker</button>
+    <button type="button" role="tab" data-tab="kalender" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Kalender<span class="badge" id="calBadge" hidden></span></button>
+    <button type="button" role="tab" data-tab="finn" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="15.5" y="4" width="3" height="13" rx="1"/></svg>Finn</button>
+    <button type="button" role="tab" data-tab="bot" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1.1" fill="currentColor"/><circle cx="15" cy="13" r="1.1" fill="currentColor"/></svg>Bot</button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-bg" data-close></div>
+  <div class="sheet-p" role="dialog" aria-modal="true" aria-labelledby="sheetT">
+    <div class="sheet-h"><span class="grab"></span><div class="sheet-t" id="sheetT"></div><button class="sheet-x" type="button" data-close aria-label="Lukk">✕</button></div>
+    <div class="sheet-b" id="sheetB"></div>
+  </div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const nf = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 });
+  const kr = (v) => (v > 0 ? nf.format(Math.round(v)) : '–');
+  const krU = (v) => (v > 0 ? `${nf.format(Math.round(v))}<span class="u"> kr</span>` : '–');
+  const sign = (v) => (v >= 0 ? '+' : '−') + nf.format(Math.abs(Math.round(v)));
+  const nb = (s) => String(s ?? '').replace(/per household/i, 'per husstand');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+
+  // ---------- Kobling (#db=...&k=...) ----------
+  function parseLink(text) {
+    const i = String(text || '').indexOf('#');
+    const h = i >= 0 ? text.slice(i + 1) : String(text || '');
+    if (h === 'demo') return { demo: true };
+    const p = new URLSearchParams(h);
+    const db = p.get('db'), k = p.get('k');
+    if (db && k && /^https:\/\/[a-z0-9.-]+\.(firebaseio\.com|firebasedatabase\.app)$/i.test(db.replace(/\/$/, ''))) return { db: db.replace(/\/$/, ''), k };
+    return null;
+  }
+  let cfg = parseLink(location.hash);
+  if (cfg && !cfg.demo) store.set('rr-cfg', JSON.stringify(cfg));
+  if (!cfg) { try { cfg = JSON.parse(store.get('rr-cfg') || 'null'); } catch { cfg = null; } }
+
+  // ---------- Data ----------
+  let tree = { data: null, bot: null, news: null, finn: null, lyn: null };
+  let liveState = 'connecting';
+  let es = null, pollTimer = null;
+  const openRows = new Set();
+  const openShops = new Set();
+  const fmtDate = (s) => { const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }); };
+
+  function setAt(path, value, merge) {
+    const parts = path.split('/').filter(Boolean);
+    if (!parts.length) {
+      if (merge && value && typeof value === 'object') tree = { ...tree, ...value };
+      else tree = value && typeof value === 'object' ? { data: value.data ?? null, bot: value.bot ?? null, news: value.news ?? null, finn: value.finn ?? null, lyn: value.lyn ?? null } : { data: null, bot: null, news: null, finn: null, lyn: null };
+      return;
+    }
+    let o = tree;
+    for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+    const last = parts[parts.length - 1];
+    o[last] = merge && value && typeof value === 'object' ? { ...(o[last] || {}), ...value } : value;
+  }
+
+  function connect() {
+    if (cfg.demo) {
+      const opt = (f) => fetch(f, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      Promise.all([fetch('demo.json', { cache: 'no-store' }).then((r) => r.json()), opt('demo-news.json'), opt('demo-finn.json'), opt('demo-lyn.json')]).then(([d, n, fi, ly]) => {
+        tree = { data: d, news: n, finn: fi, lyn: ly && { ...ly, updated: Date.now() - 12000, started: Date.now() - 3 * 3600000 }, bot: { beat: Date.now(), paused: false, lastStore: d.updated, lastOnline: d.updated, nextOnline: Date.now() + 150000, nextStore: Date.now() + 420000, storeEvery: 10, netEvery: 3 } };
+        liveState = 'demo'; render();
+      }).catch(() => { liveState = 'off'; render(); });
+      return;
+    }
+    const base = `${cfg.db}/${encodeURIComponent(cfg.k)}`;
+    try { if (es) es.close(); } catch {}
+    if (typeof EventSource === 'undefined') { startPolling(base); return; }
+    es = new EventSource(`${base}.json`);
+    es.addEventListener('put', (e) => { const m = JSON.parse(e.data); setAt(m.path, m.data, false); liveState = 'on'; render(); });
+    es.addEventListener('patch', (e) => { const m = JSON.parse(e.data); setAt(m.path, m.data, true); liveState = 'on'; render(); });
+    es.addEventListener('cancel', () => { liveState = 'off'; render(); });
+    es.onopen = () => { liveState = 'on'; renderLive(); };
+    es.onerror = () => { liveState = 'off'; renderLive(); if (es.readyState === 2) startPolling(base); };
+  }
+  function startPolling(base) {
+    clearInterval(pollTimer);
+    const once = () => fetch(`${base}.json`, { cache: 'no-store' }).then((r) => r.json()).then((d) => { setAt('/', d, false); liveState = 'poll'; render(); }).catch(() => { liveState = 'off'; renderLive(); });
+    once(); pollTimer = setInterval(once, 30000);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && cfg && !cfg.demo && (!es || es.readyState === 2)) connect();
+  });
+
+  // ---------- Kommandoer ----------
+  async function send(c, okMsg) {
+    if (!cfg || cfg.demo) { toast('Demo: ingen bot å sende til'); return; }
+    try {
+      const r = await fetch(`${cfg.db}/${encodeURIComponent(cfg.k)}/cmd.json`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ c, t: { '.sv': 'timestamp' } }) });
+      if (!r.ok) throw new Error(r.status);
+      toast(okMsg);
+    } catch { toast('Fikk ikke sendt. Sjekk nettet og prøv igjen.'); }
+  }
+  let toastT;
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+
+  // ---------- Tid ----------
+  function ago(ms) {
+    if (!ms) return 'aldri';
+    const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+    if (s < 45) return 'nå nettopp';
+    const m = Math.round(s / 60);
+    if (m < 60) return `${m} min siden`;
+    return `${Math.floor(m / 60)} t ${m % 60} min siden`;
+  }
+  const until = (ms) => { if (!ms) return '–'; const m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? 'nå' : `om ${m} min`; };
+  const clock = (ms) => ms ? new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }) : '–';
+
+  // ---------- Analyse ----------
+  // Hver vare får én "hovedlinje": beste tilbud på lager, ellers billigste kjente pris.
+  function analyse(it) {
+    const offers = (it.offers || []).slice();
+    const inStock = offers.filter((o) => o.state === 'in');
+    const okPrice = (o) => !(it.max > 0) || !(o.price > 0) || o.price <= it.max;
+    const prefer = (a, b) => (a.where === 'haugesund' ? -1 : 0) - (b.where === 'haugesund' ? -1 : 0) || a.price - b.price;
+    const buy = inStock.filter(okPrice).sort(prefer)[0];
+    const over = inStock.filter((o) => !okPrice(o)).sort(prefer)[0];
+    const cheapest = offers.filter((o) => o.price > 0).sort((a, b) => a.price - b.price || (a.state === 'unlisted' ? -1 : 1))[0];
+    const main = buy || over || cheapest;
+    const finn = it.finn && it.finn.n ? it.finn.med : null;
+    const margin = main && finn && main.price > 0 ? finn - main.price : null;
+    const status = buy ? 'buy' : over ? 'over' : 'watch';
+    return { offers, buy, over, main, finn, margin, status };
+  }
+  const shopOf = (o) => o.shop;
+
+  // ---------- Tegning ----------
+  function renderLive() {
+    const el = $('live'), t = $('liveTxt'), b = tree.bot || {};
+    el.className = 'live';
+    const last = Math.max(b.lastOnline || 0, b.lastStore || 0);
+    const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
+    // Med lynvakten: klokkeslettet (med sekunder) for siste sjekk av en butikk – tikker hele tiden.
+    const lc = lynLastCheck();
+    if (liveState === 'on' || liveState === 'poll') { el.classList.add('on'); t.textContent = lc ? `live · sjekket ${clockS(lc)}` : `live ${clock(last || Date.now())}${nxt ? (nxt > Date.now() ? ` · neste ${clock(nxt)}` : ' · sjekker nå') : ''}`; }
+    else if (liveState === 'demo') { el.classList.add('on'); t.textContent = lc ? `demo · sjekket ${clockS(lc)}` : 'demo'; }
+    else if (liveState === 'off') { el.classList.add('off'); t.textContent = 'frakoblet'; }
+    else t.textContent = 'kobler til';
+  }
+
+  // Lagerstatus som et tydelig merke først på linjen (blir aldri kuttet): PÅ LAGER, SLIPP-dato, KOMMER eller UTSOLGT.
+  function stockPill(state, release, haugesund) {
+    if (state === 'in') return `<span class="pill in">${haugesund ? 'I BUTIKK' : 'PÅ LAGER'}</span>`;
+    if (release && daysTo(release) >= 0) return `<span class="pill rel">SLIPP ${esc(fmtDate(release))}</span>`;
+    if (state === 'unlisted') return '<span class="pill rel">KOMMER</span>';
+    return '<span class="pill out">UTSOLGT</span>';
+  }
+  function statusLine(x) {
+    const o = x.a.main;
+    if (!o) return '<span class="pill out">IKKE FUNNET</span>ingen butikk ennå';
+    const pill = stockPill(o.state, x.it.release, o.where === 'haugesund');
+    const extra = x.a.status === 'over' ? ` · <span class="warn">over maks ${kr(x.it.max)}</span>` : o.state === 'in' && o.where === 'haugesund' && o.store ? ` · ${esc(o.store)}` : '';
+    return `${pill}${esc(shopOf(o))}${extra}`;
+  }
+
+  // Fortjeneste i prosent av butikkprisen. Stripe: grønn ≥ 10 %, oransje 0–10 %, rød ved tap.
+  const marginPct = (m, price) => (m !== null && price > 0 ? (m / price) * 100 : null);
+  const marginTier = (m, price) => { if (m === null) return ''; const p = marginPct(m, price); return m < 0 ? 'm-loss' : p !== null && p < 10 ? 'm-thin' : 'm-good'; };
+  const marginCell = (m, price) => {
+    if (m === null) return '<span class="v mg dim">–</span>';
+    const p = marginPct(m, price);
+    const pt = p === null ? '' : `<small>${p < 0 ? '−' : ''}${nf.format(Math.abs(Math.round(p)))} %</small>`;
+    return `<span class="v mg ${m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${sign(m)}<span class="u"> kr</span>${pt}</span>`;
+  };
+  // Resale-tallet med et lite merke under: «solgt · 3» (bekreftet solgt på Finn) eller «ber om» (det annonsene koster nå).
+  const resCell = (v, sold) => (v ? `<span class="v rs">${krU(v)}<small class="${sold ? 'up' : 'dim'}">${sold ? `solgt · ${sold}` : 'ber om'}</small></span>` : '<span class="v dim">–</span>');
+
+  function row(x) {
+    const { it, a } = x;
+    const open = openRows.has(it.name);
+    const o = a.main;
+    const cls = [a.status === 'buy' ? 'buy' : a.status === 'over' ? 'over' : '', marginTier(a.margin, o && o.price)].filter(Boolean).join(' ');
+    const mg = marginCell(a.margin, o && o.price);
+    const pc = o && o.price > 0 ? `<span class="v ${a.status === 'over' ? 'warn' : a.status === 'watch' ? 'mut' : ''}">${krU(o.price)}</span>` : '<span class="v dim">–</span>';
+    const btn = a.status !== 'watch' ? `<a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">${a.status === 'buy' ? 'Kjøp' : 'Åpne'} hos ${esc(o.shop)} ↗</a>` : '';
+    return `<div class="row ${cls}${open ? ' open' : ''}" data-name="${esc(it.name)}">
+      <div class="rh" role="button" tabindex="0" aria-expanded="${open}">
+        <div class="nm"><div class="t">${esc(it.name)}</div><div class="s">${statusLine(x)}</div>${btn}</div>
+        ${pc}${resCell(a.finn, it.finn && it.finn.sold)}${mg}
+      </div>
+      <div class="det" ${open ? '' : 'hidden'}>${details(it, a)}</div>
+    </div>`;
+  }
+
+  function details(it, a) {
+    const label = { in: 'på lager', out: 'utsolgt', unlisted: 'kommer snart' };
+    const multi = {};
+    a.offers.forEach((o) => (multi[o.shop] = (multi[o.shop] || 0) + 1));
+    const short = (p) => String(p).replace(/^(pok[eé]mon:?\s*)?30th (celebration|anniversary)\s*/i, '').replace(/^[—–-]\s*/, '');
+    const offers = a.offers.slice().sort((x, y) => (y.state === 'in') - (x.state === 'in') || (x.price || 9e9) - (y.price || 9e9));
+    const ofHtml = offers.map((o) => {
+      const where = o.state === 'in' && o.where === 'haugesund' ? `i ${esc(o.store)}` : label[o.state];
+      const nm = multi[o.shop] > 1 ? `${esc(o.shop)} · ${esc(short(o.product))}` : esc(o.shop);
+      const okp = o.price > 0 && it.max > 0 && o.price <= it.max;
+      return `<div class="of ${o.state}"><span class="s"></span><span class="on">${nm}<small>${where}</small></span><span class="pr ${okp ? '' : 'mut'}">${kr(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.state === 'in' ? 'Kjøp' : 'Åpne'} ↗</a></div>`;
+    }).join('');
+    const kv = [
+      it.max ? `Maks <b>${kr(it.max)}</b>` : '',
+      it.be ? `Break-even <b>${kr(it.be)}</b>` : '',
+      // Trykk på Finn-prisen for alle annonsene, eller på "billigst" for den billigste annonsen.
+      a.finn ? `<a class="fl" href="${esc(it.finn.url || '')}" target="_blank" rel="noopener">${it.finn.sold ? `Solgt for <b>${kr(a.finn)}</b> <span class="dim">(${it.finn.sold} salg · ber om ${kr(it.finn.ask)})</span>` : `Resale <b>${kr(a.finn)}</b> <span class="dim">(ber om · ${it.finn.n} annonser)</span>`}</a>` : 'Resale <b>ukjent</b> <span class="dim">(ingen på Finn)</span>',
+      a.finn ? `<a class="fl min" href="${esc(it.finn.minUrl || it.finn.url || '')}" target="_blank" rel="noopener">Billigst på Finn <b>${kr(it.finn.min)}</b> ↗</a>` : ''
+    ].filter(Boolean).map((s) => `<span class="kvi">${s}</span>`).join('');
+    const info = [];
+    offers.forEach((o) => (o.info || []).forEach((s) => { if (!/klikk og send|ikke lagt ut/i.test(s) || o.state === 'in') info.push(`${o.shop}: ${nb(s)}`); }));
+    if (it.limit && !offers.some((o) => o.limit)) info.push(`Kjøpsgrense: ${nb(it.limit)}`);
+    if (it.elsewhere) info.push(`Fysisk i Norli-butikker: ${it.elsewhere}`);
+    if (it.note) info.push(it.note);
+    return `<div class="kv">${kv}</div><div class="offers">${ofHtml || '<div class="of"><span class="on mut">Ikke funnet i noen butikk ennå</span></div>'}</div>
+      ${info.length ? `<ul class="info">${[...new Set(info)].map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}`;
+  }
+
+  function section(id, title, note, cols, list, emptyText) {
+    const el = $(id);
+    if (!list.length && !emptyText) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="sec"><div class="sec-t"><span>${title}</span><span>${note}</span></div>
+      <div class="cols"><span></span><span>${cols[0]}</span><span>Resale</span><span>Margin</span></div>
+      ${list.length ? list.map(row).join('') : `<div class="empty">${emptyText}</div>`}</div>`;
+  }
+
+  // ---------- Kalender ----------
+  // Sett (fra boten, med dato kryssjekket mot flere kilder) + enkeltprodukter med slippdato (watchlisten og Norli).
+  const openCal = new Set();
+  const MON = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+  const MONL = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+  const ymd = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+  const daysTo = (s) => { const d = ymd(s); if (!d) return null; const t = new Date(); return Math.round((d - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5); };
+  const longDate = (s) => { const d = ymd(s); return d ? `${d.getDate()}. ${MONL[d.getMonth()]}` : String(s || ''); };
+  // Spennet kildene oppgir, f.eks. "16.–18. sep" eller "30. sep–2. okt".
+  const dateRange = (list) => {
+    const ds = [...new Set((list || []).filter((x) => ymd(x)))].sort();
+    if (!ds.length) return '';
+    const a = ymd(ds[0]), b = ymd(ds[ds.length - 1]);
+    if (ds.length === 1) return `${a.getDate()}. ${MON[a.getMonth()]}`;
+    return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear() ? `${a.getDate()}.–${b.getDate()}. ${MON[b.getMonth()]}` : `${a.getDate()}. ${MON[a.getMonth()]}–${b.getDate()}. ${MON[b.getMonth()]}`;
+  };
+  const countdown = (n) => (n === 0 ? 'i dag' : n === 1 ? 'i morgen' : n > 1 ? `om ${n} dager` : n === -1 ? 'i går' : `${-n} dager siden`);
+  const agoShort = (ms) => { const m = Math.round((Date.now() - ms) / 60000); if (m < 2) return 'nå'; if (m < 60) return `${m} min`; const h = Math.round(m / 60); return h < 24 ? `${h} t` : `${Math.round(h / 24)} d`; };
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanShop = (s) => String(s || '').replace(/\s*\((butikk.*|nettbutikk|hele butikken|produktlenke)\)/i, '');
+  const SRC = { norli: 'Norli (Norge)', offisiell: 'Pokemon.com', serebii: 'Serebii', pokejakt: 'Pokejakt.no' };
+  const AVAIL = { InStock: 'på lager', PreOrder: 'kan forhåndsbestilles', PreSale: 'kan forhåndsbestilles', LimitedAvailability: 'få igjen', BackOrder: 'kan bestilles' };
+
+  function calEntries() {
+    const n = tree.news || {}, d = tree.data || {};
+    const out = (n.sets || []).map((s) => ({ kind: 'sett', key: 'sett:' + s.id, name: s.name, date: s.date, status: s.status, total: s.total, range: dateRange(Object.values(s.dates || {})), s }));
+    const seen = new Set();
+    (d.items || []).forEach((it) => {
+      if (!it.release) return;
+      seen.add(norm(it.name));
+      const rs = it.relSrc || [];
+      const agree = rs.filter((x) => x.d === it.release).length;
+      out.push({ kind: 'produkt', key: 'p:' + it.name, name: it.name, date: it.release, status: rs.length < 2 ? 'en' : agree === rs.length ? 'ok' : 'avvik', total: rs.length, range: dateRange(rs.map((x) => x.d)), it });
+    });
+    (d.sources || []).forEach((src) => (src.items || []).forEach((x) => {
+      if (!x.release || x.watched || seen.has(norm(x.name))) return;
+      seen.add(norm(x.name));
+      out.push({ kind: 'produkt', key: 'p:' + x.name, name: x.name, date: x.release, status: 'en', total: 1, x, shop: cleanShop(src.label) });
+    }));
+    return out.filter((e) => ymd(e.date)).sort((a, b) => a.date.localeCompare(b.date) || (a.kind === 'sett' ? -1 : 1));
+  }
+
+  // Kalender: hver linje er kort; trykk åpner et detaljark nedenfra i stedet for å folde ut lister midt i kalenderen.
+  let calByKey = {}, calPastOpen = false, calNewsAll = false;
+  // Lignende produkt fra tidligere sett (Finn-boten), f.eks. "Ultra-Premium Collection" fra Celebrations og 151.
+  // Gir en pekepinn på resale når produktet ikke selges på Finn ennå.
+  function calRef(name) {
+    const ps = ((tree.finn && tree.finn.products) || []).filter((p) => p && !p.watched && p.med > 0 && p.name);
+    const base = String(name || '').replace(/\s*\(.*?\)\s*/g, ' ').trim().toLowerCase();
+    let type = '';
+    ps.forEach((p) => { const t = p.name.toLowerCase(); if ((base === t || base.endsWith(' ' + t)) && t.length > type.length) type = t; });
+    if (!type) return null;
+    const list = ps.filter((p) => p.name.toLowerCase() === type).sort((a, b) => (b.n || 0) - (a.n || 0));
+    const meds = list.map((p) => p.med).sort((a, b) => a - b);
+    return { type: list[0].name, list, med: meds[Math.floor((meds.length - 1) / 2)] };
+  }
+  // Pris (butikk), resale (Finn nå) og margin for en linje i kalenderen. Mangler resale, brukes tidligere sett som pekepinn.
+  function calVals(e) {
+    let price = 0, res = 0, ref = null, sold = 0;
+    if (e.kind === 'sett') { price = e.s.price || 0; ref = calRef('Elite Trainer Box'); }
+    else if (e.it) { const a = analyse(e.it); price = a.main && a.main.price > 0 ? a.main.price : 0; res = a.finn || 0; sold = (e.it.finn && e.it.finn.sold) || 0; if (!res) ref = calRef(e.name); }
+    else { price = e.x.price || 0; ref = calRef(e.name); }
+    return { price, res, ref, sold, m: price && res ? res - price : null, mRef: price && !res && ref && e.kind !== 'sett' ? ref.med - price : null };
+  }
+  function calCells(v) {
+    const pc = v.price ? `<span class="v">${krU(v.price)}</span>` : '<span class="v dim uk">ukjent</span>';
+    const rc = v.res ? resCell(v.res, v.sold) : v.ref ? `<span class="v dim">≈${krU(v.ref.med)}<small>tidl. sett</small></span>` : '<span class="v dim uk">ukjent</span>';
+    const mc = v.m !== null ? marginCell(v.m, v.price) : v.mRef !== null ? `<span class="v mg dim">≈${sign(v.mRef)}<span class="u"> kr</span></span>` : '<span class="v mg dim">–</span>';
+    return pc + rc + mc;
+  }
+  function calSub(e) {
+    const v = calVals(e);
+    const res = v.res ? `${v.sold ? 'solgt for' : 'resale'} <b>${kr(v.res)} kr</b>` : v.ref ? `resale ukjent · tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : 'resale ukjent';
+    if (e.kind === 'sett') return `<span class="tag">SETT</span>${e.s.n ? `${e.s.n} produkter` : 'ikke lagt ut ennå'}${v.price ? ` · fra <b>${kr(v.price)} kr</b>` : ''}${v.ref ? ` · ETB tidl. sett ≈ <b>${kr(v.ref.med)} kr</b>` : ''}`;
+    return `${v.price ? `pris <b>${kr(v.price)} kr</b>` : 'pris ukjent'} · ${res}`;
+  }
+  const calMark = (e) => (e.status === 'avvik' ? `<span class="av">${esc(e.range)}</span>` : e.status === 'ok' ? '<span class="ok">✓ bekreftet</span>' : '');
+  function calLine(e) {
+    const dd = ymd(e.date), n = daysTo(e.date), mk = calMark(e);
+    return `<button type="button" class="cl${n < 0 ? ' past' : ''}" data-cal="${esc(e.key)}"><span class="db"><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small></span><span class="cn"><span class="t">${esc(e.name)}</span><span class="s">${e.kind === 'sett' ? '<span class="tag">SETT</span>' : ''}${countdown(n)}${mk ? ` · ${mk}` : ''}</span></span>${calCells(calVals(e))}</button>`;
+  }
+  // Øverst i detaljarket: nøkkeltall som i en aksjeterminal, resale over tid og tidligere sett.
+  function calTerminal(e) {
+    const v = calVals(e);
+    const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
+    let h = `<div class="tiles">${[
+      tile(e.kind === 'sett' ? 'Fra (butikk)' : 'Butikkpris', v.price ? `${kr(v.price)} kr` : 'ukjent', v.price ? 'billigst i Norge' : 'ikke lagt ut ennå'),
+      v.res && e.it && e.it.finn && e.it.finn.url
+        ? `<a class="tile lnk" href="${esc(e.it.finn.url)}" target="_blank" rel="noopener"><span>${v.sold ? 'Solgt for' : 'Resale nå'}</span><b>${kr(v.res)} kr</b><small>${v.sold ? `${v.sold} salg · ` : 'ber om · '}se annonsene ↗</small></a>`
+        : tile(v.sold ? 'Solgt for' : 'Resale nå', v.res ? `${kr(v.res)} kr` : 'ukjent', v.res ? (v.sold ? `${v.sold} salg på Finn` : 'det folk ber om på Finn') : v.ref ? `tidl. sett ≈ ${kr(v.ref.med)} kr` : 'ingen annonser ennå'),
+      tile('Margin', v.m !== null ? `${sign(v.m)} kr` : v.mRef !== null ? `≈${sign(v.mRef)} kr` : '–', v.m !== null ? 'mot Finn nå' : v.mRef !== null ? 'mot tidligere sett' : 'mangler pris', v.m !== null ? (v.m >= 0 ? 'up' : 'down') : ''),
+      tile('Slipp', countdown(daysTo(e.date)), esc(longDate(e.date)))
+    ].join('')}</div>`;
+    const fp = e.it && ((tree.finn && tree.finn.products) || []).find((p) => p && p.watched && p.name === e.name);
+    if (fp) h += `<div class="prod-t">Resale over tid</div>${finnChart(fp)}`;
+    // Hver linje åpner annonsene på Finn (eller den billigste annonsen hvis søket mangler).
+    if (v.ref) h += `<div class="prod-t">${esc(v.ref.type)} fra tidligere sett</div><div class="offers">${v.ref.list.slice(0, 5).map((p) => {
+      const u = p.url || ((p.cheap || [])[0] || {}).url || '';
+      return `<div class="of"><span class="s"></span><span class="on">${esc(p.set)}<small>${p.n || 0} annonser på Finn nå</small></span><span class="pr">${krU(p.med)}</span>${u ? `<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">Finn ↗</a>` : '<span></span>'}</div>`;
+    }).join('')}</div>`;
+    return h;
+  }
+  function calSrcLine(n) {
+    const src = (n && n.src) || [];
+    return src.length ? `<button type="button" class="srcl" data-tog="src"><span class="sl-h">Kilder</span>${src.map((x) => `<span><i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i>${esc(x.label)}</span>`).join('')}<i class="chev">›</i></button>` : '';
+  }
+  function openSheet(titleHtml, bodyHtml) {
+    $('sheetT').innerHTML = titleHtml; $('sheetB').innerHTML = bodyHtml; $('sheetB').scrollTop = 0; $('sheet').hidden = false;
+  }
+  function closeSheet() { $('sheet').hidden = true; }
+  function openCalSheet(e) {
+    openSheet(`<div class="t">${esc(e.name)}</div><div class="s">${esc(longDate(e.date))} · ${countdown(daysTo(e.date))}${e.status === 'avvik' ? ` · kildene sier ${esc(e.range)}` : ''}</div>`, calTerminal(e) + calDetails(e));
+  }
+  function srcSheet() {
+    const n = tree.news || {};
+    openSheet(`<div class="t">Kilder for datoene</div><div class="s">${n.checked ? `sjekket ${clock(n.checked)}${n.next ? ` · neste ${clock(n.next)}` : ''}` : ''}</div>`,
+      `<p class="fine" style="margin-top:0">Datoen for hvert sett sjekkes mot flere uavhengige kilder. Er de enige, står det <b>bekreftet</b>. Har Norli satt salgsstart, er det den som gjelder i Norge.</p>
+       <div class="src-st">${(n.src || []).map((x) => `<i class="dot ${x.err ? 'y' : x.ok ? 'g' : ''}"></i><span>${esc(x.label)}</span><span class="tm">${x.err ? 'feil' : x.ok ? `ok · ${agoShort(x.ok)}` : '–'}</span>${x.err ? `<span class="er">${esc(x.err)}</span>` : ''}`).join('')}</div>`);
+  }
+  function calPastHtml(past) {
+    return past.length ? `<div class="sec"><button type="button" class="fold" data-tog="past" aria-expanded="${calPastOpen}">Nylig sluppet <small>${past.length} siste 60 dager ${calPastOpen ? '▴' : '▾'}</small></button>${calPastOpen ? past.map(calLine).join('') : ''}</div>` : '';
+  }
+
+  function calDetails(e) {
+    const srcRowH = (cls, mk, name, val, link) => {
+      const inner = `<span class="mk">${mk}</span><span>${esc(name)}</span><small>${esc(val)}</small>`;
+      return link ? `<a class="sr ${cls}" href="${esc(link)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="sr ${cls}">${inner}</div>`;
+    };
+    if (e.kind === 'sett') {
+      const s = e.s, up = daysTo(s.date) >= 0;
+      const rows = ['norli', 'offisiell', 'serebii', 'pokejakt'].map((k) => {
+        const v = s.dates && s.dates[k];
+        if (!v) return srcRowH('none', '–', SRC[k], k === 'norli' ? 'ikke lagt ut hos Norli ennå' : 'ingen dato ennå', '');
+        return srcRowH(v === s.date ? 'same' : 'diff', v === s.date ? '✓' : '≠', SRC[k], longDate(v), s.links && s.links[k]);
+      }).join('');
+      // Hvilken kilde datoen kommer fra: den første i prioritert rekkefølge som oppgir den viste datoen.
+      const pick = ['norli', 'offisiell', 'serebii', 'pokejakt'].find((k) => s.dates && s.dates[k] === s.date);
+      const others = (s.total || 0) - (s.agree || 0);
+      const why = s.dates && s.dates.norli ? 'Norlis dato gjelder i Norge.'
+        : s.agree > others ? `Viser datoen flest kilder oppgir (${s.agree} mot ${others}).`
+        : `Det står ${s.agree} mot ${others}, så viser datoen fra ${SRC[pick] || 'den mest pålitelige kilden'} inntil en kilde til avgjør.`;
+      const note = s.status === 'avvik' ? `<div class="sh">Kildene oppgir ${esc(dateRange(Object.values(s.dates || {})))}. ${why}</div>` : '';
+      let h = `<div class="srcs">${note}${rows}</div>`;
+      const prods = s.prods || [];
+      if (prods.length) {
+        h += `<div class="prod-t">Produkter i norske butikker</div>` + prods.map((p) => {
+          const ofs = (p.offers || []).map((o) => {
+            const st = o.ready ? (AVAIL[o.avail] || 'kan bestilles') : up ? 'ikke bestillbar ennå' : 'utsolgt';
+            return `<div class="of ${o.ready ? 'ready' : 'out'}"><span class="s"></span><span class="on">${esc(o.store)}<small>${esc(st)}</small></span><span class="pr">${kr(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.ready ? 'Bestill' : 'Åpne'} ↗</a></div>`;
+          }).join('');
+          return `<div class="pn">${esc(String(p.name).replace(/^Pok[eé]mon\s+/i, ''))}</div><div class="offers">${ofs || '<div class="of"><span class="on mut">Ingen butikk ennå</span></div>'}</div>`;
+        }).join('');
+      } else h += `<p class="fine">${up ? 'Ingen norske butikker har lagt ut produkter fra settet ennå. Du får varsel når det skjer.' : `${s.n || 0} produkter i norske butikker – se alle på Pokejakt.`}</p>`;
+      return h + `<a class="go" href="${esc(s.url)}" target="_blank" rel="noopener">Se settet på Pokejakt ↗</a>`;
+    }
+    if (e.it) {
+      const rs = e.it.relSrc || [];
+      const rows = rs.length ? rs.map((x) => srcRowH(x.d === e.date ? 'same' : 'diff', x.d === e.date ? '✓' : '≠', x.s === 'din liste' ? 'Din liste' : x.s, longDate(x.d), '')).join('') : srcRowH('none', '–', 'Ukjent kilde', longDate(e.date), '');
+      return `<div class="srcs">${rows}</div>` + details(e.it, analyse(e.it));
+    }
+    return `<div class="srcs">${srcRowH('same', '✓', e.shop, longDate(e.date), '')}</div><a class="go" href="${esc(e.x.url)}" target="_blank" rel="noopener">Åpne hos ${esc(e.shop)} ↗</a>`;
+  }
+
+  function renderCal() {
+    const n = tree.news, all = calEntries();
+    calByKey = {}; all.forEach((e) => (calByKey[e.key] = e));
+    const up = all.filter((e) => daysTo(e.date) >= 0);
+    const past = all.filter((e) => daysTo(e.date) < 0 && daysTo(e.date) >= -60).reverse();
+    // Enkel liste: alle kommende slipp måned for måned, tidligst øverst. Trykk for detaljer.
+    const hero = $('calHero');
+    hero.className = '';
+    hero.innerHTML = up.length ? '' : `<div class="hero"><div class="hero-t">${n ? 'Ingen kjente slipp framover' : 'Venter på kalenderen'}</div><div class="hero-s">Boten sier fra så snart et nytt sett dukker opp.</div></div>`;
+    let html = '', cur = '';
+    const yr = new Date().getFullYear();
+    up.forEach((e) => {
+      const d = ymd(e.date), m = MONL[d.getMonth()] + (d.getFullYear() !== yr ? ` ${d.getFullYear()}` : '');
+      if (m !== cur) { html += `<div class="mh">${m}</div>`; cur = m; }
+      html += calLine(e);
+    });
+    $('calUp').innerHTML = html ? `<div class="calh"><span></span><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${html}` : '';
+    $('calPast').innerHTML = calPastHtml(past);
+    $('calSrcLine').innerHTML = calSrcLine(n);
+  }
+
+  // ---------- Siste endringer (øverst i Kalender) ----------
+  // Bare det som faktisk har skjedd de siste 14 dagene: ny forhåndsbestilling, flyttet dato, nytt sett, slipp snart.
+  // Boksen vises ikke når ingenting har skjedd. Merket på Kalender-knappen teller det du ikke har sett.
+  const ICON = { sett: '🆕', dato: '📅', ut: '🏷️', bestill: '🛒', snart: '⏰' };
+  let newsSeenAtOpen = +(store.get('rr-news-seen') || 0);
+  function renderNews() {
+    const n = tree.news || {};
+    const cut = Date.now() - 14 * 864e5;
+    const evs = (n.events || []).filter((e) => e.t >= cut);
+    const arts = (n.articles || []).filter((a) => a.t >= cut);
+    const onCal = !$('tab-kalender').hidden;
+    const top = evs.reduce((m, e) => Math.max(m, e.t || 0), 0);
+    if (onCal && top) store.set('rr-news-seen', String(top));
+    const seen = +(store.get('rr-news-seen') || 0);
+    const fresh = evs.filter((e) => e.t > seen).length;
+    const b = $('calBadge'); b.hidden = !fresh; b.textContent = fresh;
+    const item = (icon, title, text, t, url, isNew) => {
+      const inner = `<span class="ic">${icon}</span><span><span class="tt">${esc(title)}</span>${text ? `<span class="tx">${esc(text)}</span>` : ''}</span><span class="tm">${t ? agoShort(t) : ''}</span>`;
+      return url ? `<a class="nw${isNew ? ' new' : ''}" href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<div class="nw${isNew ? ' new' : ''}">${inner}</div>`;
+    };
+    const list = [
+      ...evs.map((e) => ({ t: e.t, h: item(ICON[e.kind] || '•', e.title, e.text, e.t, e.url, e.t > newsSeenAtOpen) })),
+      ...arts.map((a) => ({ t: a.t, h: item('📰', a.title, a.source, a.t, a.url, false) }))
+    ].sort((x, y) => y.t - x.t).slice(0, 6);
+    const shown = calNewsAll ? list : list.slice(0, 3);
+    $('calNews').innerHTML = list.length ? `<div class="chg"><div class="sec-t"><span>Siste endringer</span><span>i Norge</span></div>${shown.map((x) => x.h).join('')}${list.length > 3 ? `<button type="button" class="fold sm" data-tog="news">${calNewsAll ? 'Vis færre' : `Vis alle ${list.length}`}</button>` : ''}</div>` : '';
+  }
+
+  // ---------- Finn ----------
+  // Toppliste: butikkpris (laveste i norske butikker) mot Finn-median, rangert etter fortjeneste × salgsfart.
+  const openFinn = new Set();
+  let finnById = {};
+  let finnSort = store.get('rr-finn-sort') || 'best';
+  let movePeriod = [7, 30, 90].includes(+store.get('rr-finn-period')) ? +store.get('rr-finn-period') : 30;
+  // Sortering: [nøkkel, navn, forklaring, verdi]. Velges fra et ark med forklaring på hvert valg.
+  const FSORT = [
+    ['best', 'Signal', 'P/L vektet mot volum – beste trade nå', (p) => p.score],
+    ['margin', 'P/L', 'Gevinst i kr per stk (solgt − butikk)', (p) => profit(p)],
+    ['pct', 'ROI %', 'Avkastning i prosent av innkjøpspris', (p) => pctOf(p, profit(p))],
+    ['sold', 'Volum', 'Solgt per uke – bekreftet solgt på Finn', (p) => p.soldWeek],
+    ['listed', 'Likviditet', 'Nye annonser per uke – aktivitet i markedet', (p) => p.newWeek]
+  ];
+  function finnSortSheet() {
+    openSheet('<div class="t">Screener</div><div class="s">Ranger markedet etter</div>',
+      FSORT.map(([k, label, why]) => `<button type="button" class="opt" data-fsort="${k}" aria-pressed="${finnSort === k}"><span class="ck">${finnSort === k ? '●' : '○'}</span><span><b>${label}</b><small>${why}</small></span></button>`).join(''));
+  }
+  const nfx = (v) => (v === null || v === undefined || isNaN(v) ? '–' : nf.format(Math.round(v)));
+
+  // Prisgraf i aksjestil: resale-linjen er grønn der prisen stiger og rød der den faller. Butikkprisen
+  // (billigste i norske butikker) er en egen grå linje – den endrer seg også over tid. Feltet mellom dem er
+  // fortjenesten (grønt) eller tapet (rødt).
+  const niceTicks = (lo, hi, n) => {
+    const raw = (hi - lo) / Math.max(1, n - 1) || 1;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) || 10 * mag;
+    const out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(Math.round(v));
+    return out;
+  };
+  const CHS = { begge: { W: 320, H: 210, L: 46, R: 12, T: 18, B: 22 } };
+  const histRows = (p) => (p.hist || []).filter((r) => r && r[1] > 0);
+  // Skala for én graf: hvilke verdier den skal få plass til.
+  function chartGeom(p, kind) {
+    const C = CHS[kind], h = histRows(p);
+    const res = h.map((r) => r[1]), st = h.map((r) => r[2]).filter((v) => v > 0);
+    const vals = res.concat(st);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = Math.max((hi - lo) * 0.14, 20);
+    lo = Math.max(0, lo - pad); hi += pad;
+    const x = (i) => C.L + (i / Math.max(1, h.length - 1)) * (C.W - C.L - C.R);
+    const y = (v) => C.T + (1 - (v - lo) / (hi - lo)) * (C.H - C.T - C.B);
+    return { C, h, lo, hi, x, y };
+  }
+  function chartSvg(p, kind, title) {
+    const g = chartGeom(p, kind), { C, h, x, y } = g, n = h.length - 1, f1 = (v) => v.toFixed(1);
+    const lab = (s) => { const d = ymd(s); return d ? `${d.getDate()}.${d.getMonth() + 1}` : ''; };
+    const grid = niceTicks(g.lo, g.hi, 5).map((v) => `<line class="gd" x1="${C.L}" x2="${C.W - C.R}" y1="${f1(y(v))}" y2="${f1(y(v))}"/><text x="${C.L - 6}" y="${f1(y(v) + 3.5)}" text-anchor="end">${nf.format(v)}</text>`).join('');
+    const resSegs = () => h.slice(1).map((r, i) => {
+      const a = h[i][1], b = r[1];
+      return `<line class="sg ${b > a ? 'up' : b < a ? 'down' : 'flat'}" x1="${f1(x(i))}" y1="${f1(y(a))}" x2="${f1(x(i + 1))}" y2="${f1(y(b))}"/>`;
+    }).join('');
+    const stLine = () => { const pts = h.map((r, i) => (r[2] > 0 ? `${f1(x(i))},${f1(y(r[2]))}` : null)).filter(Boolean); return pts.length > 1 ? `<polyline class="sp2" points="${pts.join(' ')}"/>` : ''; };
+    // Høyeste og laveste verdi i perioden får tallet skrevet på grafen.
+    const extremes = (k) => {
+      let iMax = -1, iMin = -1;
+      h.forEach((r, i) => { if (r[k] > 0) { if (iMax < 0 || r[k] > h[iMax][k]) iMax = i; if (iMin < 0 || r[k] < h[iMin][k]) iMin = i; } });
+      const mk = (i, above) => (i < 0 || i === n ? '' : `<circle class="pt" cx="${f1(x(i))}" cy="${f1(y(h[i][k]))}" r="2.5"/><text class="pv" x="${f1(Math.min(Math.max(x(i), C.L + 16), C.W - C.R - 16))}" y="${f1(y(h[i][k]) + (above ? -7 : 14))}" text-anchor="middle">${nf.format(h[i][k])}</text>`);
+      return mk(iMax, true) + (iMin !== iMax ? mk(iMin, false) : '');
+    };
+    const lastR = h[n][1], lastS = h[n][2];
+    const endRes = `<circle class="pt end ${lastS > 0 ? (lastR >= lastS ? 'up' : 'down') : ''}" cx="${f1(x(n))}" cy="${f1(y(lastR))}" r="3.6"/><text class="pv end ${lastS > 0 ? (lastR >= lastS ? 'up' : 'down') : ''}" x="${f1(x(n) - 7)}" y="${f1(y(lastR) - 8)}" text-anchor="end">${nf.format(lastR)} kr</text>`;
+    const endSt = lastS > 0 ? `<circle class="pt st2" cx="${f1(x(n))}" cy="${f1(y(lastS))}" r="3.2"/><text class="pv st2" x="${f1(x(n) - 7)}" y="${f1(y(lastS) + (lastS < lastR ? 15 : -8))}" text-anchor="end">Butikk ${nf.format(lastS)} kr</text>` : '';
+    let body = '';
+    if (kind === 'begge') {
+      // Feltet mellom linjene: grønt = fortjeneste, rødt = tap.
+      const fill = h.slice(1).map((r, i) => {
+        const a = h[i], b = r; if (!(a[2] > 0 && b[2] > 0)) return '';
+        const up = (a[1] - a[2]) + (b[1] - b[2]) >= 0;
+        return `<polygon class="ar ${up ? 'up' : 'down'}" points="${f1(x(i))},${f1(y(a[1]))} ${f1(x(i + 1))},${f1(y(b[1]))} ${f1(x(i + 1))},${f1(y(b[2]))} ${f1(x(i))},${f1(y(a[2]))}"/>`;
+      }).join('');
+      body = fill + stLine() + resSegs() + extremes(1) + endSt + endRes;
+    }
+    const axis = `<text x="${C.L}" y="${C.H - 4}">${lab(h[0][0])}</text><text x="${C.W - C.R}" y="${C.H - 4}" text-anchor="end">${lab(h[n][0])}</text>`;
+    return `<svg class="chart pc" data-id="${esc(p.id)}" data-kind="${kind}" viewBox="0 0 ${C.W} ${C.H}" role="img" aria-label="${esc(title || 'Prisutvikling')}">
+      ${grid}${body}${axis}<g class="tip" visibility="hidden"><line class="tl" y1="${C.T}" y2="${C.H - C.B}"/><circle class="td" r="4"/><circle class="td2" r="3.4"/></g></svg>`;
+  }
+  function finnChart(p) {
+    const h = histRows(p);
+    if (h.length < 2) return '<p class="fine" style="margin-top:0">Prisgrafen vises når boten har samlet noen dager med data.</p>';
+    const hasSt = h.some((r) => r[2] > 0);
+    const charts = chartSvg(p, 'begge', '');
+    return `${charts}<div class="ctip">Trykk på grafen for å se prisene en bestemt dag</div>
+      <div class="legend"><span><i class="u"></i>stiger</span><span><i class="d"></i>faller</span>${hasSt ? '<span><i class="bp"></i>butikkpris</span><span><i class="fa"></i>fortjeneste</span>' : ''}</div>`;
+  }
+  // Viser dato, resale, butikkpris og fortjeneste for dagen nærmest der du trykker (i alle grafene til produktet).
+  function finnPick(svg, clientX) {
+    const p = finnById[svg.dataset.id]; if (!p) return;
+    const C0 = CHS[svg.dataset.kind], h = histRows(p); if (h.length < 2) return;
+    const r = svg.getBoundingClientRect();
+    const vx = ((clientX - r.left) / r.width) * C0.W;
+    const i = Math.max(0, Math.min(h.length - 1, Math.round(((vx - C0.L) / (C0.W - C0.L - C0.R)) * (h.length - 1))));
+    const box = svg.closest('.fdet');
+    if (!Number.isFinite(i) || !h[i] || !box) return;   // f.eks. grafen er skjult eller har null bredde
+    box.querySelectorAll('svg.pc').forEach((s) => {
+      const g = chartGeom(p, s.dataset.kind), tip = s.querySelector('.tip'), cx = g.x(i).toFixed(1);
+      tip.querySelector('.tl').setAttribute('x1', cx); tip.querySelector('.tl').setAttribute('x2', cx);
+      const d1 = tip.querySelector('.td'), d2 = tip.querySelector('.td2');
+      const showR = true, showS = h[i][2] > 0;
+      d1.setAttribute('visibility', showR ? 'visible' : 'hidden'); d2.setAttribute('visibility', showS ? 'visible' : 'hidden');
+      if (showR) { d1.setAttribute('cx', cx); d1.setAttribute('cy', g.y(h[i][1]).toFixed(1)); }
+      if (showS) { d2.setAttribute('cx', cx); d2.setAttribute('cy', g.y(h[i][2]).toFixed(1)); }
+      tip.setAttribute('visibility', 'visible');
+    });
+    const d = ymd(h[i][0]), ch = i > 0 ? h[i][1] - h[i - 1][1] : 0, s = h[i][2], m = s > 0 ? h[i][1] - s : null;
+    box.querySelector('.ctip').innerHTML = `<b>${d ? `${d.getDate()}. ${MONL[d.getMonth()]}` : esc(h[i][0])}</b> · Resale <b>${nf.format(h[i][1])} kr</b>`
+      + (i > 0 && ch ? ` <span class="${ch > 0 ? 'up' : 'down'}">${ch > 0 ? '▲' : '▼'} ${sign(ch)}</span>` : '')
+      + (s > 0 ? ` · Butikk <b>${nf.format(s)} kr</b> · <span class="${m >= 0 ? 'up' : 'down'}">${sign(m)} kr</span>` : '');
+  }
+
+  // Solgt = Finn sier selv «Solgt» på annonsen (bekreftede salg siste 30 dager). Ber om = det annonsene ute nå koster.
+  function hasSold(p) { return p.soldN > 0 && p.sold > 0; }
+  // Fortjeneste regnes fra salgsprisen når den finnes, ellers fra det folk ber om (anslag).
+  function profit(p) { return hasSold(p) && p.smargin !== null && p.smargin !== undefined ? p.smargin : p.margin; }
+  function pctOf(p, m) { const sp = p.store && p.store.price > 0 ? p.store.price : 0; return sp && m !== null && m !== undefined ? Math.round((m / sp) * 100) : null; }
+  function pctTxt(v) { return v === null ? '' : `${v < 0 ? '−' : ''}${nf.format(Math.abs(v))} %`; }
+  function dShort(ms) { const d = Math.floor((Date.now() - ms) / 86400000); return d <= 0 ? 'I dag' : d === 1 ? 'I går' : new Date(ms).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }).replace('.', ''); }
+
+  // Kort detaljvisning: fire nøkkeltall, grafen, siste salg og de billigste annonsene.
+  function finnDetails(p) {
+    const m = profit(p), has = m !== null && m !== undefined, pc = pctOf(p, m);
+    const tile = (label, val, sub, cls) => `<div class="tile"><span>${label}</span><b class="${cls || ''}">${val}</b><small>${sub}</small></div>`;
+    const cheapest = (p.cheap || []).filter((a) => a.url && a.p > 0).sort((a, b) => a.p - b.p)[0];
+    const tiles = [
+      tile('Fortjeneste', has ? `${sign(m)} kr` : '–', has ? `${pctTxt(pc)} · ${hasSold(p) ? `fra ${p.soldN} salg` : 'anslag'}` : 'per stk', has ? (m >= 0 ? 'up' : 'down') : ''),
+      tile('Solgt for', hasSold(p) ? `${nfx(p.sold)} kr` : '–', hasSold(p) ? `${p.soldN} salg siste 30 d` : 'ingen salg ennå', hasSold(p) ? 'up' : ''),
+      tile('Ber om', p.med ? `${nfx(p.med)} kr` : '–', `${nfx(p.n)} annonser ute`),
+      cheapest ? `<a class="tile lnk" href="${esc(cheapest.url)}" target="_blank" rel="noopener"><span>Billigst nå</span><b>${nfx(cheapest.p)} kr</b><small>åpne annonsen ↗</small></a>`
+        : tile('Billigst nå', p.min ? `${nfx(p.min)} kr` : '–', 'på Finn')
+    ].join('');
+    const sold = (p.soldLast || []).map((a) => `<div class="of in"><span class="s"></span><span class="on">${dShort(a.at)}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Se ↗</a></div>`).join('');
+    const cheap = (p.cheap || []).map((a) => `<div class="of"><span class="s"></span><span class="on">${esc(a.t)}${a.r ? '<span class="rtag">RESERVERT</span>' : ''}</span><span class="pr">${krU(a.p)}</span><a class="lk" href="${esc(a.url)}" target="_blank" rel="noopener">Åpne ↗</a></div>`).join('');
+    const btn = (href, txt, pri) => `<a class="btn wide${pri ? ' pri' : ''}" style="display:block;text-align:center" href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>`;
+    // Alle norske butikker som selger produktet: på lager først (grønn), så billigste.
+    const shops = (p.offers || []).map((o) => `<div class="of ${o.in ? 'in' : 'out'}"><span class="s"></span><span class="on">${esc(o.shop)}<small>${o.in ? 'på lager' : 'ikke på lager'}</small></span><span class="pr">${krU(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">${o.in ? 'Kjøp' : 'Åpne'} ↗</a></div>`).join('');
+    return `<div class="tiles">${tiles}</div>${finnChart(p)}
+      ${sold ? `<div class="prod-t">Siste salg på Finn · bekreftet solgt</div><div class="offers">${sold}</div>` : ''}
+      ${shops ? `<div class="prod-t">Kjøp i butikk · ${(p.offers || []).length} butikker</div><div class="offers">${shops}</div>` : ''}
+      ${cheap ? `<div class="prod-t">Billigst på Finn nå</div><div class="offers">${cheap}</div>` : ''}
+      <div class="btns">${p.url ? btn(p.url, 'Se alle annonser på Finn ↗') : ''}</div>`;
+  }
+
+  // Tre streker – Butikk, Solgt (bekreftet) og Ber om (annonser ute nå).
+  function finnRow(p, i) {
+    const open = openFinn.has(p.id);
+    const sp = p.store && p.store.price > 0 ? p.store.price : null;
+    const max = Math.max(sp || 0, p.med || 0, p.sold || 0) || 1;
+    const m = profit(p), has = m !== null && m !== undefined, pc = pctOf(p, m), ok = hasSold(p);
+    const bar = (cls, label, v) => `<div class="bar ${cls}"><span>${label}</span><i style="width:${v ? ((v / max) * 100).toFixed(1) : 0}%"></i><b>${v ? `${nfx(v)}<span class="u"> kr</span>` : '–'}</b></div>`;
+    return `<div class="fp${open ? ' open' : ''}" data-id="${esc(p.id)}">
+      <div class="fh" role="button" tabindex="0" aria-expanded="${open}"><span class="rk">${i + 1}</span>
+        <div class="fn"><div class="t">${esc(p.name)}</div><div class="s">${esc(p.set)}${p.odd ? '<span class="ltag">BUTIKKPRIS USIKKER</span>' : ''}</div></div>
+        <span class="fm ${!has ? 'dim' : m > 0 ? 'up' : m < 0 ? 'down' : 'mut'}">${has ? `${sign(m)}<span class="u"> kr</span>` : '–'}${has ? `<small>${ok ? pctTxt(pc) : 'anslag'}</small>` : ''}</span></div>
+      <div class="bars">
+        ${bar('', 'Butikk', sp)}
+        ${bar(ok && sp ? (p.sold >= sp ? 'up' : 'down') : '', 'Solgt', ok ? p.sold : 0)}
+        ${bar('ask', 'Ber om', p.med)}
+      </div>
+      <div class="fstat">${ok
+        ? `✅ <b>${p.soldN}</b> solgt siste 30 d · <b>${nfx(p.n)}</b> ute nå · <b>${nfx(p.newWeek)}</b> nye/uke`
+        : `<span class="dim">Ingen bekreftede salg ennå</span> · <b>${nfx(p.n)}</b> ute nå`}</div>
+      <div class="fdet" ${open ? '' : 'hidden'}>${open ? finnDetails(p) : ''}</div></div>`;
+  }
+
+  function renderFinn() {
+    const f = tree.finn, hero = $('finnHero');
+    const fs = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
+    $('finnSort').innerHTML = `<button type="button" class="sortbtn" data-sortmenu><span>Sortert på</span><b>${fs[1]}</b><small>${fs[2]}</small><i>▾</i></button>`;
+    const ps = ((f && f.products) || []).filter(Boolean);
+    finnById = {}; ps.forEach((p) => (finnById[p.id] = p));
+    hero.className = 'hero';
+    if (!ps.length) {
+      hero.innerHTML = '<div class="hero-t">Venter på Finn-data</div><div class="hero-s">Boten samler Finn-annonser første gang den kjører med den nye versjonen. Salgsfart blir sikrere etter noen dager.</div>';
+      $('finnList').innerHTML = ''; $('finnFoot').textContent = ''; return;
+    }
+    // Bevegelser: hvor mye Finn-prisen (resale) har endret seg i valgt periode (7/30/90 dager), som en aksjeliste.
+    const per = movePeriod;
+    const moves = ps.map((p) => {
+      const h = (p.hist || []).filter((r) => r && r[1] > 0);
+      if (h.length < 2) return null;
+      const last = h[h.length - 1], cut = daysTo(last[0]) - per;
+      const base = [...h].reverse().find((r) => daysTo(r[0]) <= cut) || h[0];
+      if (base === last) return null;
+      const ch = last[1] - base[1];
+      return { p, ch, pct: (ch / base[1]) * 100, span: daysTo(last[0]) - daysTo(base[0]) };
+    }).filter((m) => m && m.ch !== 0);
+    const have = moves.reduce((mx, m) => Math.max(mx, m.span), 0);
+    const perBtns = `<div class="per">${[7, 30, 90].map((d) => `<button type="button" data-per="${d}" aria-pressed="${per === d}">${d} d</button>`).join('')}</div>`;
+    const perNote = have && have < per ? ` · så langt ${have} dager` : '';
+    const ups = moves.filter((m) => m.ch > 0).sort((a, b) => b.ch - a.ch).slice(0, 3);
+    const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
+    const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
+      <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
+    hero.innerHTML = `<div class="mvh"><div class="hero-l">Bevegelser <span class="dim">· Finn-pris siste ${per} dager${perNote}</span></div>${perBtns}</div>`
+      + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>`
+        : '<div class="hero-t" style="margin-top:6px">Samler priser</div><div class="hero-s">Her ser du hva som stiger og faller mest på Finn når boten har fulgt prisene i noen dager. Historikken lagres og bygges på over tid.</div>');
+    const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
+    const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
+    $('finnList').innerHTML = list.map(finnRow).join('');
+    $('finnFoot').textContent = `Solgt = annonser Finn selv har merket «Solgt» siste 30 dager (siste pris). Ber om = typisk pris på annonsene ute nå. Butikk = laveste pris i norske butikker. Fortjeneste = solgt minus butikk (ber om når det ikke er solgt noen ennå). ${f.checked ? `Sjekket ${clock(f.checked)}.` : ''}`;
+  }
+
+  // ---------- Lynvakt (egen rask vakt på PC-en, sender status hvert 30. sekund) ----------
+  const LYN_MOTION = 'fill';   // 'fill': streken fylles til neste sjekk · 'dot': et lys løper langs streken
+  const sec1 = (v) => (v > 0 ? v.toLocaleString('nb-NO', { maximumFractionDigits: 1 }) : '–');
+  function lynSummary(L) {
+    const st = L.stores || [];
+    const dead = !L.updated || Date.now() - L.updated > 120000;
+    const err = st.filter((s) => s.status === 'feil'), slow = st.filter((s) => s.status === 'bremset');
+    const gaps = st.filter((s) => !s.rt).map((s) => s.gap).filter((g) => g > 0);
+    // Median: det vanlige tempoet, uten at én bremset butikk drar tallet opp.
+    const sg = [...gaps].sort((a, b) => a - b), avg = sg.length ? (sg.length % 2 ? sg[(sg.length - 1) / 2] : (sg[sg.length / 2 - 1] + sg[sg.length / 2]) / 2) : 0;
+    const ms = st.map((s) => s.avg).filter((v) => v > 0);
+    const avgMs = ms.length ? ms.reduce((a, b) => a + b, 0) / ms.length : 0;
+    const cls = dead || err.length ? 'dead' : slow.length ? 'paused' : '';
+    const head = dead ? 'Svarer ikke' : err.length ? `${err.length} feiler` : slow.length ? `${slow.length} bremset` : 'Alt normalt';
+    return { st, dead, err, slow, avg, avgMs, cls, head };
+  }
+  function lynAlerts(L) {
+    const al = (L.alerts || []).filter(Boolean);
+    // Enkel liste øverst i Kalender: klokkeslett, vare og butikk – trykk for å åpne. Høyst 5.
+    $('lynAlN').textContent = al.length ? `${al.length} siste` : '';
+    $('lynAlerts').innerHTML = al.length ? al.slice(0, 5).map((a) => `<a class="la${a.buy ? ' buy' : ''}" href="${esc(a.url || '#')}" target="_blank" rel="noopener"><span class="tm">${clock(a.t)}</span><span class="tx">${esc(a.text)}<small>${a.mail ? `via e-post · varslet ${a.lag != null ? `${a.lag} s` : ''} etter at e-posten kom` : a.nl ? 'utenfor listen' : a.buy ? 'under makspris – kjøp' : 'over makspris'}</small></span><span class="ar">↗</span></a>`).join('')
+      : '<div class="la-empty">Ingen lynvarsler ennå</div>';
+  }
+  // Én runde for en butikk = ventetid + butikkens svartid. Lynvakten sender når forrige sjekk ble ferdig (last)
+  // og når neste starter (next), så strekene går i samme takt som PC-en og synkes på nytt hvert 30. sekund.
+  function lynCycle(s, every) {
+    if (s.rt) return { p: 0, t: 0 };   // sanntid (direktekobling): ingen fast takt å vise
+    if (s.next && s.last && s.next > s.last) return { p: s.next - s.last + (s.ms || 0), t: s.next };
+    const sec = s.status === 'ok' ? s.gap : Math.max(s.gap || 0, s.wait || 0);
+    return { p: (sec || every) * 1000, t: s.lastOk || 0 };
+  }
+  function renderLyn() {
+    const L = tree.lyn;
+    if (!L || !L.stores) { $('lynSec').hidden = true; return; }
+    $('lynSec').hidden = false;
+    const m = lynSummary(L), every = L.every || 5;
+    $('lynSub').textContent = L.updated ? `oppdatert ${ago(L.updated)}` : '';
+    // Tallet er grønt så lenge det vanlige tempoet holder; problemer med enkeltbutikker vises i merket og listen.
+    const vc = m.dead ? 'down' : m.avg > every * 2 ? 'warn' : '';
+    $('lynHero').innerHTML = `<div class="hero-l">Hver butikk sjekkes hvert <span class="lyn-pill ${m.cls}">${esc(m.head)}</span></div>
+      <div class="hero-v ${vc}">${sec1(m.avg)}<span>sekund</span></div>
+      <div class="hero-s"><span><b>${m.st.length}</b> butikker</span><span><b>${m.slow.length}</b> bremset</span><span><b>${m.err.length}</b> feil</span><span>svar snitt <b>${nf.format(m.avgMs)} ms</b></span></div>`;
+    // Skala: 0 til 30 s (lengre hvis en butikk er bremset mer enn det).
+    const max = Math.max(30, ...m.st.map((s) => Math.max(s.gap || 0, s.status === 'ok' ? 0 : s.wait || 0)));
+    $('lynScale').innerHTML = `<span></span><span><span>0</span><span>${Math.round(max / 2)} s</span><span>${Math.round(max)} s</span></span><span></span>`;
+    const rank = { feil: 0, bremset: 1 };
+    const rows = [...m.st].sort((a, b) => (rank[a.status] ?? 2) - (rank[b.status] ?? 2));
+    // Radene bygges bare på nytt når butikklisten endrer seg; ellers oppdateres de, så strekene glir til ny lengde.
+    const list = $('lynList'), key = rows.map((s) => s.name).join('|');
+    if (list.dataset.key !== key) {
+      list.innerHTML = rows.map(() => '<div class="lb"><span class="n"></span><span class="bar"><i><b class="f"></b><u class="g"></u></i><em></em></span><span class="v"></span></div>').join('');
+      list.dataset.key = key;
+    }
+    rows.forEach((s, k) => {
+      const el = list.children[k], c = s.status === 'feil' ? 'r' : s.status === 'bremset' ? 'y' : 'g';
+      const val = s.status === 'ok' ? s.gap : Math.max(s.gap || 0, s.wait || 0);
+      const cy = lynCycle(s, every);
+      el.className = `lb ${c} m-${LYN_MOTION}${el.classList.contains('ping') ? ' ping' : ''}`;
+      el.dataset.p = cy.p; el.dataset.t = cy.t;
+      el.querySelector('.n').innerHTML = `${esc(s.name)}<small>${s.status === 'feil' ? `<span class="down">${esc(s.lastErr || 'feil')}</span>` : s.status === 'bremset' ? '<span class="warn">bremset</span>' : `${s.avg != null ? nf.format(s.avg) : '–'} ms`}</small>`;
+      el.querySelector('.bar i').style.width = `${Math.min(100, (val || 0) / max * 100).toFixed(1)}%`;
+      el.querySelector('.bar em').style.left = `${(every / max * 100).toFixed(1)}%`;
+      const v = el.querySelector('.v');
+      v.className = `v ${c === 'r' ? 'down' : c === 'y' ? 'warn' : ''}`; v.textContent = s.rt && c === 'g' ? 'sanntid' : `${sec1(val)} s`;
+      if (s.rt && c === 'g') { el.querySelector('.bar i').style.width = '100%'; el.querySelector('.f').style.transform = 'scaleX(1)'; }
+    });
+    lynAlerts(L);
+    lynStart();
+  }
+  // Bevegelsen regnes ut fra klokka, så den holder takten selv om skjermen tegnes på nytt. Stopper når
+  // Bot-fanen ikke vises eller appen er i bakgrunnen (sparer batteri). Strekene viser ekte takt, så de beveger seg også med
+  // «Reduser bevegelse» på – bare blinket ved hver sjekk slås av da (i CSS).
+  let lynRaf = 0;
+  function lynTick() {
+    lynRaf = 0;
+    if (document.hidden || $('tab-bot').hidden || $('lynSec').hidden) return;
+    const now = Date.now();
+    for (const el of $('lynList').children) {
+      const p = +el.dataset.p, t = +el.dataset.t;
+      if (!(p > 0)) continue;
+      const ph = ((((now - t) % p) + p) % p) / p;
+      if (ph < (+el.dataset.ph || 0)) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
+      el.dataset.ph = ph;
+      if (LYN_MOTION === 'fill') el.querySelector('.f').style.transform = `scaleX(${ph.toFixed(4)})`;
+      else el.querySelector('.g').style.left = `${(ph * 100).toFixed(2)}%`;
+    }
+    lynRaf = requestAnimationFrame(lynTick);
+  }
+  function lynStart() { if (!lynRaf) lynRaf = requestAnimationFrame(lynTick); }
+  // Siste sjekk av en butikk, regnet ut fra hver butikks takt (synkes med PC-en hvert 30. sekund). 0 = lynvakten kjører ikke.
+  function lynLastCheck() {
+    const L = tree.lyn;
+    if (!L || !L.stores || !L.updated || Date.now() - L.updated > 120000) return 0;
+    const now = Date.now(), every = L.every || 5;
+    return L.stores.reduce((best, s) => {
+      if (s.status === 'feil') return best;
+      const c = lynCycle(s, every);
+      if (!(c.p > 0) || !c.t) return best;
+      return Math.max(best, now - ((((now - c.t) % c.p) + c.p) % c.p));
+    }, 0);
+  }
+  const clockS = (ms) => new Date(ms).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  setInterval(() => { if (!document.hidden) renderLive(); }, 500);
+  document.addEventListener('visibilitychange', lynStart);
+  document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => setTimeout(lynStart)));
+
+  // Lynvaktens vanlige tempo (median sekunder mellom sjekkene), eller null hvis den ikke kjører.
+  function lynPace() { const L = tree.lyn; if (!L || !L.stores || !L.updated || Date.now() - L.updated > 120000) return null; return lynSummary(L).avg || null; }
+  // Lynvakten sender lagerstatus i samme sekund som noe endrer seg. Den går foran bot-dataene (som kan være
+  // opptil ett minutt gamle), både i Marked og Butikker. Bot-dataene endres ikke – vi lager en kopi.
+  function applyLive(d) {
+    const L = tree.lyn;
+    if (!L || !Array.isArray(L.live) || !L.updated || Date.now() - L.updated > 120000) return d;
+    const net = new Map(), hg = new Map();
+    L.live.forEach((x) => { if (!x || !x.u) return; if (x.k === 'h') { if (!hg.has(x.u)) hg.set(x.u, []); hg.get(x.u).push(x); } else net.set(x.u, x); });
+    const dd = JSON.parse(JSON.stringify(d));
+    (dd.items || []).forEach((it) => (it.offers || []).forEach((o) => {
+      const h = (hg.get(o.url) || []).find((x) => x.i), n = net.get(o.url);
+      if (h) { o.state = 'in'; o.where = 'haugesund'; o.store = h.p; if (h.pr > 0) o.price = h.pr; }
+      else if (n) {
+        if (n.i) { o.state = 'in'; o.where = 'nett'; o.store = ''; }
+        else if (o.state === 'in') { o.state = 'out'; o.where = ''; o.store = ''; }
+        if (n.pr > 0) o.price = n.pr;
+      }
+    }));
+    (dd.sources || []).forEach((s) => {
+      (s.items || []).forEach((it) => {
+        const x = s.kind === 'haugesund' ? (hg.get(it.url) || []).find((y) => y.p === String(it.store || '').trim()) : net.get(it.url);
+        if (!x) return;
+        it.state = x.i ? 'in' : it.state === 'unlisted' ? 'unlisted' : 'out';
+        if (x.pr > 0) it.price = x.pr;
+      });
+      if (s.items) s.inStock = s.items.filter((it) => it.state === 'in').length;
+    });
+    // «Inne nå»: varer utenfor listen som lynvakten ser er kommet på lager, men som ikke er i bot-dataene ennå –
+    // og fjern dem den ser er utsolgt igjen.
+    const other = (dd.other || []).filter((o) => { const x = o.kind === 'Haugesund' ? (hg.get(o.url) || []).find((y) => y.p === String(o.store || '').trim()) : net.get(o.url); return !x || x.i; });
+    const have = new Set(other.map((o) => `${o.url}|${o.kind === 'Haugesund' ? String(o.store || '').trim() : ''}`));
+    L.live.filter((x) => x && x.nl && x.i).forEach((x) => {
+      const key = `${x.u}|${x.k === 'h' ? x.p : ''}`;
+      if (have.has(key)) return;
+      have.add(key);
+      other.push({ shop: x.c, kind: x.k === 'h' ? 'Haugesund' : 'Nett', store: x.k === 'h' ? x.p : '', product: x.n, price: x.pr, url: x.u, finn: null, info: [] });
+    });
+    dd.other = other;
+    return dd;
+  }
+  function render() {
+    renderLive();
+    renderCal();
+    renderNews();
+    renderFinn();
+    const d = tree.data ? applyLive(tree.data) : null, b = tree.bot || {};
+    if (!d) { $('hero').innerHTML = `<div class="hero-t">Venter på data fra boten</div><div class="hero-s">Står PC-en på og kjører Pokemon-bot?</div>`; return; }
+
+    // Bannere
+    const stale = !b.beat || Date.now() - b.beat > 5 * 60000;
+    const ban = [];
+    if (stale) ban.push(`<div class="banner r"><b>Boten svarer ikke.</b> Sist hørt fra ${b.beat ? clock(b.beat) : 'aldri'}. Står PC-en på?</div>`);
+    if (b.paused) ban.push(`<div class="banner"><b>Pauset.</b> Boten sjekker ingenting før du trykker Fortsett under Bot.</div>`);
+    $('banners').innerHTML = ban.join('');
+
+    // Varer
+    const all = (d.items || []).map((it) => ({ it, a: analyse(it) }));
+    const byMargin = (x, y) => (y.a.margin ?? -1e9) - (x.a.margin ?? -1e9);
+    const buy = all.filter((x) => x.a.status === 'buy').sort(byMargin);
+    const over = all.filter((x) => x.a.status === 'over').sort(byMargin);
+    const watch = all.filter((x) => x.a.status === 'watch').sort(byMargin);
+    const hgN = (d.sources || []).filter((s) => s.kind === 'haugesund').reduce((n, s) => n + (s.inStock || 0), 0);
+
+    // Toppboks
+    const hero = $('hero');
+    const stats = `<div class="hero-s"><span><i class="dot g"></i><b>${buy.length}</b> kan kjøpes</span><span><i class="dot y"></i><b>${over.length}</b> over maks</span><span><i class="dot r"></i><b>${hgN}</b> i Haugesund</span></div>`;
+    if (buy.length) {
+      const total = buy.reduce((n, x) => n + Math.max(0, x.a.margin || 0), 0);
+      const top = buy[0];
+      hero.className = 'hero buy';
+      hero.innerHTML = `<div class="hero-l">Mulig margin nå</div><div class="hero-v">+${nf.format(Math.round(total))}<span>kr</span></div>${stats}
+        <a class="cta" href="${esc(top.a.main.url)}" target="_blank" rel="noopener">Kjøp ${esc(top.it.name)} hos ${esc(top.a.main.shop)} ↗</a>`;
+    } else {
+      // Nærmeste slippdato først; slippes flere samme dag, den med best fortjeneste.
+      const soon = watch.filter((x) => x.it.release && daysTo(x.it.release) >= 0)
+        .sort((p, q) => p.it.release.localeCompare(q.it.release) || (q.a.margin ?? -1e9) - (p.a.margin ?? -1e9))[0];
+      const best = soon || watch.filter((x) => x.a.margin > 0)[0];
+      const nxt = [b.nextOnline, b.nextStore].filter(Boolean).sort()[0];
+      hero.className = 'hero';
+      hero.innerHTML = `<div class="hero-t">Ingenting å kjøpe akkurat nå</div>${stats}
+        <div class="hero-n">${lynPace() ? `<div>⚡ Lynvakten sjekker listen din hvert <b>${sec1(lynPace())} sekund</b></div>` : nxt ? `<div>⏱ Neste sjekk: <b>${nxt > Date.now() ? `${clock(nxt)}</b> (${until(nxt)})` : 'pågår nå</b>'}</div>` : ''}${best ? `<div style="margin-top:8px">⭐ Neste som kommer på lager:<br><b>${esc(best.it.name)}</b>${best.it.release ? ` · <span class="rel">slipp ${esc(fmtDate(best.it.release))}</span> (${countdown(daysTo(best.it.release))})` : ''}<br>Billigst: ${esc(best.a.main.shop)} ${kr(best.a.main.price)} kr → ${best.a.finn ? `Finn ${kr(best.a.finn)} kr = <span class="${best.a.margin >= 0 ? 'up' : 'down'}">${sign(best.a.margin)} kr</span>` : 'Finn: ingen funn'}</div>` : ''}</div>`;
+    }
+
+    section('secBuy', 'Kan kjøpes', 'under makspris', ['Pris'], buy, buy.length ? '' : '');
+    // Inne nå: alt annet som er på lager – varer over makspris og varer som ikke er på listen din – samlet, best fortjeneste øverst.
+    const otherIn = (d.other || []).map((o) => {
+      const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
+      return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
+        <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${stockPill('in', '', o.kind === 'Haugesund')}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
+        <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
+        <span class="v">${krU(o.price)}</span>${resCell(o.finn && o.finn.med, 0)}
+        ${marginCell(m, o.price)}</div></div>` };
+    });
+    const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
+    $('secIn').innerHTML = inNow.length ? `<div class="sec"><div class="sec-t"><span>Inne nå</span><span>over makspris eller ikke på listen</span></div>
+      <div class="cols"><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${inNow.map((x) => x.h).join('')}</div>` : '';
+    section('secWatch', 'Watchlist', `${watch.length} utsolgt`, ['Billigst'], watch, '');
+
+    $('secOther').innerHTML = '';
+
+    const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
+
+    // Butikker
+    // Butikk-rad: trykk for å se alle produktene boten følger der, med pris, Finn, margin og slippdato.
+    const srcRow = (s) => {
+      const name = s.label.replace(/\s*\((butikk.*|nettbutikk)\)/i, '');
+      const key = s.source || s.label;
+      const open = openShops.has(key);
+      // Samme vare i flere butikker (f.eks. Nille Markedet og Oasen): én linje, den som er på lager først.
+      const seen = new Set();
+      const items = (s.items || []).filter((it) => { const k = it.name + '|' + it.url; if (seen.has(k)) return false; seen.add(k); return true; });
+      const list = items.map((it) => {
+        const m = it.finn && it.price > 0 ? it.finn - it.price : null;
+        const inStore = it.store && !/^(nettbutikk|\(ingen butikker\))$/i.test(it.store);
+        const st = it.state === 'in' ? (inStore ? `på lager · ${it.store}` : 'på lager') : it.state === 'unlisted' ? 'kommer snart' : 'utsolgt';
+        const rel = it.release ? ` · <span class="rel">slipp ${esc(fmtDate(it.release))}</span>` : '';
+        const over = it.max > 0 && it.price > it.max;
+        return `<a class="sp ${it.state}" href="${esc(it.url)}" target="_blank" rel="noopener"><span class="s"></span>
+          <span class="spn">${esc(it.name)}<small>${esc(st)}${rel}</small></span>
+          <span class="v ${over ? 'warn' : ''}">${krU(it.price)}</span>${resCell(it.finn, it.fsold)}
+          <span class="v mg ${m === null ? 'dim' : m >= 0 ? 'up' : 'down'}">${m === null ? '–' : `${sign(m)}<span class="u"> kr</span>`}</span></a>`;
+      }).join('');
+      const sub = s.failing ? `Feil de siste ${s.failing} sjekkene` : `${s.products} varer følges · <b>trykk for å se</b>`;
+      return `<div class="shop${open ? ' open' : ''}" data-src="${esc(key)}">
+        <div class="li" role="button" tabindex="0" aria-expanded="${open}"><i class="dot ${s.failing ? 'y' : s.inStock ? 'g' : 'r'}"></i><span class="lt">${esc(name)}<small>${sub}</small></span><span class="lr ${s.inStock ? 'up' : ''}">${s.inStock}<small>på lager</small></span></div>
+        <div class="shop-det" ${open ? '' : 'hidden'}>
+          ${items.length ? `<div class="cols5"><span></span><span></span><span>Pris</span><span>Resale</span><span>Margin</span></div>${list}` : '<div class="empty">Boten følger ingen varer her ennå.</div>'}
+        </div></div>`;
+    };
+    // Butikker med noe på lager alltid øverst (flest først); ellers samme rekkefølge som før.
+    const byStock = (a, b) => (b.inStock > 0) - (a.inStock > 0) || (b.inStock || 0) - (a.inStock || 0);
+    $('srcHg').innerHTML = (d.sources || []).filter((s) => s.kind === 'haugesund').sort(byStock).map(srcRow).join('');
+    $('srcNet').innerHTML = (d.sources || []).filter((s) => s.kind !== 'haugesund').sort(byStock).map(srcRow).join('');
+
+    // Bot
+    const bs = $('bstate');
+    bs.className = 'bstate' + (stale ? ' dead' : b.paused ? ' paused' : '');
+    $('bstateTxt').textContent = stale ? 'Svarer ikke' : b.paused ? 'Pauset' : 'Kjører';
+    $('btnPause').textContent = b.paused ? 'Fortsett' : 'Pause';
+    const kvRow = ([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
+    $('botKv').innerHTML = [
+      ['Nettbutikker', b.lastOnline ? `hvert ${b.netEvery || '?'}. min · sist ${clock(b.lastOnline)}` : '–'],
+      ['Butikker i Haugesund', b.lastStore ? `hvert ${b.storeEvery || '?'}. min · sist ${clock(b.lastStore)}` : '–'],
+      ['Finn-priser', b.finnAt ? `sist ${clock(b.finnAt)}` : '–'],
+      ['Kontakt med PC-en', b.beat ? ago(b.beat) : 'aldri']
+    ].map(kvRow).join('');
+    renderLyn();
+    $('connKv').innerHTML = [
+      ['Status', { on: 'Live', poll: 'Henter hvert 30. sek', demo: 'Demo', connecting: 'Kobler til', off: 'Frakoblet' }[liveState]],
+      ['Database', cfg.demo ? 'demo' : cfg.db.replace(/^https:\/\//, '').replace(/\.firebasedatabase\.app$/, '')]
+    ].map(kvRow).join('');
+  }
+
+  // ---------- Hendelser ----------
+  $('tab-marked').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.rh'); if (!h) return;
+    const r = h.closest('.row'), name = r.dataset.name; if (!name) return;
+    if (openRows.has(name)) openRows.delete(name); else openRows.add(name);
+    const open = openRows.has(name);
+    r.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    r.querySelector('.det').hidden = !open;
+  });
+  $('tab-marked').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('rh')) { e.preventDefault(); e.target.click(); } });
+
+  $('tab-butikker').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.li'); if (!h) return;
+    const shop = h.closest('.shop'); if (!shop) return;
+    const src = shop.dataset.src;
+    if (openShops.has(src)) openShops.delete(src); else openShops.add(src);
+    const open = openShops.has(src);
+    shop.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    shop.querySelector('.shop-det').hidden = !open;
+  });
+  $('tab-butikker').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('li')) { e.preventDefault(); e.target.click(); } });
+
+  $('tab-kalender').addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    const t = e.target.closest('[data-tog]');
+    if (t) {
+      if (t.dataset.tog === 'past') { calPastOpen = !calPastOpen; renderCal(); }
+      else if (t.dataset.tog === 'news') { calNewsAll = !calNewsAll; renderNews(); }
+      else if (t.dataset.tog === 'src') srcSheet();
+      return;
+    }
+    const c = e.target.closest('[data-cal]');
+    if (c && calByKey[c.dataset.cal]) openCalSheet(calByKey[c.dataset.cal]);
+  });
+  $('sheet').addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) { closeSheet(); return; }
+    const fs = e.target.closest('[data-fsort]');
+    if (fs) { finnSort = fs.dataset.fsort; store.set('rr-finn-sort', finnSort); closeSheet(); renderFinn(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+  $('tab-kalender').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('cr')) { e.preventDefault(); e.target.click(); } });
+
+  $('tab-finn').addEventListener('click', (e) => {
+    if (e.target.closest('[data-sortmenu]')) { finnSortSheet(); return; }
+    const pb = e.target.closest('[data-per]');
+    if (pb) { movePeriod = +pb.dataset.per; store.set('rr-finn-period', String(movePeriod)); renderFinn(); return; }
+    // Trykk på en av bevegelsene: åpne produktet i listen og scroll dit.
+    const go = e.target.closest('[data-go]');
+    if (go) {
+      const card = $('finnList').querySelector(`.fp[data-id="${CSS.escape(go.dataset.go)}"]`);
+      if (card && !openFinn.has(go.dataset.go)) card.querySelector('.fh').click();
+      if (card) { const sc = $('app'); sc.scrollTo({ top: card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8, behavior: 'smooth' }); }
+      return;
+    }
+    if (e.target.closest('a')) return;
+    const h = e.target.closest('.fh'); if (!h) return;
+    const card = h.closest('.fp'), id = card.dataset.id;
+    if (openFinn.has(id)) openFinn.delete(id); else openFinn.add(id);
+    const open = openFinn.has(id);
+    card.classList.toggle('open', open); h.setAttribute('aria-expanded', String(open));
+    const det = card.querySelector('.fdet'); det.hidden = !open;
+    if (open && finnById[id]) det.innerHTML = finnDetails(finnById[id]);
+  });
+  // Trykk eller dra på prisgrafen: vis pris for den dagen.
+  $('tab-finn').addEventListener('pointerdown', (e) => { const s = e.target.closest('svg.pc'); if (s) finnPick(s, e.clientX); });
+  $('tab-finn').addEventListener('pointermove', (e) => { const s = e.target.closest('svg.pc'); if (s && (e.buttons || e.pointerType !== 'touch')) finnPick(s, e.clientX); });
+  $('tab-finn').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fh')) { e.preventDefault(); e.target.click(); } });
+
+  const TABS = ['marked', 'butikker', 'kalender', 'finn', 'bot'];
+  function showTab(name) {
+    document.querySelectorAll('.tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    TABS.forEach((t) => ($('tab-' + t).hidden = t !== name));
+    store.set('rr-tab', name);
+    // "NY"-merket gjelder det som kom siden sist du åpnet Kalender.
+    if (name === 'kalender') { newsSeenAtOpen = +(store.get('rr-news-seen') || 0); renderNews(); }
+    $('app').scrollTo({ top: 0 });
+    closeSheet();
+  }
+  document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  $('btnCheck').addEventListener('click', () => send('sjekk', 'Boten sjekker nå'));
+  $('btnPause').addEventListener('click', () => { const p = tree.bot && tree.bot.paused; send(p ? 'fortsett' : 'pause', p ? 'Boten fortsetter' : 'Boten pauses'); });
+  $('btnFinn').addEventListener('click', () => send('finn', 'Henter nye Finn-priser'));
+  let unlinkArmed = false;
+  $('btnUnlink').addEventListener('click', () => {
+    if (!unlinkArmed) { unlinkArmed = true; $('unlinkHint').hidden = false; setTimeout(() => { unlinkArmed = false; $('unlinkHint').hidden = true; }, 4000); return; }
+    store.del('rr-cfg'); location.hash = ''; location.reload();
+  });
+  $('linkForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const c = parseLink($('linkInput').value.trim());
+    if (!c) { $('linkErr').hidden = false; return; }
+    cfg = c; if (!c.demo) store.set('rr-cfg', JSON.stringify(c)); start();
+  });
+
+  function start() {
+    $('setup').hidden = true;
+    ['top', 'app', 'tabbar'].forEach((id) => ($(id).hidden = false));
+    const t = store.get('rr-tab');
+    showTab(TABS.includes(t) ? t : 'marked');
+    render(); connect();
+    setInterval(render, 30000);
+  }
+  if (cfg) start(); else $('setup').hidden = false;
+})();
+</script>
+</body>
+</html>
