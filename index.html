@@ -993,14 +993,14 @@ body::before { display: none; }
   let movePeriod = [7, 30, 90].includes(+store.get('rr-finn-period')) ? +store.get('rr-finn-period') : 30;
   // Sortering: [nøkkel, navn, forklaring, verdi]. Velges fra et ark med forklaring på hvert valg.
   const FSORT = [
-    ['best', 'Signal', 'P/L vektet mot volum – beste trade nå', (p) => p.score],
-    ['margin', 'P/L', 'Gevinst i kr per stk (solgt − butikk)', (p) => profit(p)],
-    ['pct', 'ROI %', 'Avkastning i prosent av innkjøpspris', (p) => pctOf(p, profit(p))],
-    ['sold', 'Volum', 'Solgt per uke – bekreftet solgt på Finn', (p) => p.soldWeek],
-    ['listed', 'Likviditet', 'Nye annonser per uke – aktivitet i markedet', (p) => p.newWeek]
+    ['best', 'Top pick', 'Beste kjøp akkurat nå', (p) => p.score],
+    ['margin', 'Profit', 'Mest fortjeneste per stk', (p) => profit(p)],
+    ['sold', 'Top sellers', 'Selger mest på Finn', (p) => p.soldWeek],
+    ['listed', 'Most listed', 'Flest nye annonser', (p) => p.newWeek]
   ];
+  if (!FSORT.some((s) => s[0] === finnSort)) finnSort = 'best';   // f.eks. gammelt valg «ROI %» som er fjernet
   function finnSortSheet() {
-    openSheet('<div class="t">Screener</div><div class="s">Ranger markedet etter</div>',
+    openSheet('<div class="t">Sorter etter</div>',
       FSORT.map(([k, label, why]) => `<button type="button" class="opt" data-fsort="${k}" aria-pressed="${finnSort === k}"><span class="ck">${finnSort === k ? '●' : '○'}</span><span><b>${label}</b><small>${why}</small></span></button>`).join(''));
   }
   const nfx = (v) => (v === null || v === undefined || isNaN(v) ? '–' : nf.format(Math.round(v)));
@@ -1179,9 +1179,9 @@ body::before { display: none; }
     const downs = moves.filter((m) => m.ch < 0).sort((a, b) => a.ch - b.ch).slice(0, 3);
     const mv = (m) => `<button type="button" class="mv" data-go="${esc(m.p.id)}"><span class="ma ${m.ch > 0 ? 'up' : 'down'}">${m.ch > 0 ? '▲' : '▼'}</span>
       <span class="mn">${esc(m.p.name)}<small>${esc(m.p.set)}</small></span><span class="mc ${m.ch > 0 ? 'up' : 'down'}">${sign(m.ch)} kr<small>${m.pct < 0 ? '−' : '+'}${nf.format(Math.abs(Math.round(m.pct)))} %</small></span></button>`;
-    hero.innerHTML = `<div class="mvh"><div class="hero-l">Bevegelser <span class="dim">· Finn-pris siste ${per} dager${perNote}</span></div>${perBtns}</div>`
+    hero.innerHTML = `<div class="mvh"><div class="hero-l">Bevegelser${perNote ? ` <span class="dim">${perNote}</span>` : ''}</div>${perBtns}</div>`
       + (ups.length || downs.length ? `<div class="mvs">${ups.map(mv).join('')}${downs.map(mv).join('')}</div>`
-        : '<div class="hero-t" style="margin-top:6px">Samler priser</div><div class="hero-s">Her ser du hva som stiger og faller mest på Finn når boten har fulgt prisene i noen dager. Historikken lagres og bygges på over tid.</div>');
+        : '<div class="hero-n" style="border-top:0;margin-top:4px;padding-top:0">Ingen bevegelser ennå</div>');
     const key = FSORT.find((s) => s[0] === finnSort) || FSORT[0];
     const list = ps.slice().sort((a, b) => (key[3](b) ?? -1e9) - (key[3](a) ?? -1e9));
     $('finnList').innerHTML = list.map(finnRow).join('');
@@ -1383,11 +1383,22 @@ body::before { display: none; }
     // Inne nå: alt annet som er på lager – varer over makspris og varer som ikke er på listen din – samlet, best fortjeneste øverst.
     const otherIn = (d.other || []).map((o) => {
       const m = o.finn && o.finn.med && o.price ? o.finn.med - o.price : null;
-      return { m, h: `<div class="row ${marginTier(m, o.price)}"><div class="rh" style="cursor:default">
+      // Varer utenfor listen kan også trykkes på: hele navnet, butikken, Finn-søk og info fra butikken.
+      const key = `o:${o.shop}|${o.product}`, open = openRows.has(key);
+      const fUrl = `https://www.finn.no/recommerce/forsale/search?q=${encodeURIComponent(o.product)}&product_category=2.86.285.396`;
+      const where = o.kind === 'Haugesund' && o.store ? `i ${esc(o.store)}` : 'på lager';
+      const kv = [
+        '<span class="kvi">Ikke på listen din</span>',
+        `<span class="kvi"><a class="fl" href="${esc(fUrl)}" target="_blank" rel="noopener">${o.finn && o.finn.med ? `Resale <b>${kr(o.finn.med)}</b> <span class="dim">(ber om · ${o.finn.n} annonser)</span>` : 'Søk på Finn'} ↗</a></span>`
+      ].join('');
+      const det = `<div class="pn">${esc(o.product)}</div><div class="kv">${kv}</div>
+        <div class="offers"><div class="of in"><span class="s"></span><span class="on">${esc(o.shop)}<small>${where}</small></span><span class="pr">${kr(o.price)}</span><a class="lk" href="${esc(o.url)}" target="_blank" rel="noopener">Kjøp ↗</a></div></div>
+        ${(o.info || []).length ? `<ul class="info">${o.info.map((s) => `<li>${esc(nb(s))}</li>`).join('')}</ul>` : ''}`;
+      return { m, h: `<div class="row ${marginTier(m, o.price)}${open ? ' open' : ''}" data-name="${esc(key)}"><div class="rh" role="button" tabindex="0" aria-expanded="${open}">
         <div class="nm"><div class="t">${esc(o.product)}</div><div class="s">${stockPill('in', '', o.kind === 'Haugesund')}${esc(o.shop)} · <span class="mut">ikke på listen</span></div>
         <a class="go" href="${esc(o.url)}" target="_blank" rel="noopener">Åpne hos ${esc(o.shop)} ↗</a></div>
         <span class="v">${krU(o.price)}</span>${resCell(o.finn && o.finn.med, 0)}
-        ${marginCell(m, o.price)}</div></div>` };
+        ${marginCell(m, o.price)}</div><div class="det" ${open ? '' : 'hidden'}>${det}</div></div>` };
     });
     const inNow = [...over.map((x) => ({ m: x.a.margin, h: row(x) })), ...otherIn].sort((p, q) => (q.m ?? -1e9) - (p.m ?? -1e9));
     $('secIn').innerHTML = inNow.length ? `<div class="sec"><div class="sec-t"><span>Inne nå</span><span>over makspris eller ikke på listen</span></div>
