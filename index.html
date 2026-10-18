@@ -100,6 +100,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .go { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 7px 11px; border-radius: 8px; font-size: 13px; font-weight: 700; background: var(--panel-2); border: 1px solid var(--line-2); }
 .row.buy .go { background: var(--up); border-color: var(--up); color: var(--up-ink); }
 .empty { padding: 14px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
+/* Marked: knapper som velger liste (Kan kjøpes / Inne nå / Watchlist). Hver har sin farge; valgt knapp får farget bakgrunn. */
+.mseg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 14px 0 4px; padding: 4px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.mseg button { display: flex; justify-content: center; align-items: center; gap: 7px; padding: 9px 4px; border-radius: 9px; border: 1px solid transparent; font-size: 13.5px; font-weight: 700; color: #C9CED8; }
+.mseg button[data-ms="buy"] { --mc: #2BD67B; } .mseg button[data-ms="in"] { --mc: #F5A524; } .mseg button[data-ms="watch"] { --mc: #8FB8FF; }
+.mseg button b { min-width: 22px; padding: 2px 7px; border-radius: 999px; font-size: 12.5px; font-weight: 800; text-align: center; color: var(--mc); background: color-mix(in srgb, var(--mc) 16%, transparent); }
+.mseg button[aria-pressed="true"] { color: var(--ink); background: color-mix(in srgb, var(--mc) 16%, var(--panel-2)); border-color: color-mix(in srgb, var(--mc) 45%, transparent); }
+.mseg button[aria-pressed="true"] b { color: #0B0C0F; background: var(--mc); }
+.mseg button b.zero { color: #FF6B5B; background: rgba(255, 107, 91, .16); }
+.mseg button[aria-pressed="true"] b.zero { color: #0B0C0F; background: #FF6B5B; }
+#tab-marked .sec-t { display: none; }
 
 /* Utfolding */
 .det { padding: 0 0 14px; }
@@ -458,6 +468,7 @@ body::before { display: none; }
 
   <section id="tab-marked" role="tabpanel">
     <div class="hero" id="hero"></div>
+    <div class="mseg" id="mSeg"></div>
     <div id="secBuy"></div>
     <div id="secIn"></div>
     <div id="secWatch"></div>
@@ -1384,6 +1395,16 @@ body::before { display: none; }
     section('secWatch', 'Watchlist', `${watch.length} utsolgt`, ['Billigst'], watch, '');
 
     $('secOther').innerHTML = '';
+    // Knapper øverst velger hvilken liste som vises (huskes til neste gang).
+    // Buy zone = på lager under makspris · Over ask = på lager, men over makspris eller ikke på listen · Watchlist = utsolgt/kommer.
+    const segs = [['buy', 'Buy zone', buy.length, 'secBuy'], ['in', 'Over ask', inNow.length, 'secIn'], ['watch', 'Watchlist', watch.length, 'secWatch']];
+    let ms = store.get('rr-mseg'); if (!segs.some((x) => x[0] === ms)) ms = buy.length ? 'buy' : inNow.length ? 'in' : 'watch';
+    // Ingenting å kjøpe: tallet blir rødt.
+    $('mSeg').innerHTML = segs.map(([k, l, n]) => `<button type="button" data-ms="${k}" aria-pressed="${k === ms}">${l}<b class="${k === 'buy' && !n ? 'zero' : ''}">${n}</b></button>`).join('');
+    segs.forEach(([k, , n, id]) => {
+      $(id).hidden = k !== ms;
+      if (k === ms && !n) $(id).innerHTML = `<div class="empty">${k === 'buy' ? 'Ingenting i buy zone akkurat nå.' : k === 'in' ? 'Ingenting på lager akkurat nå.' : 'Watchlisten er tom.'}</div>`;
+    });
 
     const badge = $('tabBadge'); badge.hidden = !buy.length; badge.textContent = buy.length;
 
@@ -1519,6 +1540,11 @@ body::before { display: none; }
     closeSheet();
   }
   document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  $('mSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ms]');
+    if (!b) return;
+    store.set('rr-mseg', b.dataset.ms); render(); $('app').scrollTo({ top: 0 });
+  });
 
   // iPhone (appen lagt på hjem-skjermen): iOS gir appen statuslinjens høyde for lite, så fanebaren ble stående
   // med et tomt felt under seg. I hjem-skjerm-modus fyller appen hele skjermen, så bruk skjermhøyden direkte.
